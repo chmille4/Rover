@@ -40,12 +40,17 @@ body
 
 #header div 
 {
+   color: #474747;
    float: left;
    width:14%;
-   border-right: 1px solid #181818;
+   font-size: 1px;
+   text-shadow: 0 0px 0px #474747;
+   border-right: 1px solid rgb(55,55,55);
+/*   border-right: 1px solid #181818;*/
    -moz-box-shadow: 1px 0px 1px #525252;
    -webkit-box-shadow: 1px 0px 1px #525252;
    box-shadow: 1px 0px 1px #525252;
+   box-shadow: 1px 0px 4px rgb(70,70,70);
 }
         
 #content 
@@ -120,6 +125,16 @@ body
 
 #addSourcePanel {
     display: none;
+    color: rgb(90,90,90);
+    font: bold 16px arial;
+}
+
+#addSourcePanel a {
+   color: rgb(106,122,142);
+}
+
+#addSourcePanel .myButton {
+   color: rgb(90,90,90);
 }
 
 #about {
