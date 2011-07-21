@@ -4,20 +4,20 @@
 <head> 
 
     <title></title> 
-    <!-- <script src="../js/Scribl.min.js"></script> -->
-    <script src="src/Scribl.class.js" ></script>
-    <script src="src/Scribl.js" ></script>
-    <script src="src/Scribl.track.js" ></script>
-    <script src="src/Scribl.lane.js" ></script>
-    <script src="src/Scribl.events.js" ></script>
-    <script src="src/Scribl.utils.js" ></script>
-    <script src="src/Scribl.svg.js" ></script>
-    <script src="src/Scribl.glyph.js" ></script>
-    <script src="src/glyph/Scribl.blockarrow.js" ></script>
-    <script src="src/glyph/Scribl.arrow.js" ></script>
-    <script src="src/glyph/Scribl.rect.js" ></script>
-    <script src="src/glyph/Scribl.line.js" ></script>
-    <script src="src/glyph/Scribl.complex.js" ></script>     
+    <script src="js/Scribl.min.js"></script>
+    <!-- <script src="../Scribl/src/Scribl.class.js" ></script>
+    <script src="../Scribl/src/Scribl.js" ></script>
+    <script src="../Scribl/src/Scribl.track.js" ></script>
+    <script src="../Scribl/src/Scribl.lane.js" ></script>
+    <script src="../Scribl/src/Scribl.events.js" ></script>
+    <script src="../Scribl/src/Scribl.utils.js" ></script>
+    <script src="../Scribl/src/Scribl.svg.js" ></script>
+    <script src="../Scribl/src/Scribl.glyph.js" ></script>
+    <script src="../Scribl/src/glyph/Scribl.blockarrow.js" ></script>
+    <script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
+    <script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
+    <script src="../Scribl/src/glyph/Scribl.line.js" ></script>
+    <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>      -->
 		
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.14.custom.css" />
@@ -158,7 +158,8 @@
                     }
                     
                     var scrollPos = $('#canvas-content').scrollLeft(); 
-                    var canvasWidth = $('.canvas-div canvas').width();   
+                    var canvasWidth = $('.canvas-div canvas').width();
+                    if (canvasWidth == 0) canvasWidth = 14700;   
                     var viewerWidth = $('#canvas-content').width();
                     
                     // check for case when zooming and chartview has been shrunk to just viewable width for performance
@@ -185,7 +186,7 @@
                           scriblMin = min;
                           scriblMax = max;                          
                        } else {
-                          if ( !updatingRight && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth)  > .7 )) {
+                          if ( !updatingRight && canvasWidth > 0 && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth)  > .7 )) {
                               var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;
                               updatingRight = true;
                               updateSources(scriblMax-bufferSize, scriblMax+bufferSize, 'right');                              
@@ -522,7 +523,6 @@
                view.center.collapsed.laneSizes = 13; // set lanesizes so getHeight will be accurate
                view.center.collapsed.canvas.height = view.center.collapsed.getHeight();    				
 
-
                var canvasId = view.center.chart.canvas.id;
                // check track hasn't been deleted
                if(!charts.hasOwnProperty(canvasId))
@@ -714,6 +714,7 @@
                 
                 var cb = document.getElementById(view.center.chart.canvas.id+'-input');
                 var url = cb.value + '/features?segment=' + $('#chromosome').val() + ':'  + min + "," + max + ';type=' + $(cb).attr('data-type');
+
                 request.xhr = JSDAS.features(url, function(response, view, direction) { callback(response, view, direction) }, function(){}, "", [view,direction]);                                               
              }
              
@@ -727,7 +728,8 @@
                 // check if dasRequest needs to be drawn   
                 if (view.dasRequests[0].drawOnResponse) {
                   // hide spinner                  
-                  
+                  if (view.center.chart.canvas.height == 0) 
+                     view.center.chart.canvas.height = view.center.chart.getHeight();
                   var canvasId = view.center.chart.canvas.id;
                   var idAttrSel = "\'[id=" + canvasId + "-parentdiv]\'"; // have to do it this way b\c there are spaces in the id
                   $(idAttrSel).find('.spinner').css('display', 'none');                  
