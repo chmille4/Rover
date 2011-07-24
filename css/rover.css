@@ -10,7 +10,8 @@ body
     border-left:0px; 
     border-right:0px; 
     overflow:hidden; 
-    font: 13px arial;
+    font-size: 13px;
+    font-family: 'Ubuntu', sans-serif;
 } 
 
 #header 
@@ -29,10 +30,9 @@ body
     background: -webkit-gradient(linear, left top, left bottom, from(#474747), to(#303030));
     background: -moz-linear-gradient(top, #474747, #303030);
     background: linear-gradient(top, #474747, #303030);
-    
     text-align: center;
-    font-size: 28px;
-    color: #FFF;
+    font-size: 34px;
+    color: rgb(234,234,234);
     line-height: 50px;
     text-shadow: 0 -1px 1px black;
     font-weight: bold;
@@ -148,7 +148,7 @@ body
 
 #about p{
     color: rgb(90,90,90);
-    font: bold 13px arial;
+    font: bold 13px ubuntu;
     text-align: left;
 }
 
@@ -200,7 +200,7 @@ body
 
 #splash {
     width: 60%;
-    font: bold 20px arial;
+    font: bold 20px ubuntu;
     text-align:center;
     margin-left:auto;
     margin-right:auto;
@@ -250,7 +250,7 @@ body
 }
 
 #canvas-content {
-
+   background-image: url(../images/gray-xgrid-small.png);
    border-top-left-radius:3px;
    -moz-border-radius-topleft:3px;
    border-top-right-radius:3px;
@@ -382,7 +382,7 @@ body
 }
 
 .canvas-label {
-    font: bold 12px arial;
+    font: bold 12px ubuntu;
     position: fixed;
     left: 52%;
     color: rgb(60,60,60);
@@ -396,6 +396,7 @@ body
 }
 
 .canvas-div {
+
     border-radius:4px;
     -moz-border-radius: 4px;
     position:relative;
@@ -435,7 +436,7 @@ body
 
 ul.subnav {
     list-style: none;
-    font: 10px arial;
+    font: 10px ubuntu;
     margin: 0px;
     margin-top: 2px;
     padding: 0px;
@@ -469,7 +470,7 @@ ul.subnav a {
     border:1px solid #dcdcdc;
     display:inline-block;
     color:#777777;
-    font-family:arial;
+    font-family:ubuntu;
     font-size:15px;
     font-weight:bold;
     padding:6px 24px;

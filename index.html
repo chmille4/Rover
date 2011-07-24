@@ -4,6 +4,7 @@
 <head> 
 
     <title></title> 
+    <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
     <script src="js/Scribl.min.js"></script>
     <!-- <script src="../Scribl/src/Scribl.class.js" ></script>
     <script src="../Scribl/src/Scribl.js" ></script>
@@ -175,9 +176,9 @@
                           updatingRight = false;
                           scriblMin = min;
                           scriblMax = max;                          
-                       } else if (updatingLeft && ( scrollPos / canvasWidth < .02 ) ) {
+                       } else if (updatingLeft && ( scrollPos / canvasWidth < .02 ) && scriblMin > 1 ) {
                           shiftToCenter('left');
-                          var min = scriblMin-bufferSize;
+                          var min = Math.max(scriblMin-bufferSize, 1);
                           var max = scriblMin+bufferSize;
                           var scrollPos = $('#canvas-content').scrollLeft();  
                           var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;                              
@@ -190,10 +191,12 @@
                               var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;
                               updatingRight = true;
                               updateSources(scriblMax-bufferSize, scriblMax+bufferSize, 'right');                              
-                          } else if ( !updatingLeft && ( scrollPos / canvasWidth < .3 ) ) {
+                          } else if ( !updatingLeft && ( scrollPos / canvasWidth < .3 ) && scriblMin > 1) {
                               var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;
                               updatingLeft = true;
-                              updateSources(scriblMin-bufferSize, scriblMin+bufferSize, 'left');                       
+                              var min = Math.max(scriblMin-bufferSize, 1);
+                              var max = scriblMin+bufferSize;
+                              updateSources(min, max, 'left');                       
                           }
                           
                        }
@@ -697,6 +700,11 @@
                 min = parseInt(min);
                 max = parseInt(max);
                 
+                // don't go below zero
+                if(min <= 0) {
+                   alert('min = ' + min);
+                }
+                
                 // grab new coordinates for sources
                 for (var canvasId in charts) {
                   var view = charts[canvasId];
@@ -1055,7 +1063,7 @@
                    Chromosome <input style="margin-right:40px" value="1" id='chromosome'></input>
                 </div>
                 <div class='viewerButtonLeft' style="float:left">
-                      Jump To <input id="jump" style="width:10em" id='jump-to'></input>
+                      Jump To <input id="jump" style="width:6em" id='jump-to'></input>
                 </div>
                 <div style="float:right; margin-right:10px">
                    <div class='viewerButtonRight' style="margin-right:10px"><a  href="#" onClick='toggleLinkUrl()' title="Link to current view">Link</a></div>
@@ -1117,7 +1125,7 @@
     </div>
     <div id="footer">
       <div style="width=30%;margin-left:auto; margin-right:auto; margin-top: 10px">
-         Powered By <a href="http://chmille4.github.com/Scribl/">Scibl</a>
+         Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
       </div>
       <div style="float:right; margin-right:20px; margin-top:-6px">&copy; <a href="http://github.com/chmille4">Chase Miller</a> 2011</div>
     </div> 
