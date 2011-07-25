@@ -76,9 +76,9 @@ body
 }
 
 .option-controls {
-   -webkit-box-flex: 1;
-   -moz-box-flex: 1;
-   box-flex: 1;
+    -webkit-box-flex: 1;
+    -moz-box-flex: 1;
+    box-flex: 1;
     line-height: 30px;
     height: 30px;
     color: rgb(60, 60, 60);
@@ -247,6 +247,7 @@ body
    width: 94.9%;
    margin-left: 1%;
    margin-right: auto;       
+   margin-bottom: 12px;
 }
 
 #canvas-content {
