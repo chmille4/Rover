@@ -189,7 +189,7 @@ body
 
 #main{
    top:50px; 
-   bottom:40px; 
+   bottom:72px; 
    right: 0px;
    overflow:auto; 
    position:absolute;
@@ -247,7 +247,7 @@ body
    width: 94.9%;
    margin-left: 1%;
    margin-right: auto;       
-   margin-bottom: 12px;
+
 }
 
 #canvas-content {
@@ -384,8 +384,8 @@ body
 
 .canvas-label {
     font: bold 12px ubuntu;
-    position: fixed;
-    left: 52%;
+    position: absolute;
+    left: 40%;
     color: rgb(60,60,60);
 }
 
@@ -422,8 +422,8 @@ body
 }
 
 .option-control {
-    position: fixed;
-    left: 16%;
+    position: absolute;
+    left: 20px;
     width:auto;
     display:none;
     border-radius: 2px;

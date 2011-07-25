@@ -293,18 +293,17 @@
        		      parentDiv.className = "canvas-div";
        		      var optionDiv = document.createElement('div');
        		      optionDiv.className = "option-control";
+                  optionDiv.style.display = 'none';
        		      var newCanvas = document.createElement("canvas");
        		      newCanvas.id = getCheckBoxLabel(checkbox);
        		      var label = document.createElement("span");
 
-
        		      // associate elements
        		      canvasList.appendChild(parentDiv);
-       		      parentDiv.appendChild(optionDiv);
-       		      parentDiv.appendChild(label);
+       		      document.getElementById('canvas-content').appendChild(optionDiv);
+       		      document.getElementById('canvas-content').appendChild(label);
        		      parentDiv.appendChild(document.createElement('br'));
        		      parentDiv.appendChild(newCanvas);
-       		      
        		      
        		      // source title label
        		      label.innerHTML = "<span class='spinner'> <img src='images/spinner.gif'/> retrieving from: </span>" + getCheckBoxLabel(checkbox);
@@ -313,7 +312,12 @@
        		      // handle option menu
        		      parentDiv.onmouseover = function() {toggleOptionMenu(true, optionDiv)};
        		      parentDiv.onmouseout = function() {toggleOptionMenu(false, optionDiv)};
-       		      parentDiv.id = getCheckBoxLabel(checkbox) + "-parentdiv";
+                  optionDiv.onmouseover = function() {toggleOptionMenu(true, optionDiv)};
+       		      optionDiv.onmouseout = function() {toggleOptionMenu(false, optionDiv)};
+       		      var id = getCheckBoxLabel(checkbox);
+       		      parentDiv.id = id + "-parentdiv";
+       		      optionDiv.id = id + "-optiondiv"
+       		      label.id = id + '-label';
 
        		      // option menu buttons
        		      // gear button
@@ -347,8 +351,8 @@
        		      else
        		         li.innerHTML = "<a href='#'>Expand</a>";
        		      menuPanel.appendChild(li);
-       		      optionDiv.appendChild(menuPanel);
-
+       		      optionDiv.appendChild(menuPanel);       		          		      
+                  
        		      // handle additional events on menu
        		      gear.onclick = function() { handleOptionMenuClick(menuPanel); };   		      
        		      $(optionDiv).mouseleave(function() {$(menuPanel).slideUp('fast'); })
@@ -363,13 +367,15 @@
     		         }
 
        		      newCanvas.width = canWidth;
-       		   //   parentDiv.style.width = canWidth + 'px';
        		      $(newCanvas).parent().width(canWidth);
        		      newCanvas.height = '20px';
        		      newCanvas.className = "canvas";   		      
-
+       		             		      
+                  // place title/spinner
+                  var top = $(parentDiv).position().top;
+                  label.style.top = top + 'px';
+                  
      		         // make request
-
    		         var view = new View(newCanvas);
                   charts[newCanvas.id] = view;
                   makeDasRequest(view, scriblMin, scriblMax, 'center', initializeSource);
@@ -457,6 +463,9 @@
           	}
 
           	function toggleOptionMenu(over, obj) {
+          	   var parentdivId = obj.id.replace('optiondiv', 'parentdiv');
+               var top = $(document.getElementById(parentdivId)).position().top + $('#main').scrollTop() + 2;
+               obj.style.top = top + 'px';               
 
              	if (over) { 
              	   obj.style.display = "inline";
@@ -539,7 +548,7 @@
                scriblMin = view.min;
 
                // turn spinner off
-               var idAttrSel = "\'[id=" + canvasId + "-parentdiv]\'"; // have to do it this way b\c there are spaces in the id
+               var idAttrSel = "\'[id=" + canvasId + "-label]\'"; // have to do it this way b\c there are spaces in the id
                $(idAttrSel).find('.spinner').css('display', 'none')
 
                // draw chart
@@ -660,7 +669,12 @@
                 chart.ctx.clearRect(0, 0, chart.canvas.width, chart.canvas.height);                
                 chart.scale.min = min;
                 chart.scale.max = max;
-                chart.draw();                         
+                chart.draw();        
+                $('.canvas-div').each( function(i, canvasDiv) {
+                   var top = $(canvasDiv).position().top;
+                   var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
+                   document.getElementById(labelId).style.top = top + 'px';
+                });                
              }          
 
              function drawAll(min, max, widthPx, scrollLeftNts, zooming) {
