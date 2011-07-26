@@ -548,11 +548,11 @@
                scriblMin = view.min;
 
                // turn spinner off
-               var idAttrSel = "\'[id=" + canvasId + "-label]\'"; // have to do it this way b\c there are spaces in the id
-               $(idAttrSel).find('.spinner').css('display', 'none')
+               // have to do it this way b\c there are spaces in the id
+               $('[id=' + canvasId + '-label] .spinner').css('display', 'none');
 
                // draw chart
-               draw(view.center.collapsed, scriblMin, scriblMax);
+               draw(view.center.chart, scriblMin, scriblMax);
                
              }           
 
@@ -689,14 +689,14 @@
  //               if ( min >= scriblMin || max <= scriblMax) {
                   for (i in charts)  {
                      if (charts[i].dasRequests[0].status == 'received') {
-                        var newChart = charts[i].center.chart.slice(min, max);
+                        var newChart = charts[i].center.chart.slice(min, max);                        
                         newChart.width = widthPx;
                         newChart.canvas.width = widthPx;
                         draw( newChart, min, max );
                      } else {
                         // show spinner
-                        var idAttrSel = "\'[id=" + i + "-parentdiv]\'"; // have to do it this way b\c there are spaces in the id
-                        $(idAttrSel).find('.spinner').css('display', 'inherit');
+                        // have to do it this way b\c there are spaces in the id
+                        $('[id=' + i + '-label] .spinner').css('display', 'inherit');
                         
                         // clear canvas
                         var chart = charts[i].center.chart;
@@ -753,8 +753,8 @@
                   if (view.center.chart.canvas.height == 0) 
                      view.center.chart.canvas.height = view.center.chart.getHeight();
                   var canvasId = view.center.chart.canvas.id;
-                  var idAttrSel = "\'[id=" + canvasId + "-parentdiv]\'"; // have to do it this way b\c there are spaces in the id
-                  $(idAttrSel).find('.spinner').css('display', 'none');                  
+                  // have to do it this way b\c there are spaces in the id
+                  $('[id=' + canvasId + '-label] .spinner').css('display', 'none');
                   //$('.canvas-div').css('margin-left', 0);                  
                   document.getElementById(canvasId + '-parentdiv').style.marginLeft = 0;
                   view.center.chart.width = canWidth;
