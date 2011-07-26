@@ -401,6 +401,7 @@ body
     border-radius:4px;
     -moz-border-radius: 4px;
     position:relative;
+    padding-top: 5px;
     display:table;
 /*        display:inline-block;*/
 }

@@ -5,8 +5,8 @@
 
     <title></title> 
     <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
-    <script src="js/Scribl.min.js"></script>
-    <!-- <script src="../Scribl/src/Scribl.class.js" ></script>
+    <!-- <script src="js/Scribl.min.js"></script> -->
+    <script src="../Scribl/src/Scribl.class.js" ></script>
     <script src="../Scribl/src/Scribl.js" ></script>
     <script src="../Scribl/src/Scribl.track.js" ></script>
     <script src="../Scribl/src/Scribl.lane.js" ></script>
@@ -18,7 +18,7 @@
     <script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
     <script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
     <script src="../Scribl/src/glyph/Scribl.line.js" ></script>
-    <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>      -->
+    <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>     
 		
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.14.custom.css" />
@@ -79,25 +79,18 @@
                this.min = undefined;
                this.max = undefined;
                this.center = {};
-     		      this.center.expanded = new Scribl(canvas, canWidth);
-     		      this.center.expanded.scale.off = true;
-     		      this.center.collapsed = new Scribl(canvas, canWidth);               
-     		      this.center.collapsed.scale.off = true;
-     		      this.center.chart = this.center.collapsed; // default is collapsed;
+     		      this.center.chart = new Scribl(canvas, canWidth);
+     		      this.center.chart.scale.off = true;
      		      
+     		      // right buffer
      		      this.right = {};
-     		      this.right.expanded = new Scribl(canvas, canWidth);
-     		      this.right.expanded.scale.off = true;
-     		      this.right.collapsed = new Scribl(canvas, canWidth);               
-     		      this.right.collapsed.scale.off = true;
-     		      this.right.chart = this.right.collapsed; // default is collapsed;
+     		      this.right.chart = new Scribl(canvas, canWidth);
+     		      this.right.chart.scale.off = true;
      		      
+     		      // left buffer
      		      this.left = {};
-     		      this.left.expanded = new Scribl(canvas, canWidth);
-     		      this.left.expanded.scale.off = true;
-     		      this.left.collapsed = new Scribl(canvas, canWidth);               
-     		      this.left.collapsed.scale.off = true;
-     		      this.left.chart = this.left.collapsed; // default is collapsed;
+     		      this.left.chart = new Scribl(canvas, canWidth);
+     		      this.left.chart.scale.off = true;
      		      
      		      this.dasRequests=[] ;
      		      this.addDasRequest = function(request) {
@@ -236,12 +229,8 @@
     		   function shiftToCenter(direction) {
     		      
     		      for (i in charts) {
-    		         var expandCollapse = document.getElementById(i + '-input').getAttribute('data-display')
+                  charts[i][direction].chart.drawStyle = charts[i].center.chart.drawStyle;
     		         charts[i].center = charts[i][direction];
-    		         if ( expandCollapse == 'Expand')
-                     charts[i].center.chart = charts[i].center.expanded;
-                  else
-                     charts[i].center.chart = charts[i].center.collapsed;
     		      }
     		   }
     		   
@@ -532,8 +521,8 @@
                // handle response
                dasResponse(response, view.center);
 
-               view.center.collapsed.laneSizes = 13; // set lanesizes so getHeight will be accurate
-               view.center.collapsed.canvas.height = view.center.collapsed.getHeight();    				
+               view.center.chart.laneSizes = 13; // set lanesizes so getHeight will be accurate
+               view.center.chart.canvas.height = view.center.chart.getHeight();    				
 
                var canvasId = view.center.chart.canvas.id;
                // check track hasn't been deleted
@@ -565,9 +554,8 @@
                if (scriblMax < responseMin || scriblMin > responseMax)
     		         return;
     		      
-    		      var collapsed = chart.collapsed;
-    		      var expanded = chart.expanded
-    		      var canvasId = collapsed.canvas.id;
+
+    		      var canvasId = chart.chart.canvas.id;
     		      var display = document.getElementById(canvasId + '-input').getAttribute('data-display');
 
     				// check if chart is still visible
@@ -588,12 +576,11 @@
                
                
                // delete old tracks
-               delete expanded.tracks[0];
-               delete collapsed.tracks[0];
+               delete chart.chart.tracks[0];
                
-               // add new tracks
-     		      var track = expanded.addTrack();    
-               var lane = collapsed.addTrack().addLane();
+               // add new tracks and set default drawStyle
+     		      var track = chart.chart.addTrack();    
+     		      chart.chart.drawStyle = 'collapse';
                 
                var numFeatures = features.length; 
     				for (var i=0; i < numFeatures; i++) {
@@ -603,26 +590,12 @@
     					var length = end - start;
     					
     					var orientation = f.getElementsByTagName('ORIENTATION')[0].textContent;
-                  var type = f.getElementsByTagName('TYPE')[0].textContent;
-    					var lastFeature = lane.features[lane.features.length-1];    					    					
+                  var type = f.getElementsByTagName('TYPE')[0].textContent;			    					
     					
-    					if (orientation) {	
+    					if (orientation)
                      var glyphT = track.addGene(start, length, orientation);
-                     if ( i > 0 && lastFeature.getEnd() >= start) {
-       					   lastFeature.length = Math.max(end, lastFeature.getEnd()) - lastFeature.position;
-       					   lastFeature.name = "";
-       					}
-       					else {
-                        var glyphL = lane.addGene(start, length, orientation);
-                        glyphL.name = type;
-                     }
-    					} else {
+    					else
     						var glyphT = track.addFeature( new Rect( "rect", start, length) );
-    						if ( i > 0 && lastFeature.getEnd() >= start) 
-       					   lastFeature.length = Math.max(end, lastFeature.getEnd()) - lastFeature.position;
-       					else
-                        var glyphL = lane.addFeature( new Rect( "rect", start, length) );
-    					}
                      
     					if (type) {
     					   glyphT.name = type;
@@ -645,15 +618,17 @@
             }
 
     			function toggleExpand(canvasId, li) {
-    			      var view = charts[canvasId];   			   
+    			   var view = charts[canvasId];   			   
 
+               var style = li.children[0].innerHTML;
+               
     			   // expand chart
-    			   if (li.children[0].innerHTML == 'Expand') {
+    			   if (style == 'Expand') {
                   document.getElementById(canvasId + '-input').setAttribute('data-display', 'Expand');
                   li.children[0].innerHTML = 'Collapse'
-                  view.center.chart = view.center.expanded
+                  view.center.chart.drawStyle = 'expand';
     			   } else { // collapse chart 
-    			      view.center.chart = view.center.collapsed
+    			      view.center.chart.drawStyle = 'collapse'
                   document.getElementById(canvasId + '-input').setAttribute('data-display', 'Collapse');
                   li.children[0].innerHTML = 'Expand'
     			   }
@@ -802,16 +777,6 @@
                 drawAll(min, max, canvasWidth, scrollLeftNts);
                 scriblMin = min;
                 scriblMax = max;
-                
-                
-                // var range = parseInt($('#slider-range').slider('values',1) - $('#slider-range').slider('values',0));
-                // var min = jumpTo - range/2;
-                // var max = jumpTo + range/2;
-                // slideMin = min - bufferSize;
-                // slideMax = max + bufferSize;
-                // $( "#slider-range" ).slider('option', 'max', slideMax);
-                // $( "#slider-range" ).slider('option', 'min', slideMin);
-                // redraw(min, max, true);
              }
              
              function getUrlQuerys(){
