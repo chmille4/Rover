@@ -375,7 +375,11 @@
           	   // delete div that holds canvas
           	   var toDel = document.getElementById(canvas.id + "-parentdiv");
           	   $(toDel).remove();
-
+          	   
+          	   // delete div that holds label
+               var toDel = document.getElementById(canvas.id + "-label");
+          	   $(toDel).remove();
+               
                // check if view is empty and if so bring up splash page
           	   if ($('#canvasList').children().length == 0) {
     		         splash = true;
