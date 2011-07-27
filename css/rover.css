@@ -12,6 +12,10 @@ body
     overflow:hidden; 
     font-size: 13px;
     font-family: 'Ubuntu', sans-serif;
+}
+
+a {
+   color: rgb(106,122,142);
 } 
 
 #header 
@@ -26,10 +30,12 @@ body
     -moz-box-shadow: inset 0px -1px 3px #1d1d1d;
     -webkit-box-shadow: inset 0px -1px 3px #1d1d1d;
     box-shadow: inset 0px -1px 3px #1d1d1d;
-    background: #474747;
+/*    background: #474747;
     background: -webkit-gradient(linear, left top, left bottom, from(#474747), to(#303030));
     background: -moz-linear-gradient(top, #474747, #303030);
     background: linear-gradient(top, #474747, #303030);
+*/  
+    background-image: url(../images/sharkskin.gif);
     text-align: center;
     font-size: 34px;
     color: rgb(234,234,234);
@@ -45,12 +51,12 @@ body
    width:14%;
    font-size: 1px;
    text-shadow: 0 0px 0px #474747;
-   border-right: 1px solid rgb(55,55,55);
+   border-right: 1px solid #2F3C47;
 /*   border-right: 1px solid #181818;*/
    -moz-box-shadow: 1px 0px 1px #525252;
    -webkit-box-shadow: 1px 0px 1px #525252;
    box-shadow: 1px 0px 1px #525252;
-   box-shadow: 1px 0px 4px rgb(70,70,70);
+   box-shadow: 1px 0px 4px #2F3C47;
 }
         
 #content 
@@ -95,8 +101,7 @@ body
     -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);
-    
+    -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);    
 }
 
 #subtitle {
@@ -158,7 +163,7 @@ body
 
 #sourcePanelToolbar {
    position: absolute;
-   bottom: 40px;
+   bottom: 0px;
    cursor: pointer;
    width: 14%;
    text-align: center;
@@ -172,7 +177,7 @@ body
 #vdivide {
    position: absolute;
    top:50px;
-   bottom: 40px;
+   bottom: 0px;
    left: 14%;
    width: 6px;
    border: 1px solid #c5c5c5;
@@ -343,13 +348,34 @@ body
 
 #scroll-slider-container{
    position: absolute;
-   bottom:40px;
-   width: 85.5%;
+   bottom:0px;
+   width: 85.4%;
    right: 0px;
    border-top: 1px solid rgba(0, 0, 0, 0.3);
    -moz-box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.1);
    -webkit-box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
    box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.1);
+   
+   -webkit-box-flex: 1;
+   -moz-box-flex: 1;
+   box-flex: 1;
+   line-height: 30px;
+   height: 31px;
+   color: rgb(60, 60, 60);
+   text-shadow: 1px 1px 1px white;
+   color: #333333;
+   font-weight: bold;
+   text-shadow: 0 1px 1px #ffffff;
+   font-size: 11px;
+   background: #ffffff;
+   background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#e0e0e1));
+   background: -moz-linear-gradient(top, #ffffff, #e0e0e1);
+   background: linear-gradient(top, #ffffff, #e0e0e1);
+   -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+   -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+   -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);    
+   
    
 } 
 
@@ -402,8 +428,8 @@ body
     -moz-border-radius: 4px;
     position:relative;
     padding-top: 5px;
-    display:table;
-/*        display:inline-block;*/
+/*    display:table;*/
+        display:inline-block;
 }
 
 .canvas-div:nth-child(odd) {
@@ -490,24 +516,16 @@ ul.subnav a {
    
 
 
-/*       Footer      */
- 
- #footer 
- { 
-     bottom:0px; 
-     width:100%; 
-     height:40px; 
-     background-color:#000000; 
-     position:absolute; 
-     text-align: center;
-     color: #e9e9e9;
-     font-size: 14px;
-     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
-     box-shadow: inset 0 1px 10px rgba(0, 0, 0, 0.6);
-     overflow: hidden;
-     background: #343434 url(../images/dot.png);
-
- } 
- #footer a {
-    color: #e9e9e9;
- }
+#copyright {
+   color: rgb(60, 60, 60);
+   text-shadow: 1px 1px 1px white;
+   color: #333333;
+   font-weight: bold;
+   text-shadow: 0 1px 1px #ffffff;
+   width: 350px;
+   position: absolute;
+   bottom: 2px;
+   right: 0px;
+   font-weight: bold; 
+   text-align:center;
+}

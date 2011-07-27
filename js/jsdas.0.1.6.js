@@ -2425,10 +2425,10 @@ JSDAS.XMLLoader = {
 
 
 		var xmlloader = this; //necessary so the closures get the variable
-		var change = function(xhr){
+		var change = function(xhr, url){
 			if (xhr && (xhr.readyState == 4)) {
 				if (xmlloader.httpSuccess(xhr)) {
-					processResponse(xhr);
+					processResponse(xhr, url);
 				}
 				else { //if it failed, it mighht be that the source has no CORS enabled. In such case, fallback to proxy before erroring
 					if(usingCORS && xmlloader.proxyURL) { //if it failed when using CORS and we've got a proxy, try to get the data via the proxy
@@ -2436,7 +2436,7 @@ JSDAS.XMLLoader = {
 					  usingCORS = false;
 					  var new_xhr = xmlloader.xhr();
 					  new_xhr.open('GET', xmlloader.proxyURL+'?url='+url, true);
-					  new_xhr.onreadystatechange = function() {change(new_xhr);}
+					  new_xhr.onreadystatechange = function() {change(new_xhr, url);}
 					  new_xhr.send(null);
 					} else {
 					  errorcallback && errorcallback({id: "xmlhttprequest_error", msg: xhr.status});
@@ -2446,12 +2446,14 @@ JSDAS.XMLLoader = {
 				xhr = undefined;
 			} 
 		};
-		var processResponse = function(xhr) {
+		var processResponse = function(xhr, url) {
 			//WARNING: Since Uniprot (and maybe others) do not respond with a correct content-type, we cannot check it here. Should be reactivated as soon as the servers are updated.
 			//var ct = xhr.getResponseHeader("content-type");
 			//var xml = ct && ct.indexOf("xml") >= 0;
 			//if (xml) {
 				var data = xhr.responseXML;
+				var comment = data.createComment(url);
+				data.appendChild(comment);
 				if(!data) { //This block is here since we cannot rely on content type headers
 				     errorcallback && errorcallback({id: 'not_xml', msg: "The response was not XML"});
 				}
@@ -2463,7 +2465,7 @@ JSDAS.XMLLoader = {
 			//errorcallback && errorcallback({id: 'not_xml', msg: "The response was not XML"});
 		};
 	
-		xhr.onreadystatechange = function() {change(xhr);};
+		xhr.onreadystatechange = function() {change(xhr, url);};
 
 		// Send the data
 		try {

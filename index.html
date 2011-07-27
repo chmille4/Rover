@@ -262,6 +262,10 @@
        		         splash = false;
        		         toggleSplashPage();
        		      }
+       		      // set canvas attributes
+                  if (canWidth == undefined) 
+                     canWidth = (scriblMax - scriblMin) / ( (viewerMax - viewerMin) / $('#canvas-content').width()); 
+       		      
        		      
        		      // create elements
        		      var canvasList = document.getElementById("canvasList");
@@ -294,6 +298,11 @@
        		      parentDiv.id = id + "-parentdiv";
        		      optionDiv.id = id + "-optiondiv"
        		      label.id = id + '-label';
+       		      
+       		      if (noScale) {
+                     initScale();
+    		            noScale = false;               
+    		         }
 
        		      // option menu buttons
        		      // gear button
@@ -332,15 +341,6 @@
        		      // handle additional events on menu
        		      gear.onclick = function() { handleOptionMenuClick(menuPanel); };   		      
        		      $(optionDiv).mouseleave(function() {$(menuPanel).slideUp('fast'); })
-
-       		      // set canvas attributes
-                  if (canWidth == undefined) 
-                     canWidth = (scriblMax - scriblMin) / ( (viewerMax - viewerMin) / $('#canvas-content').width()); 
-
-                  if (noScale) {
-                     initScale();
-    		            noScale = false;               
-    		         }
 
        		      newCanvas.width = canWidth;
        		      $(newCanvas).parent().width(canWidth);
@@ -537,8 +537,9 @@
              }           
 
     		   function dasResponse(xmlDoc, chart) {
-    		      // check if response is no longer relevant to where the user is currently and if so don't waste time parsing it    		      
-    		      var matches = xmlDoc.URL.match(/.*segment=\d:(\d+),(\d+).*/);
+    		      // check if response is no longer relevant to where the user is currently and if so don't waste time parsing it    	
+    		      var url = xmlDoc.lastChild.nodeValue;
+    		      var matches = url.match(/.*segment=\d:(\d+),(\d+).*/);    		      
     		      var responseMin = matches[1];
     		      var responseMax = matches[2];    		                  
 
@@ -1076,7 +1077,6 @@
                  </div>                 
               </div>               
        </div>
-       <div id='test' style="border: 1px solid red">h</div>
        
     </div> 
     <div id="sourcePanelToolbar" class='option-controls' href='#'>
@@ -1085,20 +1085,28 @@
        </div>
     </div>
     
-    <div id='scroll-slider-container' class='option-controls'>
-       <div style="width:350px;  margin-left:auto; margin-right:auto">
-          <div style="margin-top:6px; float:left" class="ui-icon ui-icon-circle-minus"></div>
-          <div id='scroll-slider'></div>
-          <div style="margin-top:6px; float:right" class="ui-icon ui-icon-circle-plus"></div>
+    <div id='scroll-slider-container'>
+       <div style="width:350px; margin-left:auto; margin-right:auto">
+          <div style="margin-top:8px; float:left" class="ui-icon ui-icon-circle-minus"></div>
+          <div style="margin-top: 11px" id='scroll-slider'></div>
+          <div style="margin-top:8px; float:right" class="ui-icon ui-icon-circle-plus"></div>
+          <div style="clear:both"></div>
        </div>
+       
        <!-- <div class='slider-title' style="margin-top: 4px; width: 3em; margin-left:auto; margin-right:auto">Scroll</div>        -->
     </div>
-    <div id="footer">
+    
+    <div id="copyright">
+       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
+       &copy; <a href="http://github.com/chmille4">Chase Miller</a> 2011
+    </div>
+    
+    <!-- <div id="footer">
       <div style="width=30%;margin-left:auto; margin-right:auto; margin-top: 10px">
          Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
       </div>
       <div style="float:right; margin-right:20px; margin-top:-6px">&copy; <a href="http://github.com/chmille4">Chase Miller</a> 2011</div>
-    </div> 
+    </div>  -->
 
 </body> 
 
