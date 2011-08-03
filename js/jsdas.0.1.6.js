@@ -2452,8 +2452,10 @@ JSDAS.XMLLoader = {
 			//var xml = ct && ct.indexOf("xml") >= 0;
 			//if (xml) {
 				var data = xhr.responseXML;
-				var comment = data.createComment(url);
-				data.appendChild(comment);
+				if (data) {
+   				var comment = data.createComment(url);
+   				data.appendChild(comment);
+   			}
 				if(!data) { //This block is here since we cannot rely on content type headers
 				     errorcallback && errorcallback({id: 'not_xml', msg: "The response was not XML"});
 				}

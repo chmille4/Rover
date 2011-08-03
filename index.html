@@ -209,7 +209,10 @@
                   }
                 });
                 
-              $('#canvasList').sortable();
+              $('#canvasList').sortable({update: function() {
+                 updateLabelPositions();
+                 }
+              });
                 
     		   });
     		   
@@ -379,6 +382,10 @@
           	   // delete div that holds label
                var toDel = document.getElementById(canvas.id + "-label");
           	   $(toDel).remove();
+          	   
+          	   // delete div that holds track menu
+          	   var toDel = document.getElementById(canvas.id + "-optiondiv");
+          	   $(toDel).remove();
                
                // check if view is empty and if so bring up splash page
           	   if ($('#canvasList').children().length == 0) {
@@ -395,6 +402,9 @@
 
           	   // delete chart from list
           	   delete charts[chartId];
+          	   
+          	   // update labels/menus
+               updateLabelPositions();
           	}
 
           	function initScale() {
@@ -443,8 +453,9 @@
           	}
 
           	function toggleOptionMenu(over, obj) {
-          	   var parentdivId = obj.id.replace('optiondiv', 'parentdiv');
-               var top = $(document.getElementById(parentdivId)).position().top + $('#main').scrollTop() + 2;
+//          	   var parentdivId = obj.id.replace('optiondiv', 'parentdiv');
+          	   var canvasLabelId = obj.id.replace('optiondiv', 'label');
+               var top = $(document.getElementById(canvasLabelId)).position().top + 2;               
                obj.style.top = top + 'px';               
 
              	if (over) { 
@@ -490,11 +501,14 @@
                 url = url.replace(/\/$/,'');
                 
                 var li = document.createElement('li');
+                var div = document.createElement('div');
                 document.getElementById('source-list').appendChild(li);
+                li.appendChild(div);
+                
                 var checkbox = document.createElement('input')
-                li.appendChild(checkbox);
+                div.appendChild(checkbox);
                 var label = document.createElement('label');            
-                li.appendChild(label);
+                div.appendChild(label);
                 checkbox.type = "checkbox";
                 checkbox.value = url;
                 checkbox.id = name + '-input';
@@ -511,7 +525,9 @@
                
                // handle response
                dasResponse(response, view.center);
-
+               
+               // defaults
+               view.center.chart.drawStyle = 'collapse';
                view.center.chart.laneSizes = 13; // set lanesizes so getHeight will be accurate
                view.center.chart.canvas.height = view.center.chart.getHeight();    				
 
@@ -538,7 +554,10 @@
 
     		   function dasResponse(xmlDoc, chart) {
     		      // check if response is no longer relevant to where the user is currently and if so don't waste time parsing it    	
-    		      var url = xmlDoc.lastChild.nodeValue;
+    		      if (xmlDoc.URL)
+    		         var url = xmlDoc.URL
+    		      else
+    		         var url = xmlDoc.lastChild.nodeValue;
     		      var matches = url.match(/.*segment=\d:(\d+),(\d+).*/);    		      
     		      var responseMin = matches[1];
     		      var responseMax = matches[2];    		                  
@@ -572,7 +591,6 @@
                
                // add new tracks and set default drawStyle
      		      var track = chart.chart.addTrack();    
-     		      chart.chart.drawStyle = 'collapse';
                 
                var numFeatures = features.length; 
     				for (var i=0; i < numFeatures; i++) {
@@ -628,8 +646,17 @@
     			   view.center.chart.canvas.height = view.center.chart.getHeight();
     			   draw(view.center.chart, scriblMin, scriblMax);
     			}
-
-             function draw(chart, min, max) {   
+    			
+    			
+            function updateLabelPositions() {
+               $('.canvas-div').each( function(i, canvasDiv) {
+                   var top = $(canvasDiv).position().top + $('#main').scrollTop();
+                   var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
+                   document.getElementById(labelId).style.top = top + 'px';
+                });
+            }
+            
+            function draw(chart, min, max) {   
                 chart.scale.off = true;
                 chart.scale.pretty = false;
                 chart.laneSizes = 13;
@@ -637,11 +664,7 @@
                 chart.scale.min = min;
                 chart.scale.max = max;
                 chart.draw();        
-                $('.canvas-div').each( function(i, canvasDiv) {
-                   var top = $(canvasDiv).position().top;
-                   var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
-                   document.getElementById(labelId).style.top = top + 'px';
-                });                
+                updateLabelPositions();               
              }          
 
              function drawAll(min, max, widthPx, scrollLeftNts, zooming) {
@@ -791,11 +814,12 @@
              }
              
              function serializeToIframe() {
+                var url = serializeToUrl();
                 var iframeStr = '<iframe width="500" height="315" style="border:1px solid rgb(220,220,220); border-radius: 4px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="';
-                iframeStr += serializeToUrl();
+                iframeStr += url;
                 iframeStr += '&embed=true"'
                 iframeStr += '></iframe>';
-                iframeStr += '<br/><small>Powered by <a href="http://chmille4.github.com/Scribl" style="color:#0000FF;text-align:left">Scribl</a></small>';
+                iframeStr += '<br/><small><a href="' + url + '" style="color:#0000FF;text-align:left">View Full Screen in Rover</a></small>';
                 return iframeStr;
              }
              
@@ -879,15 +903,18 @@
                 // hide all other divs
                 $('#side').css('display', 'none');
                 $('#header').css('display', 'none');
-                $('#footer').css('display', 'none');
                 $('#sourcePanelToolbar').css('display', 'none');
+                $('#vdivide').css('display', 'none');
+                $('#copyright').css('display', 'none');
+                $('#right-buttons').css('display', 'none');
                 
                 // restyle main
                 $('#main').css('width', '100%');
+                $('#main').css('left', '0px')
                 $('#main').css('top', '0px');
+                $('#scroll-slider-container').css('width', '100%');
+                $('#scroll-slider-container').css('left', '0px');
                 
-                // move pan title up
-                $('#pan').css('margin-top', '0px');
              }
              
              function exportToFigureMaker() {
@@ -980,12 +1007,17 @@
                  // Pixel width of the scroller
                  return (wNoScroll - wScroll);
              }
+             
+             function testIE() {
+                if (navigator.appName == 'Microsoft Internet Explorer')
+                  alert("Rover takes advantage of the latest features on the web and therefore doesn't work with Internet Explorer. Please use Chrome, Safari, or Firefox");
+             }
 
     		</script>
 
 </head> 
      
-<body> 
+<body onLoad="testIE()"> 
 
     <div id="header">
        <div>
@@ -994,7 +1026,7 @@
        <div style="width:6px; color: #474747; font-size: 1px">
           -
        </div>
-       Rover <span style="font-style: italic; font-size: 11px">HTML5 DAS Genome Browser</span>
+       Rover <span style="font-style: italic; font-size: 11px; color:#bbbfc3; text-shadow: 0 0px 0px black;">HTML5 DAS Genome Browser</span>
     </div> 
      
     <div id="content"> 
@@ -1036,8 +1068,15 @@
                 <div class='viewerButtonLeft' style="float:left">
                       Jump To <input id="jump" style="width:6em" id='jump-to'></input>
                 </div>
-                <div style="float:right; margin-right:10px">
-                   <div class='viewerButtonRight' style="margin-right:10px"><a  href="#" onClick='toggleLinkUrl()' title="Link to current view">Link</a></div>
+                <div id='right-buttons' style="float:right; margin-right:10px">
+                   <div class='viewerButtonRight' style="position:relative;margin-right:10px; z-index:100"><a  href="#" onClick='toggleLinkUrl()' title="Link to current view">Link</a>
+                      <div id="link-url">
+                         <div style="box-shadow: 4px 4px 4px -2px rgb(170,170,170);">
+                            <div>Link to current view</div><input id="link-url-input"></input><br/>
+                            <div>Embed in website</div><input id="embed-url-input"></input>
+                         </div>
+                      </div>
+                   </div>
                    <div class='viewerButtonRight'><a href="#" onClick='exportToFigureMaker()' title="Export view to Figure Maker"style="margin-right:10px">Figurize</a></div>
                    <div class='viewerButtonRight'><a href='#' onClick="toggleAbout()">About</a></div>
                 </div>
@@ -1050,10 +1089,7 @@
              <p style="font-size: 13px"><a href="#" onClick="toggleAbout()">About DAS Browser</a></p>
           </div>
           
-             <div id="link-url">
-                Link to current view<br/><input id="link-url-input"></input><br/>
-                Embed in website<br/><input id="embed-url-input"></input>
-             </div>
+
 
              <br/>
              <div id='viewer' style="text-align: center; margin: 0px auto opx auto">                      
@@ -1066,7 +1102,7 @@
                    <div id='cover-scroll-bar'></div>  
                 </div>
                 <div id='zoom' >
-                   <div style="float:left">
+                   <div style="float:left; height:100%">
                       <div class="ui-icon ui-icon-circle-plus"></div>
                       <div id="zoom-slider"></div>
                       <div class="ui-icon ui-icon-circle-minus"></div>
@@ -1097,16 +1133,8 @@
     </div>
     
     <div id="copyright">
-       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
-       &copy; <a href="http://github.com/chmille4">Chase Miller</a> 2011
+       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a> <span style='margin-left:6px'>&copy; </span><a href="http://github.com/chmille4">Chase Miller</a> 2011
     </div>
-    
-    <!-- <div id="footer">
-      <div style="width=30%;margin-left:auto; margin-right:auto; margin-top: 10px">
-         Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
-      </div>
-      <div style="float:right; margin-right:20px; margin-top:-6px">&copy; <a href="http://github.com/chmille4">Chase Miller</a> 2011</div>
-    </div>  -->
 
 </body> 
 

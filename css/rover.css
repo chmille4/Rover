@@ -37,8 +37,8 @@ a {
 */  
     background-image: url(../images/sharkskin.gif);
     text-align: center;
-    font-size: 34px;
-    color: rgb(234,234,234);
+    font-size: 30px;
+    color: white;
     line-height: 50px;
     text-shadow: 0 -1px 1px black;
     font-weight: bold;
@@ -48,15 +48,15 @@ a {
 {
    color: #474747;
    float: left;
-   width:14%;
+   width:181px;
    font-size: 1px;
    text-shadow: 0 0px 0px #474747;
-   border-right: 1px solid #2F3C47;
+   border-right: 1px solid #4B515B;
 /*   border-right: 1px solid #181818;*/
-   -moz-box-shadow: 1px 0px 1px #525252;
+/*   -moz-box-shadow: 1px 0px 1px #525252;
    -webkit-box-shadow: 1px 0px 1px #525252;
-   box-shadow: 1px 0px 1px #525252;
-   box-shadow: 1px 0px 4px #2F3C47;
+   box-shadow: 1px 0px 1px #525252;*/
+   box-shadow: 1px 0px 4px #505662;
 }
         
 #content 
@@ -72,13 +72,18 @@ a {
 
 #side {
    top:50px; 
-   bottom:58px; 
+   bottom:31px; 
    overflow:auto; 
    position:absolute;
-   width: 14%;
+   width: 181px;
    float:left;
    border-right: 1px solid rgb(180, 180, 180);
    text-align: center;
+   background: rgb(245,245,245);
+   background: -webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), rgb(250,250,250));
+   background: -moz-linear-gradient(top, rgb(245,245,245), rgb(250,250,250));
+   background: linear-gradient(top, rgb(245,245,245), rgb(250,250,250));
+   
 }
 
 .option-controls {
@@ -114,18 +119,32 @@ a {
     
 
 /*    box-shadow: inset 0px 1px 7px -3px black;     */
+   
 }
 
 #sourcePanel ul {
     text-align: left;
     list-style: none;
-    margin-left: 2px;
-    padding-left: 2px;
+    margin-left: 0px;
+    padding-left: 0px;
 }
 
-#sourcePanel li:nth-child(even) {
-    background-color: rgb(220, 220, 220);
-    margin-right: 4px;
+#sourcePanel li {
+       border-bottom: 1px solid rgb(255,255,255);
+}
+
+#sourcePanel li div {
+   border-bottom: 1px solid rgb(230,230,230);
+   width: 100%;
+   height: 100%;
+}
+
+#sourcePanel li:first-child {
+   border-top: 1px solid rgb(230,230,230);
+}
+
+#sourcePanel li:first-child div {
+   border-top: 1px solid rgb(255,255,255);    
 }
 
 #addSourcePanel {
@@ -165,7 +184,7 @@ a {
    position: absolute;
    bottom: 0px;
    cursor: pointer;
-   width: 14%;
+   width: 181px;
    text-align: center;
    border-top: 1px solid rgba(0, 0, 0, 0.3);
    -moz-box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.1);
@@ -178,7 +197,7 @@ a {
    position: absolute;
    top:50px;
    bottom: 0px;
-   left: 14%;
+   left: 181px;
    width: 6px;
    border: 1px solid #c5c5c5;
    border-width: 0 1px 0 1px;
@@ -194,12 +213,11 @@ a {
 
 #main{
    top:50px; 
-   bottom:72px; 
-   right: 0px;
+   bottom:31px; 
+   left: 189px;
    overflow:auto; 
    position:absolute;
-   width:85.5%;
-   float:right;
+   right: 0px;
    text-align: center;
 }
 
@@ -248,10 +266,14 @@ a {
 }
 
 #center-view {
-   float: left;
-   width: 94.9%;
-   margin-left: 1%;
-   margin-right: auto;       
+   position: absolute;
+   left: 6px;
+   right: 41px;
+/*   width: 94.9%;
+   margin-left: 1px;
+   margin-right: 100px;*/       
+/*   margin-left: 10px;
+   margin-right: 50px;*/
 
 }
 
@@ -265,25 +287,27 @@ a {
 }
 
 #link-url {
-    background-color: rgb(210,210,210);
-    color: rgb(30,30,30);
+    background-color: rgb(230,230,230);
+    color: rgb(50,50,50);
     border: 1px solid rgb(160,160, 160);
     border-top: 0px;
     border-bottom-left-radius:4px;
     -moz-border-radius-bottomleft:4px;
     border-bottom-right-radius:4px;
     -moz-border-radius-bottomright:4px;
+    padding-top: 5px;
     width: 128px;
-    float:right;
-    margin-top: 0px;
-    margin-right: -1px;
-    padding: 1px;   
-    position:absolute;
-    top:30;
-    right:0;
+    font-size: 12px;
+    left:-1px;
     display: none;
-    box-shadow: 1px 1px 5px #1d1d1d;
-    z-index: 3;
+    box-shadow: inset 0px 4px 4px -2px rgb(170,170,170);
+    position: absolute;
+    line-height: 18px;
+    z-index: 4;
+}
+
+#link-url input {
+   width: 110px;
 }
 
 .slider {    
@@ -303,17 +327,19 @@ a {
 }
 
 #zoom{
-   float:right;
+   position: absolute;
+   right: 0px;
    margin-right:0px;   
    z-index: 2;
-   height: 50%;
+   height: 180px;
    width: 28px;
    
    -moz-border-radius-topleft:3px;
    -moz-border-radius-bottomleft:3px;   
    border-top-left-radius:3px;
    border-bottom-left-radius:3px;
-   padding-top: 18px;
+   padding-top: 10px;
+   padding-bottom: 10px;
    padding-right: 2px;
    padding-left: 2px;
    
@@ -340,7 +366,7 @@ a {
 #zoom-slider {
    font-size:9.5px;
    display:inline-block; 
-   height: 150px;
+   height: 80%;
 }
 .slider-title {
    font-weight: bold;
@@ -349,7 +375,7 @@ a {
 #scroll-slider-container{
    position: absolute;
    bottom:0px;
-   width: 85.4%;
+   left: 189px;
    right: 0px;
    border-top: 1px solid rgba(0, 0, 0, 0.3);
    -moz-box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.1);
@@ -396,8 +422,12 @@ a {
 }
 
 #scale {
-   background: -moz-linear-gradient(top, rgb(95, 95, 95), rgb(70,70,70));
+/*   background: -moz-linear-gradient(top, rgb(95, 95, 95), rgb(70,70,70));
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(95,95,95)), to(rgb(70, 70, 70)));   
+*/
+   background-color: rgb(68,76,84);
+   background: -webkit-gradient(linear, left top, left bottom, from(rgb(86,98,109)), to(rgb(68,76,84)) );   
+   background: -moz-linear-gradient(top, rgb(86,98,109), rgb(68,76,84));
 }
 
 #canvasList {
