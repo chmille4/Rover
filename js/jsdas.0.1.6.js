@@ -125,7 +125,7 @@ var JSDAS = function() {
 				var response;
 				if (JSDAS.error)
 				    response = undefined;
-				else if (charts.hasOwnProperty(args[0].center.chart.canvas.id)) {
+				else if (rover.tracks.hasOwnProperty(args[0].center.chart.canvas.id)) {
 				   args.unshift(xml)
 				   callback.apply(this||window, args)
 				}
