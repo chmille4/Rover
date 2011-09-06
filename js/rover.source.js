@@ -19,14 +19,17 @@ var DasSource = Class.extend({
       // var request = new DasRequest;                
       // track.addDasRequest(request);
       this.newRequest();
-      track.min = parseInt(Math.max(min, 1));
-      track.max = parseInt(max);  
-
-       var cb = document.getElementById(track.center.chart.canvas.id+'-input');      
-      // var url = cb.value + '/features?segment=' + $('#chromosome').val() + ':'  + min + "," + max + ';type=' + $(cb).attr('data-type');     
+      min = parseInt(Math.max(min, 1));
+      max = parseInt(max);  
       var fullUrl = this.url + '/features?segment=' + this.chromosome + ':'  + min + "," + max + ';type=' + this.typeFilter;     
 
       this.request.xhr = JSDAS.features(fullUrl, function(response, track, direction) { callback(response, track, direction) }, function(){}, "", [track,direction]);
+   },
+   
+   refetch: function() {
+      this.track.showSpinner();
+      this.fetch(this.track.rover.min, this.track.rover.max, this.track.updateSource, this.track, 'center');
+      this.request.drawOnResponse = true;
    },
    
    parse: function(xmlDoc, view) {

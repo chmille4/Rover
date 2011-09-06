@@ -25,8 +25,13 @@ var Rover = Class.extend({
       this.testIE();
    },
    
+   newTrack: function() {
+     var rover = this;
+     var track = rover.addTrack("", "", "", "collapse", rover.getChromosome());
+     track.showEditPanel();
+   },
+   
    addTrack: function(name, url, type, display, chromosome) {
-      var id = name;
       
       // create source
       var source = new DasSource(name, url, type, chromosome);
@@ -40,76 +45,70 @@ var Rover = Class.extend({
       // create elements
       var parentDiv = document.createElement('div');
       parentDiv.className = "canvas-div";
-      var optionDiv = document.createElement('div');
-      optionDiv.className = "option-control";
-      optionDiv.style.display = 'none';
+      var trackMenuDiv = document.createElement('div');
+      trackMenuDiv.className = "option-control";
+      trackMenuDiv.style.display = 'none';
+      
+      var removeTrackDiv = document.createElement('div');
+      removeTrackDiv.innerHTML = 'X';
+      removeTrackDiv.className = "removeTrackButton";
+//      removeTrackDiv.style.display = 'none';
+      
       var newCanvas = document.createElement("canvas");
-      newCanvas.id = id; 
       var label = document.createElement("span");
       
       
+      // add meta-data editing capabilities
+      var trackEditDiv = document.createElement("div");
+      trackEditDiv.className = 'track-edit-div';
+      $(trackEditDiv).width( this.getDisplayWidth() );
+      
+      
       // create track
-      var track = new RoverTrack(id, source, newCanvas, rover.getWidthWithBuffers());
+      var track = new RoverTrack(source, newCanvas, rover.getWidthWithBuffers());
+      //newCanvas.id = track.id;
+      track.rover = rover;
       track.drawStyle = display;
       source.track = track;            
 
       // associate elements
       canvasList.appendChild(parentDiv);
-      this.canvasContentDiv.appendChild(optionDiv);
+      this.canvasContentDiv.appendChild(trackMenuDiv);
+      this.canvasContentDiv.appendChild(removeTrackDiv);
       this.canvasContentDiv.appendChild(label);
+      this.canvasContentDiv.appendChild(trackEditDiv);
+      
       parentDiv.appendChild(document.createElement('br'));
       parentDiv.appendChild(newCanvas);
 
       // source title label
-      label.innerHTML = "<span class='spinner'> <img src='images/spinner.gif'/> retrieving from: </span>" + source.name;
+      var spinner = document.createElement('span');
+      spinner.className = 'spinner';
+      spinner.innerHTML = " <img src='images/spinner.gif'/> retrieving from: ";
+      var nameDiv = document.createElement('span');
+      nameDiv.innerHTML = source.name;
+      //label.innerHTML = "<span class='spinner'> <img src='images/spinner.gif'/> retrieving from: </span>" + source.name;
+      label.appendChild(spinner);
+      label.appendChild(nameDiv);
       label.className = "canvas-label";
 
       var id = id;
-      parentDiv.id = id + "-parentdiv";
-      optionDiv.id = id + "-optiondiv"
-      label.id = id + '-label';
+//      parentDiv.id = id + "-parentdiv";
+//      trackMenuDiv.id = id + "-optiondiv"
+//      label.id = id + '-label';
+ //     trackEditDiv.id = id + '-track-edit-div';
+//      removeTrackDiv.id = id + '-removediv';
 
       if (this.scaleDiv.childElementCount == 0) {
          rover.initScale();
       }
 
-      // option menu buttons
-      // gear button
-      var gear = document.createElement('span');
-      gear.style.float = 'left';
-      gear.innerHTML = "<a href='#'><span style='float:left' class='ui-icon ui-icon-gear'></a></span><span style='float:left' class='ui-icon ui-icon-triangle-1-s'></span>";
-      gear.onmouseover = function() {$(gear).addClass('option-hover');};
-      gear.onmouseout = function() {$(gear).removeClass('option-hover');}   		      
-      optionDiv.appendChild(gear);
-
-
-      // close button
-      var close = document.createElement('span');
-      close.style.float = 'left';
-      close.innerHTML = "<a href='#'><span style='float:left; border-left: 1px solid white' class='ui-icon ui-icon-close'></span></a>";
-      close.onmouseover = function() {$(close).addClass('option-hover');};
-      close.onmouseout = function() {$(close).removeClass('option-hover');}
-      close.onclick = function() {rover.removeTrack(id);}
-      optionDiv.appendChild(close);
-      optionDiv.appendChild(document.createElement('br'));
-
-      // menu panel
-      var menuPanel = document.createElement('ul');
-      menuPanel.className = 'subnav';
-      menuPanel.style.display = 'none';
-      var li = document.createElement('li');
-      li.id = newCanvas.id + '-expand-option'
-      li.onclick = function() { toggleExpand(newCanvas.id, li);}
-      if (display == 'Expand')
-         li.innerHTML = "<a href='#'>Collapse</a>";
-      else
-         li.innerHTML = "<a href='#'>Expand</a>";
-      menuPanel.appendChild(li);
-      optionDiv.appendChild(menuPanel);       		          		      
-
-      // handle additional events on menu
-      gear.onclick = function() { track.clickMenu() };   		      
-      $(optionDiv).mouseleave(function() {$(menuPanel).slideUp('fast'); })
+      // add track menu
+      track.createMenu(trackMenuDiv, display);
+      
+      // add source edit panel
+      track.createEditPanel(trackEditDiv);
+      
 
       newCanvas.width = this.getWidthWithBuffers();
       $(newCanvas).parent().width(this.getWidthWithBuffers());
@@ -120,14 +119,15 @@ var Rover = Class.extend({
       var top = $(parentDiv).position().top;
       label.style.top = top + 'px';
 
-      // make request
-      //         		         var view = new View(newCanvas);
 
-      
+      // associate html elements with track
       track.parentDiv = parentDiv;
       track.labelDiv = label;
-      track.menuDiv = optionDiv;
-      track.menuDropdown = menuPanel;
+      track.menuDiv = trackMenuDiv;
+      track.removeDiv = removeTrackDiv;
+      track.spinner = spinner;
+      track.editDiv = trackEditDiv;
+      track.nameDiv = nameDiv;
       
       track.min = rover.min;
       track.max = rover.max;
@@ -135,15 +135,20 @@ var Rover = Class.extend({
       // handle track menu
       parentDiv.onmouseover = function() { track.showMenu() };
       parentDiv.onmouseout  = function() { track.hideMenu() };
-      optionDiv.onmouseover = function() { track.showMenu() };
-      optionDiv.onmouseout  = function() { track.hideMenu() };
+      trackMenuDiv.onmouseover = function() { track.showMenu() };
+      removeTrackDiv.onmouseover = function() { track.showMenu() };
+      removeTrackDiv.onclick = function() { rover.removeTrack( track.id ) };
+ //     trackMenuDiv.onmouseout  = function() { track.hideMenu() };
 
-      rover.tracks[newCanvas.id] = track;
-      track.source.fetch(track.min, track.max, track.initSource, track, 'center');
+      rover.tracks[track.id] = track;
+      if ( track.source.url )
+         track.source.fetch(rover.min, rover.max, track.initSource, track, 'center');
       //makeDasRequest(track, scriblMin, scriblMax, 'center', initializeSource);
       
       // call onAddTrack function if set
-      rover.onAddTrack(track);      
+      if (rover.onAddTrack) rover.onAddTrack(track);
+      
+      return track;   
    },
    
    removeTrack: function(id) {
@@ -153,7 +158,9 @@ var Rover = Class.extend({
  	   // delete divs associated with track
  	   $(track.parentDiv).remove();
       $(track.labelDiv).remove();
-      $(track.menuDiv).remove();      
+      $(track.menuDiv).remove(); 
+      $(track.removeDiv).remove(); 
+      
 
  	   // abort in progress das requests
  	   track.source.request.xhr.abort();
@@ -171,8 +178,8 @@ var Rover = Class.extend({
    fetchAll: function(min, max, direction) {
       var rover = this;
       for (var i in rover.tracks) {
-         var view = rover.tracks[i];
-         rover.tracks[i].source.fetch(min, max, rover.tracks[i].updateSource, view, direction);
+         var track = rover.tracks[i];
+         rover.tracks[i].source.fetch(min, max, rover.tracks[i].updateSource, track, direction);
       }   
       
    },
@@ -190,16 +197,15 @@ var Rover = Class.extend({
               rover.tracks[i].draw(min, max, widthPx);
            } else {
               // show spinner
-              // have to do it this way b\c there are spaces in the id
-              $('[id=' + i + '-label] .spinner').css('display', 'inherit');
-
+              rover.tracks[i].showSpinner();
+              
               // clear canvas
               var chart = rover.tracks[i].center.chart;
               if (!zooming)
                  chart.ctx.clearRect(0, 0, chart.canvas.width, chart.canvas.height);
 
               // set draw to happen when request is received
-              rover.tracks[i].source.request.drawOnResponse = true;                                             
+              rover.tracks[i].source.request.drawOnResponse = true;
            }
         }
    },
@@ -249,8 +255,11 @@ var Rover = Class.extend({
       for( var i in this.tracks ) {
          var canvasDiv = this.tracks[i].parentDiv;
          var top = $(canvasDiv).position().top + $('#main').scrollTop();
-         var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
-         document.getElementById(labelId).style.top = top + 'px';         
+         this.tracks[i].labelDiv.style.top = top + 'px';
+         this.tracks[i].editDiv.style.top = top + 'px';
+         
+         // var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
+         // document.getElementById(labelId).style.top = top + 'px';
       }
    },
    
@@ -458,9 +467,10 @@ var Rover = Class.extend({
       var displays = querys['display'].split(',');
 
       // set display
-      for (var i=0; i < displays.length; i++) {                            
-         if (displays[i] == 'Expand' || displays[i] == 'Collapse'){
-            rover.addTrack(names[i], urls[i], types[i], displays[i], querys['segment']);
+      for (var i=0; i < displays.length; i++) {   
+         var display = displays[i].toLowerCase();
+         if (display == 'expand' || display == 'collapse'){
+            rover.addTrack(names[i], urls[i], types[i], display, querys['segment']);
          }
       }
       

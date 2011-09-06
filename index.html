@@ -25,9 +25,12 @@
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
    <link rel="stylesheet" href="css/jquery.ui.aristo.all.css">
    <link rel="stylesheet" type="text/css" href="css/rover.css" />
+   <link rel="stylesheet" type="text/css" href="js/SimplejQueryDropdowns/css/dropdown.css" />
+   
    
    <script src="js/jquery-ui.chase.min.js"></script>
    <script src="js/jsdas.0.1.6.js" ></script>
+   <script type="text/javascript" language="javascript" src="js/SimplejQueryDropdowns/js/jquery.dropdownPlain.js"></script>
 	
 	<script type="text/javascript">
 
@@ -69,7 +72,7 @@
           		   $(document).ready(function() {  
           		      rover = new Rover( document.getElementById('rover') );
           		      rover.onRemoveTrack = function(id) { removeTrack(id) };
-          		      rover.onAddTrack = function(track) { addTrack(track) };
+//          		      rover.onAddTrack = function(track) { addTrack(track) };
 
           		      toggleSplashPage();
 
@@ -223,7 +226,7 @@
                 	function removeTrack(id){
 
                      // uncheck box
-                	   document.getElementById(id + "-input").checked = false;                                          
+                	 //  document.getElementById(id + "-input").checked = false;                                          
                      
                      // check if view is empty and if so bring up splash page
                 	   if (rover.isEmpty()) {
@@ -260,12 +263,12 @@
                    function toggleAbout() {
                       if (aboutShowing) {
                          aboutShowing = false;
-                         document.getElementById('sourcePanel').style.display = "inherit";
+                         //document.getElementById('sourcePanel').style.display = "inherit";
                          document.getElementById('about').style.display = "none";                   
                       } else {
                          aboutShowing = true;
-                         document.getElementById('sourcePanel').style.display = "none";
-                         document.getElementById('about').style.display = "inherit";                   
+                         //document.getElementById('sourcePanel').style.display = "none";
+                         document.getElementById('about').style.display = "inline";                   
                       }
                    }
 
@@ -275,10 +278,10 @@
                    }
                    
                    function addTrack(track) {
-                     var cb = addCheckbox(track);
-                     cb.checked = true;
-                     $(cb).click();
-                     cb.checked = true; // click unchecks it so re-check it
+                     // var cb = addCheckbox(track);
+                     // cb.checked = true;
+                     // $(cb).click();
+                     // cb.checked = true; // click unchecks it so re-check it
                    }
 
                    function addCheckbox(track) {
@@ -319,27 +322,27 @@
                         $('#link-url').css('display', 'none')
                   }
 
-          			function toggleExpand(canvasId, li) {
-          			   var track = rover.tracks[canvasId];   			   
-
-                     var style = li.children[0].innerHTML;
-
-          			   // expand chart
-          			   if (style == 'Expand') {
-                        //document.getElementById(canvasId + '-input').setAttribute('data-display', 'Expand');
-                        track.drawStyle = 'expand';
-                        li.children[0].innerHTML = 'Collapse'
-                        track.center.chart.drawStyle = 'expand';
-          			   } else { // collapse chart 
-          			      track.center.chart.drawStyle = 'collapse'
-          			      track.drawStyle = 'collapse'
-                        //document.getElementById(canvasId + '-input').setAttribute('data-display', 'Collapse');
-                        li.children[0].innerHTML = 'Expand'
-          			   }
-                     track.center.chart.laneSizes = 13;
-          			   track.center.chart.canvas.height = track.center.chart.getHeight();
-          			   track.draw(rover.min, rover.max);
-          			}
+                  // function toggleExpand(canvasId, li) {
+                  //    var track = rover.tracks[canvasId];             
+                  // 
+                  //                      var style = li.children[0].innerHTML;
+                  // 
+                  //    // expand chart
+                  //    if (style == 'Expand') {
+                  //                         //document.getElementById(canvasId + '-input').setAttribute('data-display', 'Expand');
+                  //                         track.drawStyle = 'expand';
+                  //                         li.children[0].innerHTML = 'Collapse'
+                  //                         track.center.chart.drawStyle = 'expand';
+                  //    } else { // collapse chart 
+                  //       track.center.chart.drawStyle = 'collapse'
+                  //       track.drawStyle = 'collapse'
+                  //                         //document.getElementById(canvasId + '-input').setAttribute('data-display', 'Collapse');
+                  //                         li.children[0].innerHTML = 'Expand'
+                  //    }
+                  //                      track.center.chart.laneSizes = 13;
+                  //    track.center.chart.canvas.height = track.center.chart.getHeight();
+                  //    track.draw(rover.min, rover.max);
+                  // }
 
                    function jump() {
                       var jumpTo = parseInt($('#jump').val());
@@ -420,24 +423,24 @@
 <body> 
 
     <div id="header">
-       <div>
+       <!-- <div>
           _
        </div>
        <div style="width:6px; color: #474747; font-size: 1px">
           -
-       </div>
+       </div> -->
        Rover <span style="font-style: italic; font-size: 11px; color:#bbbfc3; text-shadow: 0 0px 0px black;">HTML5 DAS Genome Browser</span>
     </div> 
      
     <div id="content"> 
-       <div id="side">         
+       <!-- <div id="side">         
           <div id="dasTitle" class="option-controls">DAS Sources</div>
           <div id="sourcePanel">
-    	      <br/>     	      
-    	      <div id="subtitle">check boxes to add data</div>
-    	      <ul id="source-list"></ul>
-    	   </div>
-    	   <div id="addSourcePanel">
+            <br/>             
+            <div id="subtitle">check boxes to add data</div>
+            <ul id="source-list"></ul>
+         </div>
+         <div id="addSourcePanel">
             <br/>
             <div>
                DAS Source URL:<br/><input id="dassource" type="text" name="dassource" /><br />
@@ -451,13 +454,9 @@
                </div>
             </div>
          </div>
-         <div id='about'>
-            <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking add source at the bottom of the DAS Source pane.</p>
-            <br/>
-            <a href="#" class="myButton" onClick="toggleAbout()" >X</a>
-         </div>
+
        </div>
-       <div id='vdivide'></div>
+       <div id='vdivide'></div> -->
        
        <div id="main">
           <div id="top-controls" class="option-controls">
@@ -478,7 +477,7 @@
                       </div>
                    </div>
                    <div class='viewerButtonRight'><a href="#" onClick='exportToFigureMaker()' title="Export view to Figure Maker"style="margin-right:10px">Figurize</a></div>
-                   <div class='viewerButtonRight'><a href='#' onClick="toggleAbout()">About</a></div>
+                   <div class='viewerButtonRight'><a href='#' onClick="rover.newTrack()">+ Track</a></div>
                 </div>
                 <div style="clear:both"></div>
           </div>
@@ -504,16 +503,23 @@
                      z<br/>o<br/>o<br/>m
                   </div>
                </div>
+
              </div>               
        </div>
        
     </div> 
-    <div id="sourcePanelToolbar" class='option-controls' href='#'>
+    <!-- <div id="sourcePanelToolbar" class='option-controls' href='#'>
        <div style=""  onClick="toggleDasSources()">
           Add Source
        </div>
+    </div> -->
+    <div id='about'>
+       <span style="width:100%">About</span>
+       <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking +Track at the top right of the viewer.</p>
+       <p>Source code is available <a href='https://github.com/chmille4/Rover'>here</a>. Feel free to use, modify, and contribute.</p>
+       <br/>
+       <a href="#" class="myButton" onClick="toggleAbout()" >X</a>
     </div>
-    
     <div id='scroll-slider-container'>
        <div style="width:350px; margin-left:auto; margin-right:auto">
           <div style="margin-top:8px; float:left" class="ui-icon ui-icon-circle-minus"></div>
@@ -525,9 +531,15 @@
        <!-- <div class='slider-title' style="margin-top: 4px; width: 3em; margin-left:auto; margin-right:auto">Scroll</div>        -->
     </div>
     
+    <div id="aboutLink">
+       <a href="#" onClick="toggleAbout()">About</a>
+    </div>
     <div id="copyright">
+       
        Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a> <span style='margin-left:6px'>&copy; </span><a href="http://github.com/chmille4">Chase Miller</a> 2011
     </div>
+    
+
 
 </body> 
 

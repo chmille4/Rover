@@ -1,11 +1,11 @@
 var RoverTrack = Class.extend({
-   init: function(id, source, canvas, canWidth) {
-      this.id = id;
+   init: function(source, canvas, canWidth) {
+      this.id = _uniqueId('roverTrack');
       this.source = source;
       this.displayMin = undefined;
       this.displayMax = undefined;
-      this.min = undefined;
-      this.max = undefined;
+      this.rover = undefined;
+      this.canvas = canvas;
       
       //default options
       this.drawStyle = 'collapsed';
@@ -29,8 +29,11 @@ var RoverTrack = Class.extend({
       this.parentDiv = undefined;
       this.labelDiv  = undefined;
       this.menuDiv   = undefined;
+      this.removeDiv   = undefined;
       this.menuDropdown = undefined;
-      
+      this.spinner = undefined;
+      this.nameDiv = undefined;
+      this.editDiv = undefined;
    },
    
    draw: function(min, max, widthPx) {                         
@@ -48,8 +51,12 @@ var RoverTrack = Class.extend({
       view.ctx.clearRect(0, 0, view.canvas.width, view.canvas.height);                
       view.scale.min = min;
       view.scale.max = max;
+      if(view.drawStyle != this.drawStyle) {
+         view.drawStyle = this.drawStyle;
+         view.canvas.height = view.getHeight();
+      }
       view.draw();        
-      rover.updateLabelPositions();               
+      this.rover.updateLabelPositions();               
     },
    
    initSource: function(response, track) {
@@ -65,21 +72,20 @@ var RoverTrack = Class.extend({
       track.center.chart.laneSizes = 13; // set lanesizes so getHeight will be accurate
       track.center.chart.canvas.height = track.center.chart.getHeight();    				
 
-      var canvasId = track.center.chart.canvas.id;
+
       // check track hasn't been deleted
-      if(!rover.tracks.hasOwnProperty(canvasId))
+      if(!rover.tracks.hasOwnProperty(track.id))
          return;
 
       // keep track of tracks
-      rover.tracks[canvasId] = track;
+      rover.tracks[track.id] = track;
 
       // set max & min
       rover.max = track.max;
       rover.min = track.min;
 
       // turn spinner off
-      // have to do it this way b\c there are spaces in the id
-      $('[id=' + canvasId + '-label] .spinner').css('display', 'none');
+      track.hideSpinner();
 
       // draw chart
       track.draw(rover.min, rover.max);
@@ -93,33 +99,189 @@ var RoverTrack = Class.extend({
       track.source.parse(response, track[direction]);  
 
       // check if dasRequest needs to be drawn   
-      if (track.source.request.drawOnResponse) {
-         // hide spinner                  
+      if (track.source.request.drawOnResponse) {                  
          if (track.center.chart.canvas.height == 0) 
             track.center.chart.canvas.height = track.center.chart.getHeight();
-         var canvasId = track.center.chart.canvas.id;
-         // have to do it this way b\c there are spaces in the id
-         $('[id=' + canvasId + '-label] .spinner').css('display', 'none');
-         //$('.canvas-div').css('margin-left', 0);                  
-         document.getElementById(canvasId + '-parentdiv').style.marginLeft = 0;
+         
+         // hide spinner
+         track.hideSpinner();
+         
+         track.parentDiv.style.marginLeft = 0;
          track.center.chart.width = rover.getWidthWithBuffers();
          track.center.chart.canvas.width = rover.getWidthWithBuffers();
 
-         track.draw(track.min, track.max);
+         track.draw(track.rover.min, track.rover.max);
 
          // reset request
          track.source.request.drawOnResponse = false;
       }
    },
    
+   createMenu: function(trackMenuDiv, display) {
+      var track = this;
+
+      $(trackMenuDiv).html(' \
+           <ul class="dropdown">                                                       \
+           	<li><a href="#" style="margin-top:-4px"><img style="float:left" width="16" src="./images/gear_white.png"</img>   \
+             	</div><div class="ui-icon ui-icon-triangle-1-s"></div></a>              \
+           		<ul class="sub_menu" style="text-align: center">                                          			 \
+                  <div id ="top-border"></div>                                                           \
+           			 <li>                                                       \
+           				<span style="padding-left:8px">View As ></span>                                     \
+           				<ul>                                                              \
+           					<li><a class="'+track.id+'-drawStyle" name="collapse" href="#">Collapsed</a></li>                                \
+           					<li><a class="'+track.id+'-drawStyle" name="expand" href="#">Expanded</a></li>                               \
+                        <li><a class="'+track.id+'-drawStyle" name="line" href="#">Line Chart</a></li>                               \
+           				</ul>                                                             \
+           			 </li>                                                               \
+           			 <li><a href="#" class="'+track.id+'-edit">Edit</a></li>                            \
+           		</ul>                                                                   \
+           	</li>                                                                      \
+         </ul>                                                                         \
+      ');
+      
+      // set menu actions
+      $('[class=' + track.id + '-drawStyle]').click([track], function(event) { 
+         var track = event.data[0];
+         var newDrawStyle = event.target.name;
+         track.drawStyle = newDrawStyle;
+         track.draw(track.rover.min, track.rover.max)
+      });
+      
+      $('[class=' + track.id + '-edit]').click([track], function(event) { 
+         var track = event.data[0];
+         track.showEditPanel();
+      });
+      
+      
+      
+      
+//      document.getElementById('collapsed').onclick = function() {alert('hi');};
+      
+      // set click and hover behavior
+      $(trackMenuDiv).unbind('click').click( function(event) {
+        $(trackMenuDiv).find('.sub_menu').css('visibility', 'visible');
+      });
+      
+      $(trackMenuDiv).unbind('mouseleave').mouseleave( function(event){
+         $(trackMenuDiv).find('.sub_menu').css('visibility', 'hidden');
+      });
+   },
+   
    showMenu: function() {
       var top = $(this.labelDiv).position().top + 2;               
-      this.menuDiv.style.top = top + 'px';               
-      this.menuDiv.style.display = "inline";
+      
+      // go over all tracks and show this tracks menu while hiding all others
+      // this has to be done b\c the extended menu wasn't triggering mouseout
+      for ( var i in this.rover.tracks) {
+         if (this.rover.tracks[i].id == this.id ) {
+            this.menuDiv.style.top = top + 'px';               
+            this.menuDiv.style.display = "inline";
+
+            this.removeDiv.style.top = top + 'px';
+            this.removeDiv.style.display = "inline";
+         } else {
+            this.rover.tracks[i].hideMenu();
+         }
+      }      
    },
    
    hideMenu: function() {
-      this.menuDiv.style.display = 'none'
+      this.menuDiv.style.display = 'none';
+      this.removeDiv.style.display = 'none'
+   },
+   
+   
+   
+   createEditPanel: function(editDiv) {
+      var track = this;
+      
+      // create inputs
+      var nameInput = document.createElement('input');
+      var nameLabel = document.createElement('span');
+      nameLabel.innerHTML = 'Name';
+      nameLabel.className = 'labels';
+      
+      var urlInput = document.createElement('input');
+      var urlLabel = document.createElement('span');
+      urlLabel.innerHTML = 'URL'
+      urlLabel.className = 'labels';
+      
+      var chromoInput = document.createElement('input');      
+      var chromoLabel = document.createElement('span');
+      chromoLabel.innerHTML = 'Chromosome';
+      chromoLabel.className = 'labels';
+      
+      var typeFilterInput = document.createElement('input');
+      var typeFilterLabel = document.createElement('span');
+      typeFilterLabel.innerHTML = 'Type Filter';
+      typeFilterLabel.className = 'labels';
+      
+      // create controls
+      var cancelButton = document.createElement('button');
+      cancelButton.innerHTML = 'X';
+      cancelButton.onclick = function(e) { track.hideEditPanel(); };
+      var saveButton = document.createElement('button');
+      saveButton.innerHTML = 'Save';
+      saveButton.onclick = function(e) {
+         track.setName( $(nameInput).val() );
+         track.setUrl( $(urlInput).val() );
+         track.setChromosome( $(chromoInput).val() );
+         track.setTypeFilter( $(typeFilterInput).val() );
+         track.source.refetch();
+         track.hideEditPanel();
+      }
+      
+      // columns
+      var columnsDiv = document.createElement('div');
+      columnsDiv.className = 'columns';
+      var leftColumn = document.createElement('div');
+      leftColumn.style.cssFloat = 'left';
+      var rightColumn = document.createElement('div');
+      rightColumn.style.cssFloat = 'right';
+      
+      // add elements
+      $(leftColumn).append( $('<div></div>').append(nameLabel, nameInput), $('<div></div>').append(urlLabel, urlInput) );
+      $(rightColumn).append( $('<div></div>').append(chromoLabel, chromoInput), $('<div></div>').append(typeFilterLabel, typeFilterInput) );
+      columnsDiv.appendChild(leftColumn);
+      columnsDiv.appendChild(rightColumn);      
+      editDiv.appendChild(columnsDiv);      
+      $(editDiv).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton) );
+      
+      // hook up inputs
+      $(nameInput).val(this.source.name);
+      $(urlInput).val(this.source.url);
+      $(chromoInput).val(this.source.chromosome);
+      $(typeFilterInput).val(this.source.typeFilter);
+      
+   },
+   
+   showEditPanel: function() {
+      // edit panel height
+      var panelHeight = '80px';
+      
+      // update position
+      var top = $(this.parentDiv).position().top + $('#main').scrollTop();
+      this.editDiv.style.top = top + 'px';
+      
+      // change height
+      $(this.parentDiv).height( panelHeight );
+      $(this.editDiv).height( panelHeight );
+      
+      // show edit panel      
+      $(this.editDiv).css('display', 'inline');
+     
+     this.rover.updateLabelPositions()
+   },
+   
+   hideEditPanel: function() {
+       // change height
+       $(this.parentDiv).height( "" );
+
+       // show edit panel      
+       $(this.editDiv).css('display', 'none');
+
+      this.rover.updateLabelPositions()
    },
    
    clickMenu: function() {
@@ -128,7 +290,37 @@ var RoverTrack = Class.extend({
       $(this.menuDropdown).mouseleave( function() {
          $(this.menuDropdown).slideUp('slow'); //When the mouse hovers out of the subnav, move it back up
       });
-   }
+   }, 
+   
+   showSpinner: function() {
+      $(this.spinner).css('display', 'inherit');
+   },
+   
+   hideSpinner: function() {
+      $(this.spinner).css('display', 'none');
+   },
+   
+   setName: function(name) {
+      // replace name
+      // var html = this.labelDiv.innerHTML.replace(this.source.name, name);
+      // this.labelDiv.innerHTML = html;
+      this.nameDiv.innerHTML = name;
+      this.source.name = name;
+   },
+   
+   setUrl: function(url) {
+      this.source.url = url;
+   },
+   
+   
+   setChromosome: function(chromosome) {
+      this.source.chromosome = chromosome; 
+   },
+   
+   setTypeFilter: function(typeFilter) {
+      this.source.typeFilter = typeFilter;      
+   },
+   
    
    
    
