@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html lang="en"> 
+
+<head> 
+   <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>
+   <link href='style.css' rel='stylesheet' type='text/css'>
+</head> 
+     
+<body> 
+   <div class='content' style="height: 710px">
+      <div id='links'>
+         <div class='link'><a href='https://github.com/chmille4/Rover'>Source</a></div>
+         <div class='vbreak'>.</div>
+         <div class='link'><a href='https://github.com/chmille4/Rover/issues'>Bugs/Requests</a></div>
+         <!-- <div class='vbreak'>.</div>         
+         <div class='link'><a href='#'>Tutorials</a></div> -->
+         <div class='vbreak'>.</div>
+         <div class='link'><a href='#aboutv'>About</a></div>
+         <div class='vbreak'>.</div>
+         <div class='link'><a href='#detailsv'>More Info</a></div>
+         <div class='vbreak'>.</div>         
+         <div class='link'><a href='home.html'>Home</a></div>
+      </div>
+      <div id='title'>
+         <!-- Rover -->
+         <img src='images/rover_full_logo.png'/>
+         <!-- <div style="position:relative; display:inline">
+            <div style='display:inline; font: italic 20px ubuntu; color: #474747; position: absolute; width: 500px; top: 55px; left: 30px'>
+               HTML5 Canvas Genome Browser
+            </div>
+         </div>    -->      
+         <!-- <div style="display:inline; border-left: 2px solid rgb(210,210,210); color:white; margin-left: 550px">.</div>
+         <div style="display:inline" id='tryit'>Try it</div> -->
+         <div class='break'>.</div>
+      </div>
+      <div id='view1'>
+         <div style='float:left'>
+            <img  src='images/screen_shot3.png'/>
+         </div>
+         <div id='features'>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Web based - access anywhere<span></div>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Share - link to any data or view<span></div>  
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Integrate data from multiple databases<span></div>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Smooth Scroll/Zoom<span></div>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Lightweight - 100% javascript and no server<span></div>
+         </div>
+         <div style="clear:both"></div>
+         <div style='text-align:center'><a id='tryit' href='file:///Users/chase/Desktop/tmp_workspace/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://das.sanger.ac.uk/das/ens_36_refseq,http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript&names=Ensembl%20NCBI36/hg18,ens_NCBI36_refseq,Ensembl%20NCBI36/hg18%20depth&min=1110431.8549897228&max=1188431.8549897228&display=line,collapse,expand&segment=1&types=refGene,refGene,refGene'>Try it</a></div>
+      </div>
+   </div>
+   
+   <div id='view2' class='view'>
+      <div class='content'>
+         <a name='detailsv'></a>
+         <div class='view-title'>More Info</div>
+         <div id='details'>
+            <div class='title'>Motivation</div>
+            <div>
+               Rover was built to take advantage of the latest in web technology, separate the graphics and the genome browser, and create a lightweight browser with developer resources (in progress).
+            </div>
+            <div class ='title'>DAS</div>
+            <div>
+               Rover uses the <a href='http://www.biodas.org/wiki/Main_Page'>DAS Protocol</a> to fetch data from any database that supports it (UCSC, Ensembl, Sanger, WormBase, FlyBase, etc..). A list of active DAS sources can be found at the <a href='http://www.biodas.org/wiki/DasRegistry'>DAS Registry</a>.
+            </div>
+            <div class ='title'>Graphics</div>
+            <div>
+               For graphics Rover uses <a href='chmille4.github.com/Scribl/'>Scribl</a>, genomics graphics library, also developed in the Marth Lab. Separating the graphics and the genome browser is a major motivation for Scribl and allows both projects to progress independently.  Rover benefits from any work done to Scribl, however Scribl does not become tangled with Rover and can be used as the basis for other projects.
+            </div>
+            <div class ='title'>API</div>
+            <div>
+               Currently an effort is underway to build an official API to allow the core functionality of Rover to be easily used to build custom and niche genome browsers. This early release of Rover is to allow time for community support and feedback in the hopes of building a better API.
+            </div>
+            <div class ='title'>Data</div>
+            <div>
+               At the moment Rover only supports the DAS protocol and the easiest way to get your own data into Rover is to setup a <a href='http://www.biodas.org/servers/'>DAS Server</a>. However custom sources using your own protocol can be added (more on this coming) if the DAS protocol is insufficient. Additionally, after the API is stable, support for common data formats using the aide of a server could be added.
+            </div>
+         </div>
+         
+      </div>
+   </div>
+
+   <div id='view3' class='view'>
+      <div class='content'>
+         <a name='aboutv'></a>
+         <div class='view-title'>About</div>
+         <div id='about'>
+            Rover is an open source project and uses the <a href='chmille4.github.com/Scribl/'>Scribl</a> genomics graphics library for all graphics. It is being actively developed in the <a href='http://bioinformatics.bc.edu/marthlab/Main_Page'>Marth Lab</a> at Boston College. For any questions or suggestions contact <a href='https://github.com/chmille4'>Chase Miller</a> (chmille4 near gmail).
+         </div>
+         <div style="text-align: center">
+            <img style="height:415px; margin-top: 35px" src='images/rover_logo_large.png'/>
+            <div style="margin-top: 25px">&copy; Chase Miller </div>
+         </div>
+      </div>
+   </div>
+   
+</body> 
+
+</html>

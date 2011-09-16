@@ -469,9 +469,7 @@ var Rover = Class.extend({
       // set display
       for (var i=0; i < displays.length; i++) {   
          var display = displays[i].toLowerCase();
-         if (display == 'expand' || display == 'collapse'){
-            rover.addTrack(names[i], urls[i], types[i], display, querys['segment']);
-         }
+         rover.addTrack(names[i], urls[i], types[i], display, querys['segment']);
       }
       
       // success

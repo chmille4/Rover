@@ -188,7 +188,12 @@
                       // watch for enter key on chromosome box
                       $("#chromosome").keyup(function(event) {
                          // check for enter key
-                        if(event.keyCode == 13) {     
+                        if(event.keyCode == 13) {
+                           // change chromosome for all tracks
+                           for (var i in rover.tracks)
+                              rover.tracks[i].setChromosome( $("#chromosome").val() );
+                           
+                           // fetch and draw new data
                            rover.fetchAll(rover.min, rover.max, 'center');    
                            rover.draw(rover.min, rover.max, $('.canvas-div canvas').width(), rover.getDisplayMinNts());
                         }
@@ -534,10 +539,10 @@
     <div id="aboutLink">
        <a href="#" onClick="toggleAbout()">About</a>
     </div>
-    <div id="copyright">
+    <!-- <div id="copyright">
        
        Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a> <span style='margin-left:6px'>&copy; </span><a href="http://github.com/chmille4">Chase Miller</a> 2011
-    </div>
+    </div> -->
     
 
 

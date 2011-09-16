@@ -34,6 +34,10 @@ var RoverTrack = Class.extend({
       this.spinner = undefined;
       this.nameDiv = undefined;
       this.editDiv = undefined;
+      this.nameInput = undefined;
+      this.urlInput = undefined;
+      this.chromoInput = undefined;
+      this.typeFilterInput = undefined;
    },
    
    draw: function(min, max, widthPx) {                         
@@ -197,25 +201,29 @@ var RoverTrack = Class.extend({
       var track = this;
       
       // create inputs
-      var nameInput = document.createElement('input');
+      track.nameInput = document.createElement('input');
       var nameLabel = document.createElement('span');
       nameLabel.innerHTML = 'Name';
       nameLabel.className = 'labels';
       
-      var urlInput = document.createElement('input');
+      track.urlInput = document.createElement('input');
       var urlLabel = document.createElement('span');
-      urlLabel.innerHTML = 'URL'
+      urlLabel.innerHTML = 'Source URL'
       urlLabel.className = 'labels';
       
-      var chromoInput = document.createElement('input');      
+      track.chromoInput = document.createElement('input');
       var chromoLabel = document.createElement('span');
       chromoLabel.innerHTML = 'Chromosome';
       chromoLabel.className = 'labels';
       
-      var typeFilterInput = document.createElement('input');
+      track.typeFilterInput = document.createElement('input');
       var typeFilterLabel = document.createElement('span');
       typeFilterLabel.innerHTML = 'Type Filter';
       typeFilterLabel.className = 'labels';
+      
+      var helpDiv = document.createElement('div');
+      helpDiv.innerHTML = 'More DAS sources can be found at the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a>';
+      helpDiv.style.fontSize = '10px';
       
       // create controls
       var cancelButton = document.createElement('button');
@@ -224,11 +232,15 @@ var RoverTrack = Class.extend({
       var saveButton = document.createElement('button');
       saveButton.innerHTML = 'Save';
       saveButton.onclick = function(e) {
-         track.setName( $(nameInput).val() );
-         track.setUrl( $(urlInput).val() );
-         track.setChromosome( $(chromoInput).val() );
-         track.setTypeFilter( $(typeFilterInput).val() );
-         track.source.refetch();
+         track.setName( $(track.nameInput).val() );
+         
+         // check if any attributes are changed that require seq data to be refetched
+         if (  track.setUrl( $(track.urlInput).val() ) ||
+               track.setChromosome( $(track.chromoInput).val() ) ||
+               track.setTypeFilter( $(track.typeFilterInput).val() ) ) {
+                  track.source.refetch();
+               }
+         
          track.hideEditPanel();
       }
       
@@ -241,24 +253,19 @@ var RoverTrack = Class.extend({
       rightColumn.style.cssFloat = 'right';
       
       // add elements
-      $(leftColumn).append( $('<div></div>').append(nameLabel, nameInput), $('<div></div>').append(urlLabel, urlInput) );
-      $(rightColumn).append( $('<div></div>').append(chromoLabel, chromoInput), $('<div></div>').append(typeFilterLabel, typeFilterInput) );
+      $(leftColumn).append( $('<div></div>').append(nameLabel, this.nameInput), $('<div></div>').append(urlLabel, this.urlInput) );
+      $(rightColumn).append( $('<div></div>').append(chromoLabel, this.chromoInput), $('<div></div>').append(typeFilterLabel, this.typeFilterInput) );
       columnsDiv.appendChild(leftColumn);
       columnsDiv.appendChild(rightColumn);      
       editDiv.appendChild(columnsDiv);      
-      $(editDiv).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton) );
+      $(editDiv).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton), helpDiv );
       
-      // hook up inputs
-      $(nameInput).val(this.source.name);
-      $(urlInput).val(this.source.url);
-      $(chromoInput).val(this.source.chromosome);
-      $(typeFilterInput).val(this.source.typeFilter);
-      
+      this.chromoInput.disabled = true;      
    },
    
    showEditPanel: function() {
       // edit panel height
-      var panelHeight = '80px';
+      var panelHeight = '90px';
       
       // update position
       var top = $(this.parentDiv).position().top + $('#main').scrollTop();
@@ -267,6 +274,12 @@ var RoverTrack = Class.extend({
       // change height
       $(this.parentDiv).height( panelHeight );
       $(this.editDiv).height( panelHeight );
+      
+      // set inputs
+      $(this.nameInput).val(this.source.name);
+      $(this.urlInput).val(this.source.url);
+      $(this.chromoInput).val(this.source.chromosome);
+      $(this.typeFilterInput).val(this.source.typeFilter);      
       
       // show edit panel      
       $(this.editDiv).css('display', 'inline');
@@ -301,24 +314,42 @@ var RoverTrack = Class.extend({
    },
    
    setName: function(name) {
-      // replace name
-      // var html = this.labelDiv.innerHTML.replace(this.source.name, name);
-      // this.labelDiv.innerHTML = html;
       this.nameDiv.innerHTML = name;
-      this.source.name = name;
+      
+      if (this.source.name == name)
+         return false;
+      else {
+         this.source.name = name;
+         return true;
+      }
    },
    
    setUrl: function(url) {
-      this.source.url = url;
+      if (!url || this.source.url == url)
+         return false;
+      else {
+         this.source.url = url;
+         return true;
+      }
    },
    
    
    setChromosome: function(chromosome) {
-      this.source.chromosome = chromosome; 
+      if (!chromosome || this.source.chromosome == chromosome)
+         return false;
+      else {
+         this.source.chromosome = chromosome;
+         return true;
+      }
    },
    
    setTypeFilter: function(typeFilter) {
-      this.source.typeFilter = typeFilter;      
+      if (!typeFilter || this.source.typeFilter == typeFilter)
+         return false;
+      else {
+         this.source.typeFilter = typeFilter;
+         return true;
+      }      
    },
    
    
