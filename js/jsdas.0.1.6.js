@@ -2459,7 +2459,7 @@ JSDAS.XMLLoader = {
 				if(!data) { //This block is here since we cannot rely on content type headers
 				     errorcallback && errorcallback({id: 'not_xml', msg: "The response was not XML"});
 				}
-				if(data.documentElement.nodeName != 'parsererror') {
+				else if(data.documentElement.nodeName != 'parsererror') {
 					callback(data);
 					return;
 				} 
