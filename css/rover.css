@@ -456,6 +456,16 @@ a {
     color: rgb(60,60,60);
 }
 
+.error{
+   color: red;
+   text-decoration: underline;
+   display: none;
+}
+
+.error:hover{
+   cursor: pointer;
+}
+
 .track-edit-div {
    background: white;
    position: absolute;

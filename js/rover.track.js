@@ -32,6 +32,7 @@ var RoverTrack = Class.extend({
       this.removeDiv   = undefined;
       this.menuDropdown = undefined;
       this.spinner = undefined;
+      this.errorLabel = undefined;
       this.nameDiv = undefined;
       this.editDiv = undefined;
       this.nameInput = undefined;
@@ -352,7 +353,15 @@ var RoverTrack = Class.extend({
       }      
    },
    
+   hideErrorLabel: function() {
+      $(this.errorLabel).css('display', 'none');
+   },
    
-   
-   
+   handleError: function() {
+      // turn off spinner
+      this.hideSpinner();
+      
+      // show error message
+      $(this.errorLabel).css('display', 'inline');
+   }
 });

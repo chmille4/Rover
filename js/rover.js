@@ -80,6 +80,13 @@ var Rover = Class.extend({
       
       parentDiv.appendChild(document.createElement('br'));
       parentDiv.appendChild(newCanvas);
+      
+      // error label
+      var errorLabel = document.createElement('a');
+      errorLabel.className = 'error';
+      errorLabel.innerHTML = 'Error, Retry  '
+      errorLabel.onclick = function() { track.hideErrorLabel(); track.source.refetch(); };
+      label.appendChild(errorLabel);
 
       // source title label
       var spinner = document.createElement('span');
@@ -91,14 +98,7 @@ var Rover = Class.extend({
       label.appendChild(spinner);
       label.appendChild(nameDiv);
       label.className = "canvas-label";
-
-      var id = id;
-//      parentDiv.id = id + "-parentdiv";
-//      trackMenuDiv.id = id + "-optiondiv"
-//      label.id = id + '-label';
- //     trackEditDiv.id = id + '-track-edit-div';
-//      removeTrackDiv.id = id + '-removediv';
-
+      
       if (this.scaleDiv.childElementCount == 0) {
          rover.initScale();
       }
@@ -126,6 +126,7 @@ var Rover = Class.extend({
       track.menuDiv = trackMenuDiv;
       track.removeDiv = removeTrackDiv;
       track.spinner = spinner;
+      track.errorLabel = errorLabel;
       track.editDiv = trackEditDiv;
       track.nameDiv = nameDiv;
       

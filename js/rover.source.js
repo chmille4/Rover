@@ -23,7 +23,7 @@ var DasSource = Class.extend({
       max = parseInt(max);  
       var fullUrl = this.url + '/features?segment=' + this.chromosome + ':'  + min + "," + max + ';type=' + this.typeFilter;     
 
-      this.request.xhr = JSDAS.features(fullUrl, function(response, track, direction) { callback(response, track, direction) }, function(){}, "", [track,direction]);
+      this.request.xhr = JSDAS.features(fullUrl, function(response, track, direction) { callback(response, track, direction) }, function(){ track.handleError(); }, "", [track,direction]);
    },
    
    refetch: function() {
