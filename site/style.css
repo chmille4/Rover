@@ -25,7 +25,7 @@ body {
 
 #links .link a:hover {
    color: white;
-/*   background: -webkit-gradient(linear, left top, left bottom, from(#6C8A97), to(#495E66));*/
+   background: #717E8C;
    background: -webkit-gradient(
        linear,
        left top,
@@ -35,8 +35,8 @@ body {
        color-stop(0.52, #636E7A),
        color-stop(1, #606B77));
 
-   background: -moz-linear-gradient(top, rgb(86,99,110), rgb(67,73,81));
-   background: linear-gradient(top, rgb(86,99,110), rgb(67,73,81));
+   background: -moz-linear-gradient(top, #778493, #717E8C 48%, #636E7A 52%, #606B77);
+   background: linear-gradient(top, #778493, #717E8C 48%, #636E7A 52%, #606B77);
    border-radius: 4px;
    color: white;
 }
@@ -120,9 +120,12 @@ body {
 
 #tryit {
    border: 1px solid red;
+   background: red;
    background: -webkit-gradient(linear, left top, left bottom, from(red), to(#DA0000));
-   background: -moz-linear-gradient(top, red, #e0e0e1);
-   background: linear-gradient(top, red, #e0e0e1);
+   background: -moz-linear-gradient(top, red, #DA0000);
+   background: -o-linear-gradient(top, red, #DA0000);
+   background: linear-gradient(top, red, #DA0000);
+   filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#444444', EndColorStr='#999999');
    color: white;
    width: 100px;
    padding: 10px 20px 10px 20px;
@@ -142,8 +145,11 @@ body {
 
 #view2 {   
    background: -webkit-gradient(linear, left top, left bottom, from(#9AABBE), to(#8D9DAE));
-   background: -moz-linear-gradient(top, rgb(86,99,110), rgb(67,73,81));
-   background: linear-gradient(top, rgb(86,99,110), rgb(67,73,81));   
+   background: -moz-linear-gradient(top, #9AABBE, #8D9DAE);
+   background: -o-linear-gradient(top, #9AABBE, #8D9DAE);   
+   background: linear-gradient(top, #9AABBE, #8D9DAE);
+   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#9AABBE', endColorstr='#8D9DAE');
+
    border-top: 4px dashed white;
 /*   border-top: 4px solid #8E9DAF;*/
    
@@ -170,6 +176,7 @@ body {
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(86,99,110)), to(rgb(67,73,81)));
    background: -moz-linear-gradient(top, rgb(86,99,110), rgb(67,73,81));
    background: linear-gradient(top, rgb(86,99,110), rgb(67,73,81));   
+   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#56636E', endColorstr='#434951');
    border-top: 4px dashed #8D9DAE;
 /*   border-top: 4px solid #8E9DAF;*/
    
