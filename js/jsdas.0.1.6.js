@@ -125,7 +125,7 @@ var JSDAS = function() {
 				var response;
 				if (JSDAS.error)
 				    response = undefined;
-				else if (charts.hasOwnProperty(args[0].center.chart.canvas.id)) {
+				else if (rover.tracks.hasOwnProperty(args[0].id)) {
 				   args.unshift(xml)
 				   callback.apply(this||window, args)
 				}
@@ -2439,7 +2439,8 @@ JSDAS.XMLLoader = {
 					  new_xhr.onreadystatechange = function() {change(new_xhr, url);}
 					  new_xhr.send(null);
 					} else {
-					  errorcallback && errorcallback({id: "xmlhttprequest_error", msg: xhr.status});
+					  if (xhr.status != 0)
+					    errorcallback && errorcallback({id: "xmlhttprequest_error", msg: xhr.status});
 					}
 				}
 				//to prevent IE memory leaks

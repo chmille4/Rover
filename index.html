@@ -6,13 +6,32 @@
     <title></title> 
     <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
     <script src="js/Scribl.min.js"></script>
+    <script src="js/changecssjs.js" type="text/javascript"></script>
+      <!-- <script src="../Scribl/src/Scribl.class.js" ></script>
+      <script src="../Scribl/src/Scribl.js" ></script>
+      <script src="../Scribl/src/Scribl.track.js" ></script>
+      <script src="../Scribl/src/Scribl.lane.js" ></script>
+      <script src="../Scribl/src/Scribl.tooltips.js" ></script>      
+      <script src="../Scribl/src/Scribl.events.js" ></script>
+      <script src="../Scribl/src/Scribl.utils.js" ></script>
+      <script src="../Scribl/src/Scribl.svg.js" ></script>
+      <script src="../Scribl/src/Scribl.glyph.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.blockarrow.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.line.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>     -->
+	
 		
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
    <link rel="stylesheet" href="css/jquery.ui.aristo.all.css">
    <link rel="stylesheet" type="text/css" href="css/rover.css" />
+   <link rel="stylesheet" type="text/css" href="js/SimplejQueryDropdowns/css/dropdown.css" />
+   
    
    <script src="js/jquery-ui.chase.min.js"></script>
    <script src="js/jsdas.0.1.6.js" ></script>
+   <script type="text/javascript" language="javascript" src="js/SimplejQueryDropdowns/js/jquery.dropdownPlain.js"></script>
 	
 	<script type="text/javascript">
 
@@ -28,1018 +47,406 @@
 
    </script>
     
-    <script type="text/javascript">    
-    		   var sources = [];
-            var noScale = true;
-    		   var scriblMin = 1;
-    		   var scriblMax = 150000;
-    		   var slideMin = scriblMin;
-    		   var slideMax = scriblMax;
-    		   var viewerMin = 20000;
-    		   var viewerMax = 80000;
-    		   var splash = true;
-    		   var addSourcePanelShowing = false;
-    		   var aboutShowing = false;
-    		   var bufferSize = undefined;
-    		   var bufferMultiple = 6;
-    		   var minBufferSize = 50000;
-    		   var zoomMin = 1000;
-    		   var zoomMax = 100000;
-    		   var zoomValue = undefined;
-    		   var updatingLeft = updatingRight = false;
-    		   var scrollInitialized = false;
-    		   var changing = false;
-            var scrollFunc = undefined;
-            var maxScrollSpeed = 200;
-    		   var charts = new Array();
-    		   var DasRequest = function() { 
-    		      this.xhr=undefined; 
-    		      this.min=undefined; 
-    		      this.max=undefined; 
-    		      this.status="waiting"; 
-    		      this.drawOnResponse = false;
-    		   };
-    		   var canWidth = undefined;
-    		   var View = function(canvas) {
-    		      this.displayMin = undefined;
-    		      this.displayMax = undefined;
-               this.min = undefined;
-               this.max = undefined;
-               this.center = {};
-     		      this.center.chart = new Scribl(canvas, canWidth);
-     		      this.center.chart.scale.off = true;
-     		      
-     		      // right buffer
-     		      this.right = {};
-     		      this.right.chart = new Scribl(canvas, canWidth);
-     		      this.right.chart.scale.off = true;
-     		      
-     		      // left buffer
-     		      this.left = {};
-     		      this.left.chart = new Scribl(canvas, canWidth);
-     		      this.left.chart.scale.off = true;
-     		      
-     		      this.dasRequests=[] ;
-     		      this.addDasRequest = function(request) {
-     		         var numDasRequests = this.dasRequests.length;
-     		         if (numDasRequests > 0)
-     		            for ( var i=0; i<numDasRequests; i++)
-     		               this.dasRequests[i].xhr.abort();
-
-     		         this.dasRequests = [request];
-     		      };
-     		   };
-
-    		   $(document).ready(function() {  
-    		      
-    		      // set custom scrollbar position and width based on current users scrollbar width
-    		      var scrollBarWidthPx = getScrollerWidth();
-    		      $('#cover-scroll-bar').css('height', scrollBarWidthPx);
-               $('#cover-scroll-bar').css('margin-top', -scrollBarWidthPx);
-               
-    		      toggleSplashPage();
-               
-               // bind checkboxes to click
-               $(function() {$("#sourcePanel input").click( function() {handleDasSourceCheckbox(this)} ) }); 
-               
-               loadUrlQuery();
-               zoomValue = zoomValue || 1000; 
-     		      $( "#zoom-slider" ).slider({
-     		         orientation: 'vertical',
-                    min: zoomMin,
-                    max: zoomMax,
-                    value: zoomValue,
-                    slide: function(event, ui) { zoom(ui) },
-                    change: function(event,ui) {
-                        bufferSize = (scale.scale.max - scale.scale.min) * bufferMultiple;
-                        var newMin = Math.max(scale.scale.min-bufferSize,1);
-                        var newMax = scale.scale.max+bufferSize;
-                        var totalNts = newMax - newMin;
-                        var widthNts = scale.scale.max - scale.scale.min;
-                        var widthPx = $('#canvas-content').width();
-                        var totalPx = widthPx / (widthNts / totalNts);
-                        var leftNts = scale.scale.min;
-                        
-                        if (newMin < scriblMin || newMax > scriblMax) {
-                           updateSources(newMin, newMax, 'center');
-                           drawAll(newMin, newMax, totalPx, leftNts, true);
-                        } else
-                           drawAll(newMin, newMax, totalPx, leftNts, false);
-                        scriblMin = newMin;
-                        scriblMax = newMax;
-                        //var leftPx = leftNts / totalNts * $('.canvas-div canvas').width();
-                      //  document.getElementById('canvas-content').scrollLeft = leftPx;                       
-                    }
-                 });
-                 
-                 $('#canvas-content').scroll(function(){
-                    if (!scrollInitialized) {
-                       scrollInitialized = true;
-                       return;
-                    }
-                    
-                    var scrollPos = $('#canvas-content').scrollLeft(); 
-                    var canvasWidth = $('.canvas-div canvas').width();
-                    if (canvasWidth == 0) canvasWidth = 14700;   
-                    var viewerWidth = $('#canvas-content').width();
-                    
-                    // check for case when zooming and chartview has been shrunk to just viewable width for performance
-                    if (canvasWidth != viewerWidth) {
-                            
-                       if (updatingRight && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth) > .98 )) {
-                          shiftToCenter('right');
-                          var min = scriblMax-bufferSize;
-                          var max = scriblMax+bufferSize;             
-                          var scrollPos = $('#canvas-content').scrollLeft();  
-                          var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;                                               
-                          drawAll(min, max, canvasWidth, scrollLeftNts);
-                          updatingRight = false;
-                          scriblMin = min;
-                          scriblMax = max;                          
-                       } else if (updatingLeft && ( scrollPos / canvasWidth < .02 ) && scriblMin > 1 ) {
-                          shiftToCenter('left');
-                          var min = Math.max(scriblMin-bufferSize, 1);
-                          var max = scriblMin+bufferSize;
-                          var scrollPos = $('#canvas-content').scrollLeft();  
-                          var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;                              
-                          drawAll(min, max, canvasWidth, scrollLeftNts);
-                          updatingLeft = false;
-                          scriblMin = min;
-                          scriblMax = max;                          
-                       } else {
-                          if ( !updatingRight && canvasWidth > 0 && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth)  > .7 )) {
-                              var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;
-                              updatingRight = true;
-                              updateSources(scriblMax-bufferSize, scriblMax+bufferSize, 'right');                              
-                          } else if ( !updatingLeft && ( scrollPos / canvasWidth < .3 ) && scriblMin > 1) {
-                              var scrollLeftNts = scrollPos / canvasWidth * (scriblMax - scriblMin) + scriblMin;
-                              updatingLeft = true;
-                              var min = Math.max(scriblMin-bufferSize, 1);
-                              var max = scriblMin+bufferSize;
-                              updateSources(min, max, 'left');                       
-                          }
-                          
-                       }
-                   }
-                 });
-
-                 $("#scroll-slider" ).slider({
-                      min: -100,
-                      max: 100,
-                      value: 0,
-                      start: function(event, ui) { scroll(ui) },
-                      stop: function() { window.clearInterval(scrollFunc); $("#scroll-slider" ).slider('option', 'value', 0);},
-                  });
-                
-                
-                // watch for enter key on jump input box
-                $("#jump").keyup(function(event) {
-                   // check for enter key
-                  if(event.keyCode == 13) {     
-                    jump();
-                  }
-                });                
-                
-                // watch for enter key on chromosome box
-                $("#chromosome").keyup(function(event) {
-                   // check for enter key
-                  if(event.keyCode == 13) {     
-                     updateSources(scriblMin, scriblMax, 'center');    
-                     drawAll(scriblMin, scriblMax, $('.canvas-div canvas').width(), getViewerMinNts());
-                  }
-                });
-                
-              $('#canvasList').sortable({update: function() {
-                 updateLabelPositions();
-                 }
-              });
-                
-    		   });
-    		   
-    		   function shiftToCenter(direction) {
-    		      
-    		      for (i in charts) {
-                  charts[i][direction].chart.drawStyle = charts[i].center.chart.drawStyle;
-    		         charts[i].center = charts[i][direction];
-    		      }
-    		   }
-    		   
-    		   function scroll(ui) {
-    		      scrolling = true;
-    		      var canvasContent = document.getElementById('canvas-content');
-               scrollFunc = setInterval( function() {updateScroll(canvasContent)},20)
-               //$('#test').text('not scrolling');
-    		   }
-    		   
-    		   function updateScroll(canvasContent) {
-               var scrollPixels = $('#scroll-slider').slider('option', 'value') / 100 * maxScrollSpeed;
-               canvasContent.scrollLeft += scrollPixels;
-    		   }
-    		   
-    		   function zoom(ui) {
-                var totalNts = scriblMax - scriblMin;
-                var totalPx = $('.canvas-div canvas').width();
-
-                // flip value so it looks like we are going from max to min;
-                var widthNts = zoomMax - ui['value'] + zoomMin;
-
-                var canvasContainer = document.getElementById('canvas-content');
-               // 
-               // // get center
-               var centerPx = canvasContainer.scrollLeft + $(canvasContainer).width()/2;
-               var totalSliceNts = scale.scale.max - scale.scale.min;
-               var centerNts = centerPx / totalPx * totalSliceNts + scale.scale.min;               
-
-               // get min max nt
-               var minNts = centerNts - widthNts/2;
-               var maxNts = centerNts + widthNts/2;
-
-               drawAll(minNts, maxNts, $('#canvas-content').width());
-    		   }
-
-       		function handleDasSourceCheckbox(checkbox) {
-       		   
-       		   if( $(checkbox).is(':checked') ) {
-       		      //  check if empty
-       		      if ($('#canvasList').children().length == 0) {
-       		         splash = false;
-       		         toggleSplashPage();
-       		      }
-       		      // set canvas attributes
-                  if (canWidth == undefined) 
-                     canWidth = (scriblMax - scriblMin) / ( (viewerMax - viewerMin) / $('#canvas-content').width()); 
-       		      
-       		      
-       		      // create elements
-       		      var canvasList = document.getElementById("canvasList");
-       		      var parentDiv = document.createElement('div');
-       		      parentDiv.className = "canvas-div";
-       		      var optionDiv = document.createElement('div');
-       		      optionDiv.className = "option-control";
-                  optionDiv.style.display = 'none';
-       		      var newCanvas = document.createElement("canvas");
-       		      newCanvas.id = getCheckBoxLabel(checkbox);
-       		      var label = document.createElement("span");
-
-       		      // associate elements
-       		      canvasList.appendChild(parentDiv);
-       		      document.getElementById('canvas-content').appendChild(optionDiv);
-       		      document.getElementById('canvas-content').appendChild(label);
-       		      parentDiv.appendChild(document.createElement('br'));
-       		      parentDiv.appendChild(newCanvas);
-       		      
-       		      // source title label
-       		      label.innerHTML = "<span class='spinner'> <img src='images/spinner.gif'/> retrieving from: </span>" + getCheckBoxLabel(checkbox);
-       		      label.className = "canvas-label";
-
-       		      // handle option menu
-       		      parentDiv.onmouseover = function() {toggleOptionMenu(true, optionDiv)};
-       		      parentDiv.onmouseout = function() {toggleOptionMenu(false, optionDiv)};
-                  optionDiv.onmouseover = function() {toggleOptionMenu(true, optionDiv)};
-       		      optionDiv.onmouseout = function() {toggleOptionMenu(false, optionDiv)};
-       		      var id = getCheckBoxLabel(checkbox);
-       		      parentDiv.id = id + "-parentdiv";
-       		      optionDiv.id = id + "-optiondiv"
-       		      label.id = id + '-label';
-       		      
-       		      if (noScale) {
-                     initScale();
-    		            noScale = false;               
-    		         }
-
-       		      // option menu buttons
-       		      // gear button
-       		      var gear = document.createElement('span');
-       		      gear.style.float = 'left';
-                   gear.innerHTML = "<a href='#'><span style='float:left' class='ui-icon ui-icon-gear'></a></span><span style='float:left' class='ui-icon ui-icon-triangle-1-s'></span>";
-       		      gear.onmouseover = function() {$(gear).addClass('option-hover');};
-       		      gear.onmouseout = function() {$(gear).removeClass('option-hover');}   		      
-       		      optionDiv.appendChild(gear);
-
-
-       		      // close button
-                  var close = document.createElement('span');
-                  close.style.float = 'left';
-                  close.innerHTML = "<a href='#'><span style='float:left; border-left: 1px solid white' class='ui-icon ui-icon-close'></span></a>";
-                  close.onmouseover = function() {$(close).addClass('option-hover');};
-                  close.onmouseout = function() {$(close).removeClass('option-hover');}
-                  close.onclick = function() {removeCanvas(getCheckBoxLabel(checkbox));}
-                  optionDiv.appendChild(close);
-       		      optionDiv.appendChild(document.createElement('br'));
-
-       		      // menu panel
-       		      var menuPanel = document.createElement('ul');
-       		      menuPanel.className = 'subnav';
-       		      menuPanel.style.display = 'none';
-       		      var li = document.createElement('li');
-       		      li.id = newCanvas.id + '-expand-option'
-       		      li.onclick = function() { toggleExpand(newCanvas.id, li);}
-       		      if (checkbox.getAttribute('data-display') == 'Expand')
-       		         li.innerHTML = "<a href='#'>Collapse</a>";
-       		      else
-       		         li.innerHTML = "<a href='#'>Expand</a>";
-       		      menuPanel.appendChild(li);
-       		      optionDiv.appendChild(menuPanel);       		          		      
-                  
-       		      // handle additional events on menu
-       		      gear.onclick = function() { handleOptionMenuClick(menuPanel); };   		      
-       		      $(optionDiv).mouseleave(function() {$(menuPanel).slideUp('fast'); })
-
-       		      newCanvas.width = canWidth;
-       		      $(newCanvas).parent().width(canWidth);
-       		      newCanvas.height = '20px';
-       		      newCanvas.className = "canvas";   		      
-       		             		      
-                  // place title/spinner
-                  var top = $(parentDiv).position().top;
-                  label.style.top = top + 'px';
-                  
-     		         // make request
-   		         var view = new View(newCanvas);
-                  charts[newCanvas.id] = view;
-                  makeDasRequest(view, scriblMin, scriblMax, 'center', initializeSource);
-       				
-       		   } else {
-       		      removeCanvas(getCheckBoxLabel(checkbox));
-       		   }
-
-             }
-
-          	function getCheckBoxLabel(checkbox){
-          	   return ($(checkbox).next().text());
-          	}
-
-          	function removeCanvas(canvasId){
-          	   
-          	   // uncheck boxp
-          	   var canvas = document.getElementById(canvasId);
-          	   document.getElementById(canvas.id + "-input").checked = false;
-
-          	   // delete div that holds canvas
-          	   var toDel = document.getElementById(canvas.id + "-parentdiv");
-          	   $(toDel).remove();
-          	   
-          	   // delete div that holds label
-               var toDel = document.getElementById(canvas.id + "-label");
-          	   $(toDel).remove();
-          	   
-          	   // delete div that holds track menu
-          	   var toDel = document.getElementById(canvas.id + "-optiondiv");
-          	   $(toDel).remove();
-               
-               // check if view is empty and if so bring up splash page
-          	   if ($('#canvasList').children().length == 0) {
-    		         splash = true;
-    		         toggleSplashPage();
-    		      }
-
-          	   // abort in progress das requests
-          	   var chartId = canvasId.split('-input')[0]
-          	   var requests = charts[chartId].dasRequests;
-          	   var requestNum = requests.length;      	   
-          	   for( var i=0; i < requestNum; i++) 
-          	      requests[i].xhr.abort();
-
-          	   // delete chart from list
-          	   delete charts[chartId];
-          	   
-          	   // update labels/menus
-               updateLabelPositions();
-          	}
-
-          	function initScale() {
-                var canvas = document.createElement("canvas");
-                canvas.id = 'scale';
-                canvas.className = 'canvas';
-                canvas.height = 20;
-                canvas.width = canWidth;
-                $('#scaleDiv').prepend(canvas);
-
-          	   scale = new Scribl(canvas, canWidth);
-          	   scale.scale.font.size = 11;
-               scale.scale.font.color = 'rgb(220,220,220)';
-               scale.tick.major.color = 'rgb(220,220,220)';
-               scale.tick.minor.color = 'rgb(220,220,220)';
-               scale.tick.halfColor = 'rgb(220,220,220)';
-               scale.scale.size = 8;
-          	   scale.scale.auto = false;
-    				scale.scale.min = scriblMin; //$('#slider-range').slider('values',0);
-    				scale.scale.max = scriblMax;//$('#slider-range').slider('values',1);
-    				scale.draw();
-    				// set scroll
-               var scrollLeft = (viewerMin - scriblMin) / (scriblMax - scriblMin) * canWidth;
-               document.getElementById('canvas-content').scrollLeft = scrollLeft;
-          	}
-
-          	function handleOptionMenuClick(menu) {
-                $(menu).slideDown('fast').show(); //Drop down the subnav on click
-                // 
-                $(menu).mouseleave( function() {
-                   $(menu).slideUp('slow'); //When the mouse hovers out of the subnav, move it back up
-                });
-
-          	}
-          	
-          	function toggleSplashPage(){
-          	   if (!splash) {
-          	      $('#splash').css('display', 'none')
-          	      $('#viewer').css('display', 'inline')
-          	      splash = false
-       	      } else {
-       	         $('#splash').css('display', 'inline')
-          	      $('#viewer').css('display', 'none')
-          	      splash = true;
-       	      }
-          	}
-
-          	function toggleOptionMenu(over, obj) {
-//          	   var parentdivId = obj.id.replace('optiondiv', 'parentdiv');
-          	   var canvasLabelId = obj.id.replace('optiondiv', 'label');
-               var top = $(document.getElementById(canvasLabelId)).position().top + 2;               
-               obj.style.top = top + 'px';               
-
-             	if (over) { 
-             	   obj.style.display = "inline";
-             	}
-             	else {
-                   obj.style.display = "none";
-                }
-             }
-
-             function toggleDasSources() {
-                if (addSourcePanelShowing) {
-                   addSourcePanelShowing = false;
-                   document.getElementById('sourcePanel').style.display = "inherit";
-                   document.getElementById('addSourcePanel').style.display = "none";                   
-                } else {
-                   addSourcePanelShowing = true;
-                   document.getElementById('sourcePanel').style.display = "none";
-                   document.getElementById('addSourcePanel').style.display = "inherit";                   
-                }
-             }
-             
-             function toggleAbout() {
-                if (aboutShowing) {
-                   aboutShowing = false;
-                   document.getElementById('sourcePanel').style.display = "inherit";
-                   document.getElementById('about').style.display = "none";                   
-                } else {
-                   aboutShowing = true;
-                   document.getElementById('sourcePanel').style.display = "none";
-                   document.getElementById('about').style.display = "inherit";                   
-                }
-             }
-             
-             function userAddDas() {
-                addDas($('#dasname').val(), $('#dassource').val(), $('#dastype').val(), 'Collapse');
-                toggleDasSources();
-             }
-
-             function addDas(name, url, type, display) {
-                
-                // create uniform base url
-                url = url.replace(/\/$/,'');
-                // // temporary fix to compensate for ensembl changing their das server url
-                // url = url.replace ('useast.ensembl.org', 'www.ensembl.org');
-                
-                var li = document.createElement('li');
-                var div = document.createElement('div');
-                document.getElementById('source-list').appendChild(li);
-                li.appendChild(div);
-                
-                var checkbox = document.createElement('input')
-                div.appendChild(checkbox);
-                var label = document.createElement('label');            
-                div.appendChild(label);
-                checkbox.type = "checkbox";
-                checkbox.value = url;
-                checkbox.id = name + '-input';
-                checkbox.setAttribute('data-type', type);
-                checkbox.setAttribute('data-display', display);
-                label.setAttribute('for', checkbox.id);
-                $(checkbox).next().text(name);
-                $(checkbox).click( function() {handleDasSourceCheckbox(checkbox)} );               
-             }  
-             
-             function initializeSource(response, view) {
-               // update request status
-               view.dasRequests[0].status = 'received'; 
-               
-               // handle response
-               dasResponse(response, view.center);
-               
-               // defaults
-               view.center.chart.drawStyle = 'collapse';
-               view.center.chart.laneSizes = 13; // set lanesizes so getHeight will be accurate
-               view.center.chart.canvas.height = view.center.chart.getHeight();    				
-
-               var canvasId = view.center.chart.canvas.id;
-               // check track hasn't been deleted
-               if(!charts.hasOwnProperty(canvasId))
-                  return;
-
-               // keep track of views
-               charts[canvasId] = view;
-
-               // set max & min
-               scriblMax = view.max;
-               scriblMin = view.min;
-
-               // turn spinner off
-               // have to do it this way b\c there are spaces in the id
-               $('[id=' + canvasId + '-label] .spinner').css('display', 'none');
-
-               // draw chart
-               draw(view.center.chart, scriblMin, scriblMax);
-               
-             }           
-
-    		   function dasResponse(xmlDoc, chart) {
-    		      // check if response is no longer relevant to where the user is currently and if so don't waste time parsing it    	
-    		      if (xmlDoc.URL)
-    		         var url = xmlDoc.URL
-    		      else
-    		         var url = xmlDoc.lastChild.nodeValue;
-    		      var matches = url.match(/.*segment=\d:(\d+),(\d+).*/);    		      
-    		      var responseMin = matches[1];
-    		      var responseMax = matches[2];    		                  
-
-               if (scriblMax < responseMin || scriblMin > responseMax)
-    		         return;
-    		      
-
-    		      var canvasId = chart.chart.canvas.id;
-    		      var display = document.getElementById(canvasId + '-input').getAttribute('data-display');
-
-    				// check if chart is still visible
-    				if(!charts[canvasId]) {
-    				   return;
-    				}
-
-    				var xmlFeatures = xmlDoc.getElementsByTagName('FEATURE');
-                if (!xmlFeatures) {
-                   // TODO add an error fetching message
-                   return; 
-                }
-               
-               // convert features to array and sort
-               var features=[];
-               for(var i=0,n; n=xmlFeatures[i]; ++i) features.push(n);
-               features.sort( function(a,b){ return(a.getElementsByTagName('START')[0].textContent - b.getElementsByTagName('START')[0].textContent); } );
-               
-               
-               // delete old tracks
-               delete chart.chart.tracks[0];
-               
-               // add new tracks and set default drawStyle
-     		      var track = chart.chart.addTrack();    
-                
-               var numFeatures = features.length; 
-    				for (var i=0; i < numFeatures; i++) {
-    					var f = features[i];
-    					var start = parseInt(f.getElementsByTagName('START')[0].textContent);
-    					var end = parseInt(f.getElementsByTagName('END')[0].textContent);
-    					var length = end - start;
-    					
-    					var orientation = f.getElementsByTagName('ORIENTATION')[0].textContent;
-                  var type = f.getElementsByTagName('TYPE')[0].textContent;			    					
-    					
-    					if (orientation)
-                     var glyphT = track.addGene(start, length, orientation);
-    					else
-    						var glyphT = track.addFeature( new Rect( "rect", start, length) );
-                     
-    					if (type) {
-    					   glyphT.name = type;
-    					}
-                  // if(f.LINK && f.LINK[0] && f.LINK[0].href) { 
-                  //    //glyph.onMouseover = f.TYPE.textContent + "\n" + f.LINK[0].textContent || f.LINK[0].href;
-                  //    //glyph.onClick = f.LINK[0].href.replace(":8080", "");
-                  // }
-    				}
-    			}
+    <script src="js/rover.js" ></script>
+    <script src="js/rover.source.js" ></script>
+    <script src="js/rover.track.js" ></script>
     
-            function toggleLinkUrl() {
-               if( $('#link-url').css('display') == 'none' ) {
-                  $('#link-url-input').val(serializeToUrl());
-                  $('#link-url').css('display', 'inherit');                  
-                  $('#embed-url-input').val(serializeToIframe());
-               }
-               else
-                  $('#link-url').css('display', 'none')
-            }
+    <script>
+                  var splash = true;
+                  var addSourcePanelShowing = false;
+                  var aboutShowing = false;
+                  var noScale = true;
+                  var bufferSize = undefined;
+                  var bufferMultiple = 6;
+                  var minBufferSize = 50000;
+                  var zoomMin = 1000;
+                  var zoomMax = 100000;
+                  var zoomValue = undefined;
+                  var updatingLeft = updatingRight = false;
+                  var scrollInitialized = false;
+                  var changing = false;
+                  var scrollFunc = undefined;
+                  var maxScrollSpeed = 200;
+                  var rover = undefined;
 
-    			function toggleExpand(canvasId, li) {
-    			   var view = charts[canvasId];   			   
 
-               var style = li.children[0].innerHTML;
-               
-    			   // expand chart
-    			   if (style == 'Expand') {
-                  document.getElementById(canvasId + '-input').setAttribute('data-display', 'Expand');
-                  li.children[0].innerHTML = 'Collapse'
-                  view.center.chart.drawStyle = 'expand';
-    			   } else { // collapse chart 
-    			      view.center.chart.drawStyle = 'collapse'
-                  document.getElementById(canvasId + '-input').setAttribute('data-display', 'Collapse');
-                  li.children[0].innerHTML = 'Expand'
-    			   }
-               view.center.chart.laneSizes = 13;
-    			   view.center.chart.canvas.height = view.center.chart.getHeight();
-    			   draw(view.center.chart, scriblMin, scriblMax);
-    			}
-    			
-    			
-            function updateLabelPositions() {
-               $('.canvas-div').each( function(i, canvasDiv) {
-                   var top = $(canvasDiv).position().top + $('#main').scrollTop();
-                   var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
-                   document.getElementById(labelId).style.top = top + 'px';
-                });
-            }
-            
-            function draw(chart, min, max) {   
-                chart.scale.off = true;
-                chart.scale.pretty = false;
-                chart.laneSizes = 13;
-                chart.ctx.clearRect(0, 0, chart.canvas.width, chart.canvas.height);                
-                chart.scale.min = min;
-                chart.scale.max = max;
-                chart.draw();        
-                updateLabelPositions();               
-             }          
+          		   $(document).ready(function() {  
+          		      rover = new Rover( document.getElementById('rover') );
+          		      rover.onRemoveTrack = function(id) { removeTrack(id) };
+//          		      rover.onAddTrack = function(track) { addTrack(track) };
 
-             function drawAll(min, max, widthPx, scrollLeftNts, zooming) {
-                                               
-                // draw scale
-                canWidth = widthPx;
-                
-                redrawScale(min, max, scrollLeftNts, zooming);
-                                
+          		      toggleSplashPage();
 
-                // draw tracks
- //               if ( min >= scriblMin || max <= scriblMax) {
-                  for (i in charts)  {
-                     if (charts[i].dasRequests[0].status == 'received') {
-                        var newChart = charts[i].center.chart.slice(min, max);                        
-                        newChart.width = widthPx;
-                        newChart.canvas.width = widthPx;
-                        draw( newChart, min, max );
-                     } else {
-                        // show spinner
-                        // have to do it this way b\c there are spaces in the id
-                        $('[id=' + i + '-label] .spinner').css('display', 'inherit');
-                        
-                        // clear canvas
-                        var chart = charts[i].center.chart;
-                        if (!zooming)
-                           chart.ctx.clearRect(0, 0, chart.canvas.width, chart.canvas.height);
-                        
-                        // set draw to happen when request is received
-                        charts[i].dasRequests[0].drawOnResponse = true;                                             
+                     // bind checkboxes to click
+                     $(function() {$("#sourcePanel input").click( function() {handleDasSourceCheckbox(this)} ) }); 
+
+                     loadUrlQuery();
+                     
+                     // set up zoom slider
+                     zoomValue = zoomValue || 1000; 
+           		      $( "#zoom-slider" ).slider({
+           		         orientation: 'vertical',
+                          min: zoomMin,
+                          max: zoomMax,
+                          value: zoomValue,
+                          slide: function(event, ui) { 
+                              // flip value so slider looks like we are going from max to min;
+                   		      var numNtsToShow = zoomMax - ui['value'] + zoomMin;
+                   		      
+                   		      // redraw rover with the display being numNtsToShow nts wide
+                   		      rover.zoom(numNtsToShow);
+                           },
+                          change: function(event,ui) {
+                              bufferSize = (rover.scale.scale.max - rover.scale.scale.min) * bufferMultiple;
+                              var newMin = Math.max(rover.scale.scale.min-bufferSize,1);
+                              var newMax = rover.scale.scale.max+bufferSize;
+                              var totalNts = newMax - newMin;
+                              var widthNts = rover.scale.scale.max - rover.scale.scale.min;
+                              var widthPx = $('#canvas-content').width();
+                              var totalPx = widthPx / (widthNts / totalNts);
+                              var leftNts = rover.scale.scale.min;
+
+                              if (newMin < rover.min || newMax > rover.max) {
+                                 rover.fetchAll( parseInt(newMin), parseInt(newMax), 'center');
+                                 rover.draw(newMin, newMax, totalPx, leftNts, true);
+                              } else
+                                 rover.draw(newMin, newMax, totalPx, leftNts, false);
+                              rover.min = newMin;
+                              rover.max = newMax;
+                              //var leftPx = leftNts / totalNts * $('.canvas-div canvas').width();
+                            //  document.getElementById('canvas-content').scrollLeft = leftPx;                       
+                          }
+                       });
+
+
+                       $('#canvas-content').scroll(function(){
+                          if (!scrollInitialized) {
+                             scrollInitialized = true;
+                             return;
+                          }
+
+                          var scrollPos = $('#canvas-content').scrollLeft(); 
+                          var canvasWidth = $('.canvas-div canvas').width();
+                          if (canvasWidth == 0) canvasWidth = 14700;   
+                          var viewerWidth = $('#canvas-content').width();
+
+                          // check for case when zooming and chartview has been shrunk to just viewable width for performance
+                          if (canvasWidth != viewerWidth) {
+
+                             if (updatingRight && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth) > .98 )) {
+                                rover.shiftBufferToCenter('right');
+                                var min = rover.max-bufferSize;
+                                var max = rover.max+bufferSize;             
+                                var scrollPos = $('#canvas-content').scrollLeft();  
+                                var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;                                               
+                                rover.draw(min, max, canvasWidth, scrollLeftNts);
+                                updatingRight = false;
+                                rover.min = min;
+                                rover.max = max;                          
+                             } else if (updatingLeft && ( scrollPos / canvasWidth < .02 ) && rover.min > 1 ) {
+                                rover.shiftBufferToCenter('left');
+                                var min = Math.max(rover.min-bufferSize, 1);
+                                var max = rover.min+bufferSize;
+                                var scrollPos = $('#canvas-content').scrollLeft();  
+                                var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;                              
+                                rover.draw(min, max, canvasWidth, scrollLeftNts);
+                                updatingLeft = false;
+                                rover.min = min;
+                                rover.max = max;                          
+                             } else {
+                                if ( !updatingRight && canvasWidth > 0 && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth)  > .7 )) {
+                                    var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;
+                                    updatingRight = true;
+                                    rover.fetchAll( rover.max-bufferSize, rover.max+bufferSize, 'right');                              
+                                } else if ( !updatingLeft && ( scrollPos / canvasWidth < .3 ) && rover.min > 1) {
+                                    var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;
+                                    updatingLeft = true;
+                                    var min = Math.max(rover.min-bufferSize, 1);
+                                    var max = rover.min+bufferSize;
+                                    rover.fetchAll(min, max, 'left');                       
+                                }
+
+                             }
+                         }
+                       });
+
+                       $("#scroll-slider" ).slider({
+                            min: -100,
+                            max: 100,
+                            value: 0,
+                            start: function(event, ui) { scroll(ui) },
+                            stop: function() { window.clearInterval(scrollFunc); $("#scroll-slider" ).slider('option', 'value', 0);},
+                        });
+
+
+                      // watch for enter key on jump input box
+                      $("#jump").keyup(function(event) {
+                         // check for enter key
+                        if(event.keyCode == 13) {     
+                          jump();
+                        }
+                      });                
+
+                      // watch for enter key on chromosome box
+                      $("#chromosome").keyup(function(event) {
+                         // check for enter key
+                        if(event.keyCode == 13) {
+                           // change chromosome for all tracks
+                           for (var i in rover.tracks)
+                              rover.tracks[i].setChromosome( $("#chromosome").val() );
+                           
+                           // fetch and draw new data
+                           rover.fetchAll(rover.min, rover.max, 'center');    
+                           rover.draw(rover.min, rover.max, $('.canvas-div canvas').width(), rover.getDisplayMinNts());
+                        }
+                      });
+
+          		   });
+
+          		   function scroll(ui) {
+          		      scrolling = true;
+          		      var canvasContent = document.getElementById('canvas-content');
+                     scrollFunc = setInterval( function() {updateScroll(canvasContent)},20)
+                     //$('#test').text('not scrolling');
+          		   }
+
+          		   function updateScroll(canvasContent) {
+                     var scrollPixels = $('#scroll-slider').slider('option', 'value') / 100 * maxScrollSpeed;
+                     canvasContent.scrollLeft += scrollPixels;
+          		   }
+
+             		function handleDasSourceCheckbox(checkbox) {
+
+             		   if( $(checkbox).is(':checked') ) {
+
+             		   } else {
+             		      var id = getCheckBoxLabel(checkbox);
+             		      rover.removeTrack( id );
+             		   }
+
+                   }
+
+                	function getCheckBoxLabel(checkbox){
+                	   return ($(checkbox).next().text());
+                	}
+
+                	function removeTrack(id){
+
+                     // uncheck box
+                	 //  document.getElementById(id + "-input").checked = false;                                          
+                     
+                     // check if view is empty and if so bring up splash page
+                	   if (rover.isEmpty()) {
+                        splash = true;
+                        toggleSplashPage();
                      }
-                  }
-  //              }
-             }
+                     
+                	}
 
-             function updateSources(min, max, direction) {             
-                min = parseInt(min);
-                max = parseInt(max);
-                
-                // don't go below zero
-                if(min <= 0) {
-                   alert('min = ' + min);
-                }
-                
-                // grab new coordinates for sources
-                for (var canvasId in charts) {
-                  var view = charts[canvasId];
-                  makeDasRequest(view, min, max, direction, updateSourcesResponse)
-               }   
+                	function toggleSplashPage(){
+                	   if (!splash) {
+                	      $('#splash').css('display', 'none')
+                	      $('#viewer').css('display', 'inline')
+                	      splash = false
+             	      } else {
+             	         $('#splash').css('display', 'inline')
+                	      $('#viewer').css('display', 'none')
+                	      splash = true;
+             	      }
+                	}
 
-             }             
-             
-             function makeDasRequest(view, min, max, direction, callback) {
-                
-                var request = new DasRequest;   		         
-                view.addDasRequest(request);
-                view.min = Math.max(min, 1);
-                view.max = max;                
-                
-                var cb = document.getElementById(view.center.chart.canvas.id+'-input');
-                var url = cb.value + '/features?segment=' + $('#chromosome').val() + ':'  + min + "," + max + ';type=' + $(cb).attr('data-type');
-
-                request.xhr = JSDAS.features(url, function(response, view, direction) { callback(response, view, direction) }, function(){}, "", [view,direction]);                                               
-             }
-             
-             function updateSourcesResponse(response, view, direction) {
-                // update request status
-                view.dasRequests[0].status = 'received';                              
-                
-                // process das response   
-                dasResponse(response, view[direction]);  
-               
-                // check if dasRequest needs to be drawn   
-                if (view.dasRequests[0].drawOnResponse) {
-                  // hide spinner                  
-                  if (view.center.chart.canvas.height == 0) 
-                     view.center.chart.canvas.height = view.center.chart.getHeight();
-                  var canvasId = view.center.chart.canvas.id;
-                  // have to do it this way b\c there are spaces in the id
-                  $('[id=' + canvasId + '-label] .spinner').css('display', 'none');
-                  //$('.canvas-div').css('margin-left', 0);                  
-                  document.getElementById(canvasId + '-parentdiv').style.marginLeft = 0;
-                  view.center.chart.width = canWidth;
-                  view.center.chart.canvas.width = canWidth;
-
-                  draw(view.center.chart, view.min, view.max);
-                  
-                  // reset request
-                  view.dasRequests.drawOnResponse = false;
-               }
-                  
-             }
-             
-             function redrawScale(min, max, scrollLeftNts, zooming) {                
-                
-                // draw scale
-                scale.width = canWidth;
-                scale.canvas.width = canWidth;
-
-                // hack to fix scale bug
-                if (min == 1) min = 0;
-                scale.scale.min = min;
-                scale.scale.max = max;
-                scale.draw();  
-                var scrollLeft = (scrollLeftNts - min) / (max - min) * canWidth;      
-                if (zooming)                          
-                  $('.canvas-div').css('margin-left', scrollLeft);
-                document.getElementById('canvas-content').scrollLeft = scrollLeft; 
-             }
-
-             function getCanvasWidth(){return($(window).width() * .84);}
-             function getChartWidth(){return ($(window).width() * .84 - 40); }
-             
-             function jump() {
-                var jumpTo = parseInt($('#jump').val());
-                
-                // var scrollPos = $('#canvas-content').scrollLeft(); 
-                var canvasWidth = $('.canvas-div canvas').width();   
-                 var viewerWidth = $('#canvas-content').width();
-                var viewerWidthNts = viewerWidth / canvasWidth * (scriblMax - scriblMin);
-                var min = Math.max( jumpTo - (scriblMax-scriblMin)/2, 1 );
-                var max = min + (scriblMax - scriblMin);
-                var scrollLeftNts = jumpTo - viewerWidthNts/2;
-                updateSources(min, max, 'center');    
-                drawAll(min, max, canvasWidth, scrollLeftNts);
-                scriblMin = min;
-                scriblMax = max;
-             }
-             
-             function getUrlQuerys(){
-                // get the current URL
-                 var url = window.location.toString();
-                 url = url.replace('#', '');
-                 //get the parameters
-                 url.match(/\?(.+)$/);
-                 var params = RegExp.$1;
-                 // split up the query string and store in an
-                 // associative array
-                 var params = params.split("&");
-                 var queryStringList = {};
-
-                 for(var i=0;i<params.length;i++) {
-                     var tmp = params[i].split("=");
-                     queryStringList[tmp[0]] = unescape(tmp[1]);
-                 }
-                 return (queryStringList);
-             }
-             
-             function serializeToIframe() {
-                var url = serializeToUrl();
-                var iframeStr = '<iframe width="500" height="315" style="border:1px solid rgb(220,220,220); border-radius: 4px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="';
-                iframeStr += url;
-                iframeStr += '&embed=true"'
-                iframeStr += '></iframe>';
-                iframeStr += '<br/><small><a href="' + url + '" style="color:#0000FF;text-align:left">View Full Screen in Rover</a></small>';
-                return iframeStr;
-             }
-             
-             function serializeQuerys() {
-                var checkboxes = $('#source-list').find('input');
-
-                 // get urls
-                 var sourceUrls = [];
-                 checkboxes.each( function(index, value){sourceUrls.push(value.value)});
-
-                 // get names
-                 var sourceNames = [];
-                 checkboxes.each( function(index, value){sourceNames.push(value.id.replace(/-input$/,''))});
-
-                 // get types
-                 var types = []
-                 checkboxes.each( function(index,value){ types.push( checkboxes[index].getAttribute('data-type') ); } );
-
-                 var trackOptions = [];
-                 for(var i=0; i< sourceNames.length; i++){
-                    var expandOption = sourceNames[i] + '-expand-option';
-
-                 // check if source is being displayed
-                 var menu = document.getElementById(expandOption);
-                 if (menu){
-                   if (menu.children[0].innerHTML == "Expand")
-                     trackOptions.push("Collapse") // state is opposite of available action
-                   else
-                     trackOptions.push("Expand")
-                 }
-                 else
-                   trackOptions.push('none');
-                 }                
-
-                 // get min, max, chromosome      
-                 var min = getViewerMinNts();
-                 var max = getViewerMaxNts();
-                 var chr = $('#chromosome').val();
-
-                 // construct query string
-                 var queryStr = "?"
-                 queryStr += "urls=" + sourceUrls.join(',');
-                 queryStr += "&names=" + sourceNames.join(',');
-                 queryStr += "&min=" + min;
-                 queryStr += "&max=" + max;
-                 queryStr += "&display=" + trackOptions.join(',');
-                 queryStr += "&segment=" + chr;
-                 queryStr += "&types=" + types.join(',');
-                 
-                 return queryStr;
-             }
-             
-             function serializeToUrl() {                
-                var queryStr = serializeQuerys();
-                return (getBaseURL() + queryStr);                               
-             }
-             
-             function getBaseURL() {
-                 var url = location.href;  // entire url including querystring - also: window.location.href;
-                 var baseURL = url.split('?')[0]
-                 return baseURL;
-             }
-             
-             function getViewerMinNts() {
-                var widthPx = $('#canvas-content').width();
-                var totalPx = $('.canvas-div canvas').width();
-                var leftPx = document.getElementById('canvas-content').scrollLeft;
-                var leftNts = leftPx / totalPx * (scriblMax - scriblMin) + scriblMin;
-                return leftNts;                
-             }
-             
-             function getViewerMaxNts() {
-                var widthPx = $('#canvas-content').width();
-                var totalPx = $('.canvas-div canvas').width();
-                var leftPx = document.getElementById('canvas-content').scrollLeft;
-                var rightNts = (leftPx+widthPx) / totalPx * (scriblMax - scriblMin) + scriblMin;                
-                return rightNts;
-             }
-             
-             function maximizeViewer() {
-                // hide all other divs
-                $('#side').css('display', 'none');
-                $('#header').css('display', 'none');
-                $('#sourcePanelToolbar').css('display', 'none');
-                $('#vdivide').css('display', 'none');
-                $('#copyright').css('display', 'none');
-                $('#right-buttons').css('display', 'none');
-                
-                // restyle main
-                $('#main').css('width', '100%');
-                $('#main').css('left', '0px')
-                $('#main').css('top', '0px');
-                $('#scroll-slider-container').css('width', '100%');
-                $('#scroll-slider-container').css('left', '0px');
-                
-             }
-             
-             function exportToFigureMaker() {
-                var figureMakerUrl = "http://chmille4.github.com/figureMaker/index.html";
-                window.open(figureMakerUrl + serializeQuerys());
-             }
-             
-             function loadUrlQuery() {
-                //parse url querys (if any)
-                var querys = getUrlQuerys();                                
-                
-                if (querys != "" && Object.keys(querys).length > 0 && Object.keys(querys)[0] != "" ) {
-                   
-                   if (querys['embed'])
-                     maximizeViewer();
-                
-                   // set region
-                   viewerMin = parseInt(querys['min']);
-                   viewerMax = parseInt(querys['max']);
-                   zoomValue = zoomMax - (viewerMax-viewerMin) + zoomMin;                  
-                   bufferSize = (viewerMax - viewerMin) * bufferMultiple;
-
-                   if(querys['min'] && querys['max']) {
-                      slideMin = scriblMin = Math.max(viewerMin - bufferSize,1);
-                      slideMax = scriblMax = parseInt(viewerMax + bufferSize);
-                   }
-                   
-                   // set chromosome
-                   $('#chromosome').val( querys['segment'] );
-                   
-                   // add Das sources                   
-                   var urls = querys['urls'].split(',');
-                   var names = querys['names'].split(',');
-                   var types = querys['types'].split(',');
-                   var displays = querys['display'].split(',');
-                   for (var k=0; k < names.length; k++){
-                      addDas(names[k], urls[k], types[k], displays[k]);
-                   }
-                
-                   // set display
-                   for (var i=0; i < displays.length; i++) {
-                      if (displays[i] == 'Expand' || displays[i] == 'Collapse'){
-                        var cb = document.getElementById(names[i] + '-input');
-                        cb.checked = true;
-                        $(cb).click();
-                        cb.checked = true; // click unchecks it so re-check it
+                   function toggleDasSources() {
+                      if (addSourcePanelShowing) {
+                         addSourcePanelShowing = false;
+                         document.getElementById('sourcePanel').style.display = "inherit";
+                         document.getElementById('addSourcePanel').style.display = "none";                   
+                      } else {
+                         addSourcePanelShowing = true;
+                         document.getElementById('sourcePanel').style.display = "none";
+                         document.getElementById('addSourcePanel').style.display = "inherit";                   
                       }
                    }
-                }
-             }
-             
-             function getScrollerWidth() {
-                 var scr = null;
-                 var inn = null;
-                 var wNoScroll = 0;
-                 var wScroll = 0;
 
-                 // Outer scrolling div
-                 scr = document.createElement('div');
-                 scr.style.position = 'absolute';
-                 scr.style.top = '-1000px';
-                 scr.style.left = '-1000px';
-                 scr.style.width = '100px';
-                 scr.style.height = '50px';
-                 // Start with no scrollbar
-                 scr.style.overflow = 'hidden';
+                   function toggleAbout() {
+                      if (aboutShowing) {
+                         aboutShowing = false;
+                         //document.getElementById('sourcePanel').style.display = "inherit";
+                         document.getElementById('about').style.display = "none";                   
+                      } else {
+                         aboutShowing = true;
+                         //document.getElementById('sourcePanel').style.display = "none";
+                         document.getElementById('about').style.display = "inline";                   
+                      }
+                   }
 
-                 // Inner content div
-                 inn = document.createElement('div');
-                 inn.style.width = '100%';
-                 inn.style.height = '200px';
+                   function userAddDas() {
+                      rover.addTrack( $('#dasname').val(), $('#dassource').val(), $('#dastype').val(), 'Collapse' );
+                      toggleDasSources();
+                   }
+                   
+                   function addTrack(track) {
+                     // var cb = addCheckbox(track);
+                     // cb.checked = true;
+                     // $(cb).click();
+                     // cb.checked = true; // click unchecks it so re-check it
+                   }
 
-                 // Put the inner div in the scrolling div
-                 scr.appendChild(inn);
-                 // Append the scrolling div to the doc
+                   function addCheckbox(track) {
+                      
+                      var name = track.id;
+                      var url = track.source.url;
+                      var type = track.source.typeFilter;
+                      var display = track.drawStyle;
+                      
+                      // create uniform base url
+                      //url = url.replace(/\/$/,'');
 
-                 document.body.appendChild(scr);
+                      var li = document.createElement('li');
+                      var div = document.createElement('div');
+                      document.getElementById('source-list').appendChild(li);
+                      li.appendChild(div);
 
-                 // Width of the inner div sans scrollbar
-                 wNoScroll = inn.offsetWidth;
-                 // Add the scrollbar
-                 scr.style.overflow = 'auto';
-                 // Width of the inner div width scrollbar
-                 wScroll = inn.offsetWidth;
+                      var checkbox = document.createElement('input')
+                      div.appendChild(checkbox);
+                      var label = document.createElement('label');            
+                      div.appendChild(label);
+                      checkbox.type = "checkbox";
+                      checkbox.value = url;
+                      checkbox.id = name + '-input';
+                      label.setAttribute('for', checkbox.id);
+                      $(checkbox).next().text(name);
+                      $(checkbox).click( function() { handleDasSourceCheckbox(checkbox) } );   
+                      return checkbox;            
+                   }  
 
-                 // Remove the scrolling div from the doc
-                 document.body.removeChild(
-                 document.body.lastChild);
+                  function toggleLinkUrl() {
+                     if( $('#link-url').css('display') == 'none' ) {
+                        $('#link-url-input').val(serializeToUrl());
+                        $('#link-url').css('display', 'inherit');                  
+                        $('#embed-url-input').val(serializeToIframe());
+                     }
+                     else
+                        $('#link-url').css('display', 'none')
+                  }
 
-                 // Pixel width of the scroller
-                 return (wNoScroll - wScroll);
-             }
-             
-             function testIE() {
-                if (navigator.appName == 'Microsoft Internet Explorer')
-                  alert("Rover takes advantage of the latest features on the web and therefore doesn't work with Internet Explorer. Please use Chrome, Safari, or Firefox");
-             }
+                  // function toggleExpand(canvasId, li) {
+                  //    var track = rover.tracks[canvasId];             
+                  // 
+                  //                      var style = li.children[0].innerHTML;
+                  // 
+                  //    // expand chart
+                  //    if (style == 'Expand') {
+                  //                         //document.getElementById(canvasId + '-input').setAttribute('data-display', 'Expand');
+                  //                         track.drawStyle = 'expand';
+                  //                         li.children[0].innerHTML = 'Collapse'
+                  //                         track.center.chart.drawStyle = 'expand';
+                  //    } else { // collapse chart 
+                  //       track.center.chart.drawStyle = 'collapse'
+                  //       track.drawStyle = 'collapse'
+                  //                         //document.getElementById(canvasId + '-input').setAttribute('data-display', 'Collapse');
+                  //                         li.children[0].innerHTML = 'Expand'
+                  //    }
+                  //                      track.center.chart.laneSizes = 13;
+                  //    track.center.chart.canvas.height = track.center.chart.getHeight();
+                  //    track.draw(rover.min, rover.max);
+                  // }
 
-    		</script>
+                   function jump() {
+                      var jumpTo = parseInt($('#jump').val());
+
+                      // var scrollPos = $('#canvas-content').scrollLeft(); 
+                      var canvasWidth = $('.canvas-div canvas').width();   
+                       var viewerWidth = $('#canvas-content').width();
+                      var viewerWidthNts = viewerWidth / canvasWidth * (rover.max - rover.min);
+                      var min = Math.max( jumpTo - (rover.max-rover.min)/2, 1 );
+                      var max = min + (rover.max - rover.min);
+                      var scrollLeftNts = jumpTo - viewerWidthNts/2;
+                      rover.fetchAll( parseInt(min), parseInt(max), 'center');    
+                      rover.draw(min, max, canvasWidth, scrollLeftNts);
+                      rover.min = min;
+                      rover.max = max;
+                   }
+
+                   function serializeToIframe() {
+                      var url = serializeToUrl();
+                      var iframeStr = '<iframe width="500" height="315" style="border:1px solid rgb(220,220,220); border-radius: 4px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="';
+                      iframeStr += url;
+                      iframeStr += '&embed=true"'
+                      iframeStr += '></iframe>';
+                      iframeStr += '<br/><small><a href="' + url + '" style="color:#0000FF;text-align:left">View Full Screen in Rover</a></small>';
+                      return iframeStr;
+                   }
+
+
+                   function serializeToUrl() {                
+                      var queryStr = rover.toURL();
+                      return (getBaseURL() + queryStr);                               
+                   }
+
+                   function getBaseURL() {
+                       var url = location.href;  // entire url including querystring - also: window.location.href;
+                       var baseURL = url.split('?')[0]
+                       return baseURL;
+                   }
+
+                   function maximizeViewer(header, controls, copyright) {
+                      if (!header) $('#header').css('display', 'none');
+
+                      if (!copyright) {
+                         $('#chase').css('display', 'none');                         
+                         $('#copyright').css('text-align', 'right');
+                         $('#copyright').css('padding-right', '10px');
+                      }
+                      if (!controls) $('#right-buttons').css('display', 'none');
+                      
+                      // make controls text smaller
+                      changecss('.option-controls', 'font-size', '17px');
+                      
+                      // hide track edit panel help div
+                      changecss('.info-div', 'display', 'none');
+                   }
+
+                   function exportToFigureMaker() {
+                      var figureMakerUrl = "http://chmille4.github.com/figureMaker/index.html";
+                      window.open(figureMakerUrl + rover.toURL());
+                   }
+
+                   function loadUrlQuery() {                      
+                      if (rover.loadFromURL(location.href)) {                      
+                        if (rover.urlQuerys['embed'])
+                           maximizeViewer(rover.urlQuerys['header'], rover.urlQuerys['controls'], rover.urlQuerys['copyright']);                           
+                           
+                        // set chromosome
+                        $('#chromosome').val( rover.getChromosome() );  
+                      }
+                   }
+
+      
+    </script>
 
 </head> 
      
-<body onLoad="testIE()"> 
+<body> 
 
     <div id="header">
-       <div>
+       <!-- <div>
           _
        </div>
        <div style="width:6px; color: #474747; font-size: 1px">
           -
-       </div>
-       Rover <span style="font-style: italic; font-size: 11px; color:#bbbfc3; text-shadow: 0 0px 0px black;">HTML5 DAS Genome Browser</span>
+       </div> -->
+       Rover <span style="font-style: italic; font-size: 11px; color:#bbbfc3; text-shadow: 0 0px 0px black;">HTML5 Genome Browser</span>
     </div> 
      
     <div id="content"> 
-       <div id="side">         
+       <!-- <div id="side">         
           <div id="dasTitle" class="option-controls">DAS Sources</div>
           <div id="sourcePanel">
-    	      <br/>     	      
-    	      <div id="subtitle">check boxes to add data</div>
-    	      <ul id="source-list"></ul>
-    	   </div>
-    	   <div id="addSourcePanel">
+            <br/>             
+            <div id="subtitle">check boxes to add data</div>
+            <ul id="source-list"></ul>
+         </div>
+         <div id="addSourcePanel">
             <br/>
             <div>
                DAS Source URL:<br/><input id="dassource" type="text" name="dassource" /><br />
@@ -1053,13 +460,9 @@
                </div>
             </div>
          </div>
-         <div id='about'>
-            <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking add source at the bottom of the DAS Source pane.</p>
-            <br/>
-            <a href="#" class="myButton" onClick="toggleAbout()" >X</a>
-         </div>
+
        </div>
-       <div id='vdivide'></div>
+       <div id='vdivide'></div> -->
        
        <div id="main">
           <div id="top-controls" class="option-controls">
@@ -1071,7 +474,7 @@
                       Jump To <input id="jump" style="width:6em" id='jump-to'></input>
                 </div>
                 <div id='right-buttons' style="float:right; margin-right:10px">
-                   <div class='viewerButtonRight' style="position:relative;margin-right:10px; z-index:100"><a  href="#" onClick='toggleLinkUrl()' title="Link to current view">Link</a>
+                   <div class='viewerButtonRight' title="Link to current view" style="position:relative;margin-right:10px; z-index:100" onClick='toggleLinkUrl()'>Link
                       <div id="link-url">
                          <div style="box-shadow: 4px 4px 4px -2px rgb(170,170,170);">
                             <div>Link to current view</div><input id="link-url-input"></input><br/>
@@ -1079,8 +482,8 @@
                          </div>
                       </div>
                    </div>
-                   <div class='viewerButtonRight'><a href="#" onClick='exportToFigureMaker()' title="Export view to Figure Maker"style="margin-right:10px">Figurize</a></div>
-                   <div class='viewerButtonRight'><a href='#' onClick="toggleAbout()">About</a></div>
+                   <div class='viewerButtonRight' onClick='exportToFigureMaker()' title="Export view to Figure Maker">Figurize</div>
+                   <div class='viewerButtonRight'onClick="rover.newTrack()">+ Track</div>
                 </div>
                 <div style="clear:both"></div>
           </div>
@@ -1095,34 +498,34 @@
 
              <br/>
              <div id='viewer' style="text-align: center; margin: 0px auto opx auto">                      
+               <div id='rover'></div>
+               <div id='zoom'>
+                  <div style="float:left; height:100%">
+                     <div class="ui-icon ui-icon-circle-plus"></div>
+                     <div id="zoom-slider"></div>
+                     <div class="ui-icon ui-icon-circle-minus"></div>
+                  </div>
+                  <div class='slider-title' style="float:right; margin-top:50px;">
+                     z<br/>o<br/>o<br/>m
+                  </div>
+               </div>
 
-                <div id="center-view">                
-                   <div id="canvas-content">     
-                      <div id="scaleDiv"></div>                 
-                      <div id="canvasList"></div>
-                   </div>
-                   <div id='cover-scroll-bar'></div>  
-                </div>
-                <div id='zoom' >
-                   <div style="float:left; height:100%">
-                      <div class="ui-icon ui-icon-circle-plus"></div>
-                      <div id="zoom-slider"></div>
-                      <div class="ui-icon ui-icon-circle-minus"></div>
-                   </div>
-                   <div class='slider-title' style="float:right; margin-top:50px;">
-                      z<br/>o<br/>o<br/>m
-                   </div>
-                 </div>                 
-              </div>               
+             </div>               
        </div>
        
     </div> 
-    <div id="sourcePanelToolbar" class='option-controls' href='#'>
+    <!-- <div id="sourcePanelToolbar" class='option-controls' href='#'>
        <div style=""  onClick="toggleDasSources()">
           Add Source
        </div>
+    </div> -->
+    <div id='about'>
+       <span style="width:100%">About</span>
+       <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking +Track at the top right of the viewer.</p>
+       <p>Source code is available <a href='https://github.com/chmille4/Rover'>here</a>. Feel free to use, modify, and contribute.</p>
+       <br/>
+       <a style='cursor:pointer' class="myButton" onClick="toggleAbout()" >X</a>
     </div>
-    
     <div id='scroll-slider-container'>
        <div style="width:350px; margin-left:auto; margin-right:auto">
           <div style="margin-top:8px; float:left" class="ui-icon ui-icon-circle-minus"></div>
@@ -1134,9 +537,17 @@
        <!-- <div class='slider-title' style="margin-top: 4px; width: 3em; margin-left:auto; margin-right:auto">Scroll</div>        -->
     </div>
     
-    <div id="copyright">
-       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a> <span style='margin-left:6px'>&copy; </span><a href="http://github.com/chmille4">Chase Miller</a> 2011
+    <div id="aboutLink">
+       <a style='cursor:pointer' onClick="toggleAbout()">About</a>
     </div>
+    <div id="copyright">
+       
+       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
+       <span id='chase'><span style='margin-left:6px'>&copy; </span>
+       <a href="http://github.com/chmille4">Chase Miller</a> 2011</span>
+    </div>
+    
+
 
 </body> 
 

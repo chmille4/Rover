@@ -1,0 +1,56 @@
+
+
+/* 
+	LEVEL ONE
+*/
+
+ul {
+   list-style: none;
+   margin: 0; padding: 0; 
+}
+
+ul.dropdown                         { 
+   position: relative;
+   }
+   
+ul.dropdown li                      { height: 16px;  font-weight: bold; float: left; zoom: 1; }
+ul.dropdown a:hover		            { color: #000; }
+ul.dropdown a:active                { color: #ffa500; }
+ul.dropdown li a                    { display: block; padding: 4px 8px; border-right: 1px solid #333; text-decoration: none;
+	 								  color: #222; }
+ul.dropdown li:last-child a         { border-right: none; } /* Doesn't work in IE */
+ul.dropdown li.hover,
+ul.sub_menu li:hover                { background: #D7ECFF;}
+ul.dropdown li:hover                { color: black; position: relative; }
+ul.dropdown li div:hover            { background-image: url(../../../images/ui-icons_ffffff_256x240.png) }
+ul.dropdown li.hover a              { color: black; }
+
+
+/* 
+	LEVEL TWO
+*/
+ul.dropdown #top-border          { height:3px; width:48px; position: absolute; top: -3px; left:0px; background:rgb(180,180,180)}
+ul.dropdown ul 						{ border: 2px solid rgb(100,100,100); text-align: center; width: 90px; visibility: hidden; position: absolute; top: 16px; left: -2px; 
+                                   -moz-border-radius-topright:3px;
+                                   border-top-right-radius:3px;
+                                   -moz-border-radius-bottomright:3px;
+                                   border-bottom-right-radius:3px;
+                                   -moz-border-radius-bottomleft:3px;
+                                   border-bottom-left-radius:3px;                                                                      
+                                 }
+ul.dropdown ul li 					{ text-align: left; font-weight: normal; background: rgb(240, 240, 240); color: #000; 
+									  border-bottom: 1px solid #ccc; float: none; }
+									  
+                                    /* IE 6 & 7 Needs Inline Block */
+ul.dropdown ul li a					{ height: 8px; line-height: 8px; border-right: none; width: 100%; display: inline-block; } 
+
+/* 
+	LEVEL THREE
+*/
+ul.dropdown ul ul 					{ left: 100%; top: -2px;
+                                    -moz-border-radius-topright:3px;
+                                    border-top-right-radius:3px;
+                                    -moz-border-radius-bottomright:3px;
+                                    border-bottom-right-radius:3px;
+                                 }
+ul.sub_menu li:hover > ul 			{ visibility: visible; }
