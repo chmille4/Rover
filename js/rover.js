@@ -143,8 +143,7 @@ var Rover = Class.extend({
 
       rover.tracks[track.id] = track;
       if ( track.source.url )
-         track.source.fetch(rover.min, rover.max, track.initSource, track, 'center');
-      //makeDasRequest(track, scriblMin, scriblMax, 'center', initializeSource);
+         track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);
       
       // call onAddTrack function if set
       if (rover.onAddTrack) rover.onAddTrack(track);
@@ -198,13 +197,15 @@ var Rover = Class.extend({
               rover.tracks[i].draw(min, max, widthPx);
            } else {
               // show spinner
-              rover.tracks[i].showSpinner();
+              if ( rover.tracks[i].source.request.error )
+                  rover.tracks[i].showErrorLabel();
+              else
+                  rover.tracks[i].showSpinner();
               
               // clear canvas
               var chart = rover.tracks[i].center.chart;
               if (!zooming)
                  chart.ctx.clearRect(0, 0, chart.canvas.width, chart.canvas.height);
-
               // set draw to happen when request is received
               rover.tracks[i].source.request.drawOnResponse = true;
            }
@@ -255,7 +256,8 @@ var Rover = Class.extend({
    updateLabelPositions: function() {      
       for( var i in this.tracks ) {
          var canvasDiv = this.tracks[i].parentDiv;
-         var top = $(canvasDiv).position().top + $('#main').scrollTop();
+         var top = $(canvasDiv).position().top;// + $('#main').scrollTop();
+//         alert(top);
          this.tracks[i].labelDiv.style.top = top + 'px';
          this.tracks[i].editDiv.style.top = top + 'px';
          
@@ -287,7 +289,7 @@ var Rover = Class.extend({
       var rover = this;
       
       for (var i in rover.tracks) {
-         rover.tracks[i][direction].chart.drawStyle = rover.tracks[i].center.chart.drawStyle;
+         rover.tracks[i][direction].chart.drawStyle = rover.tracks[i].center.chart.drawStyle;         
          rover.tracks[i].center = rover.tracks[i][direction];
       }      
    },

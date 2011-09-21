@@ -13,16 +13,40 @@ var RoverTrack = Class.extend({
       // current view
       this.center = {};
       this.center.chart = new Scribl(canvas, canWidth);
-      this.center.chart.scale.off = true;
+      this.center.chart.glyph.text.color = 'white';
+      this.center.chart.glyph.color = function(lineargradient) {
+         lineargradient.addColorStop(0, 'rgb(125,125,125)');
+         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+         lineargradient.addColorStop(1, 'rgb(80,80,80)');
+         return lineargradient
+      };
+      this.center.chart.scale.off = true;      
 
       // right buffer
       this.right = {};
       this.right.chart = new Scribl(canvas, canWidth);
+      this.right.chart.glyph.text.color = 'white';
+      this.right.chart.glyph.color = function(lineargradient) {
+         lineargradient.addColorStop(0, 'rgb(125,125,125)');
+         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+         lineargradient.addColorStop(1, 'rgb(80,80,80)');
+         return lineargradient
+      };		
       this.right.chart.scale.off = true;
 
       // left buffer
       this.left = {};
       this.left.chart = new Scribl(canvas, canWidth);
+      this.left.chart.glyph.text.color = 'white';
+      this.left.chart.glyph.color = function(lineargradient) {
+         lineargradient.addColorStop(0, 'rgb(125,125,125)');
+         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+         lineargradient.addColorStop(1, 'rgb(80,80,80)');
+         return lineargradient
+      };		
       this.left.chart.scale.off = true;            
       
       // html elements
@@ -62,6 +86,7 @@ var RoverTrack = Class.extend({
       }
       view.draw();        
       this.rover.updateLabelPositions();               
+      this.hideErrorLabel();
     },
    
    initSource: function(response, track) {
@@ -127,19 +152,19 @@ var RoverTrack = Class.extend({
 
       $(trackMenuDiv).html(' \
            <ul class="dropdown">                                                       \
-           	<li><a href="#" style="margin-top:-4px"><img style="float:left" width="16" src="./images/gear_white.png"</img>   \
-             	</div><div class="ui-icon ui-icon-triangle-1-s"></div></a>              \
+           	<li><a style="margin-top:-4px"><img style="float:left" width="16" src="./images/gear_white.png"</img>   \
+             	<div class="ui-icon ui-icon-triangle-1-s"></div></a>              \
            		<ul class="sub_menu" style="text-align: center">                                          			 \
                   <div id ="top-border"></div>                                                           \
            			 <li>                                                       \
            				<span style="padding-left:8px">View As ></span>                                     \
            				<ul>                                                              \
-           					<li><a class="'+track.id+'-drawStyle" name="collapse" href="#">Collapsed</a></li>                                \
-           					<li><a class="'+track.id+'-drawStyle" name="expand" href="#">Expanded</a></li>                               \
-                        <li><a class="'+track.id+'-drawStyle" name="line" href="#">Line Chart</a></li>                               \
+           					<li><a class="'+track.id+'-drawStyle" name="collapse">Collapsed</a></li>                                \
+           					<li><a class="'+track.id+'-drawStyle" name="expand" >Expanded</a></li>                               \
+                        <li><a class="'+track.id+'-drawStyle" name="line">Line Chart</a></li>                               \
            				</ul>                                                             \
            			 </li>                                                               \
-           			 <li><a href="#" class="'+track.id+'-edit">Edit</a></li>                            \
+           			 <li><a class="'+track.id+'-edit">Edit</a></li>                            \
            		</ul>                                                                   \
            	</li>                                                                      \
          </ul>                                                                         \
@@ -248,25 +273,50 @@ var RoverTrack = Class.extend({
       // columns
       var columnsDiv = document.createElement('div');
       columnsDiv.className = 'columns';
+      var formColumn = document.createElement('div');
+      formColumn.style.cssFloat = 'left';
+      formColumn.style.textAlign = 'center';
+      formColumn.style.width = '430px';
       var leftColumn = document.createElement('div');
       leftColumn.style.cssFloat = 'left';
+      leftColumn.style.textAlign = 'right';
       var rightColumn = document.createElement('div');
       rightColumn.style.cssFloat = 'right';
+      rightColumn.style.textAlign = 'right';
+      var infoDiv = document.createElement('div');
+      infoDiv.className = 'info-div';
+      infoDiv.innerHTML = "\
+         <div>\
+            <span class='info-title'>Name</span><span>the display name for the track</span>\
+         </div>\
+         <div>\
+            <span class='info-title'>Source Url</span><span>the DAS url to the data. How annotations are retrieved</span>\
+         </div>\
+         <div>\
+            <span class='info-title'>Chromosome</span><span>the chromosome or segment</span>\
+         </div>\
+         <div>\
+            <span class='info-title'>Type Filter</span><span>annotation types of biological significance that correspond roughly to EMBL/GenBank feature table tags (e.g. exon, refGene). However each database can use their own</span>\
+         </div>"         
+      
       
       // add elements
       $(leftColumn).append( $('<div></div>').append(nameLabel, this.nameInput), $('<div></div>').append(urlLabel, this.urlInput) );
       $(rightColumn).append( $('<div></div>').append(chromoLabel, this.chromoInput), $('<div></div>').append(typeFilterLabel, this.typeFilterInput) );
-      columnsDiv.appendChild(leftColumn);
-      columnsDiv.appendChild(rightColumn);      
-      editDiv.appendChild(columnsDiv);      
-      $(editDiv).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton), helpDiv );
+      formColumn.appendChild(leftColumn);
+      formColumn.appendChild(rightColumn);
+      $(formColumn).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton), helpDiv );
+      columnsDiv.appendChild(formColumn);
+      columnsDiv.appendChild(infoDiv);      
+      editDiv.appendChild(columnsDiv);            
+      
       
       this.chromoInput.disabled = true;      
    },
    
    showEditPanel: function() {
       // edit panel height
-      var panelHeight = '90px';
+      var panelHeight = '100px';
       
       // update position
       var top = $(this.parentDiv).position().top + $('#main').scrollTop();
@@ -355,13 +405,26 @@ var RoverTrack = Class.extend({
    
    hideErrorLabel: function() {
       $(this.errorLabel).css('display', 'none');
+      this.source.request.error = false;
    },
    
-   handleError: function() {
-      // turn off spinner
-      this.hideSpinner();
-      
-      // show error message
+   showErrorLabel: function() {
       $(this.errorLabel).css('display', 'inline');
+      this.source.request.error = false;      
+   },
+   
+   
+   handleError: function() {
+
+      if (this.source.request.drawOnResponse) {
+         // turn off spinner
+         this.hideSpinner();
+      
+         // show error message
+         this.showErrorLabel();
+      }
+      
+      // update xhr request status
+      this.source.request.error = true;
    }
 });

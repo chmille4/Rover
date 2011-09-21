@@ -9,16 +9,18 @@ var DasSource = Class.extend({
          this.min=undefined; 
          this.max=undefined; 
          this.status="waiting"; 
+         this.error = false;
          this.drawOnResponse = false;
       };
       this.track = undefined;
    },
 
-   fetch: function(min, max, callback, track, direction){
+   fetch: function(min, max, callback, track, direction, drawOnResponse){
       
       // var request = new DasRequest;                
       // track.addDasRequest(request);
       this.newRequest();
+      this.request.drawOnResponse = drawOnResponse || false;
       min = parseInt(Math.max(min, 1));
       max = parseInt(max);  
       var fullUrl = this.url + '/features?segment=' + this.chromosome + ':'  + min + "," + max + ';type=' + this.typeFilter;     
@@ -28,8 +30,7 @@ var DasSource = Class.extend({
    
    refetch: function() {
       this.track.showSpinner();
-      this.fetch(this.track.rover.min, this.track.rover.max, this.track.updateSource, this.track, 'center');
-      this.request.drawOnResponse = true;
+      this.fetch(this.track.rover.min, this.track.rover.max, this.track.updateSource, this.track, 'center', true);
    },
    
    parse: function(xmlDoc, view) {
@@ -104,7 +105,7 @@ var DasSource = Class.extend({
       // if (numDasRequests > 0)
       //    for ( var i=0; i<numDasRequests; i++)
       //       this.dasRequests[i].xhr.abort();
-      if (this.request.xhr) this.request.xhr.abort();
+       if (this.request.xhr) this.request.xhr.abort();
 
       this.request.xhr=undefined; 
       this.request.min=undefined; 

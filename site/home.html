@@ -5,6 +5,15 @@
    <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
    <link href='style.css' rel='stylesheet' type='text/css'>
    
+   <script type='text/javascript'>
+      function ieswap() {
+         if (navigator.appName == 'Microsoft Internet Explorer') {
+            document.getElementById('rover-iframe').style.display = 'none';
+            document.getElementById('screenshot').style.display = 'inline';
+         }
+      }
+   </script>
+   
    <script type="text/javascript">
 
      var _gaq = _gaq || [];
@@ -21,7 +30,7 @@
    
 </head> 
      
-<body> 
+<body onload='ieswap()'> 
    <div class='content' style="height: 710px">
       <div id='links'>
          <div class='link'><a href='https://github.com/chmille4/Rover'>Source</a></div>
@@ -50,7 +59,8 @@
       </div>
       <div id='view1'>
          <div style='float:left'>
-            <img  src='images/screen_shot3.png'/>
+            <img  id='screenshot' src='images/screen_shot3.png'/>
+           <iframe id='rover-iframe' onClick='alert("hi");' width="730" height="368" style="border:1px solid rgb(220,220,220); border-radius: 4px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="file:///Users/chase/Desktop/tmp_workspace/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18,http://das.sanger.ac.uk/das/ens_36_refseq,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18&names=Ensembl NCBI36/hg18,UCSC NCBI36/hg18 refGene,ens_NCBI36_refseq,UCSC NCBI36/hg18 snp130&min=1149729&max=1162457&display=collapse,collapse,collapse,line&segment=1&types=refGene,refGene,refGene,snp130&embed=true&header=true&controls=true"></iframe>
          </div>
          <div id='features'>
             <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Web based - access anywhere<span></div>
@@ -60,7 +70,7 @@
             <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Lightweight - 100% javascript and no server<span></div>
          </div>
          <div style="clear:both"></div>
-         <div style='text-align:center'><a id='tryit' href='file:///Users/chase/Desktop/tmp_workspace/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://das.sanger.ac.uk/das/ens_36_refseq,http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript&names=Ensembl%20NCBI36/hg18,ens_NCBI36_refseq,Ensembl%20NCBI36/hg18%20depth&min=1110431.8549897228&max=1188431.8549897228&display=line,collapse,expand&segment=1&types=refGene,refGene,refGene'>Try it</a></div>
+         <div style='text-align:center'><a id='tryit' href='file:///Users/chase/Desktop/tmp_workspace/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18,http://das.sanger.ac.uk/das/ens_36_refseq,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18&names=Ensembl NCBI36/hg18,UCSC NCBI36/hg18 refGene,ens_NCBI36_refseq,UCSC NCBI36/hg18 snp130&min=1149729&max=1162457&display=collapse,collapse,collapse,line&segment=1&types=refGene,refGene,refGene,snp130'>Try it</a></div>
       </div>
    </div>
    

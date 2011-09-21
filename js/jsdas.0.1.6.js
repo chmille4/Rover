@@ -2439,7 +2439,8 @@ JSDAS.XMLLoader = {
 					  new_xhr.onreadystatechange = function() {change(new_xhr, url);}
 					  new_xhr.send(null);
 					} else {
-					  errorcallback && errorcallback({id: "xmlhttprequest_error", msg: xhr.status});
+					  if (xhr.status != 0)
+					    errorcallback && errorcallback({id: "xmlhttprequest_error", msg: xhr.status});
 					}
 				}
 				//to prevent IE memory leaks
@@ -2459,7 +2460,7 @@ JSDAS.XMLLoader = {
 				if(!data) { //This block is here since we cannot rely on content type headers
 				     errorcallback && errorcallback({id: 'not_xml', msg: "The response was not XML"});
 				}
-				if(data.documentElement.nodeName != 'parsererror') {
+				else if(data.documentElement.nodeName != 'parsererror') {
 					callback(data);
 					return;
 				} 

@@ -96,6 +96,11 @@ body {
    margin-top:45px;
 }
 
+#view1 #screenshot {
+   height: 368px;
+   display:none;
+}
+
 #features {
    float: right;
    width: 330px;

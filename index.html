@@ -5,21 +5,22 @@
 
     <title></title> 
     <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
-    <!-- <script src="js/Scribl.min.js"></script> -->
-    	<script src="../Scribl/src/Scribl.class.js" ></script>
-		<script src="../Scribl/src/Scribl.js" ></script>
-		<script src="../Scribl/src/Scribl.track.js" ></script>
-		<script src="../Scribl/src/Scribl.lane.js" ></script>
-		<script src="../Scribl/src/Scribl.tooltips.js" ></script>		
-		<script src="../Scribl/src/Scribl.events.js" ></script>
-		<script src="../Scribl/src/Scribl.utils.js" ></script>
-		<script src="../Scribl/src/Scribl.svg.js" ></script>
-		<script src="../Scribl/src/Scribl.glyph.js" ></script>
-		<script src="../Scribl/src/glyph/Scribl.blockarrow.js" ></script>
-		<script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
-		<script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
-		<script src="../Scribl/src/glyph/Scribl.line.js" ></script>
-		<script src="../Scribl/src/glyph/Scribl.complex.js" ></script>		
+    <script src="js/Scribl.min.js"></script>
+    <script src="js/changecssjs.js" type="text/javascript"></script>
+      <!-- <script src="../Scribl/src/Scribl.class.js" ></script>
+      <script src="../Scribl/src/Scribl.js" ></script>
+      <script src="../Scribl/src/Scribl.track.js" ></script>
+      <script src="../Scribl/src/Scribl.lane.js" ></script>
+      <script src="../Scribl/src/Scribl.tooltips.js" ></script>      
+      <script src="../Scribl/src/Scribl.events.js" ></script>
+      <script src="../Scribl/src/Scribl.utils.js" ></script>
+      <script src="../Scribl/src/Scribl.svg.js" ></script>
+      <script src="../Scribl/src/Scribl.glyph.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.blockarrow.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.line.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>     -->
 	
 		
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
@@ -387,22 +388,21 @@
                        return baseURL;
                    }
 
-                   function maximizeViewer() {
-                      // hide all other divs
-                      $('#side').css('display', 'none');
-                      $('#header').css('display', 'none');
-                      $('#sourcePanelToolbar').css('display', 'none');
-                      $('#vdivide').css('display', 'none');
-                      $('#copyright').css('display', 'none');
-                      $('#right-buttons').css('display', 'none');
+                   function maximizeViewer(header, controls, copyright) {
+                      if (!header) $('#header').css('display', 'none');
 
-                      // restyle main
-                      $('#main').css('width', '100%');
-                      $('#main').css('left', '0px')
-                      $('#main').css('top', '0px');
-                      $('#scroll-slider-container').css('width', '100%');
-                      $('#scroll-slider-container').css('left', '0px');
-
+                      if (!copyright) {
+                         $('#chase').css('display', 'none');                         
+                         $('#copyright').css('text-align', 'right');
+                         $('#copyright').css('padding-right', '10px');
+                      }
+                      if (!controls) $('#right-buttons').css('display', 'none');
+                      
+                      // make controls text smaller
+                      changecss('.option-controls', 'font-size', '17px');
+                      
+                      // hide track edit panel help div
+                      changecss('.info-div', 'display', 'none');
                    }
 
                    function exportToFigureMaker() {
@@ -413,7 +413,7 @@
                    function loadUrlQuery() {                      
                       if (rover.loadFromURL(location.href)) {                      
                         if (rover.urlQuerys['embed'])
-                           maximizeViewer();                           
+                           maximizeViewer(rover.urlQuerys['header'], rover.urlQuerys['controls'], rover.urlQuerys['copyright']);                           
                            
                         // set chromosome
                         $('#chromosome').val( rover.getChromosome() );  
@@ -473,7 +473,7 @@
                       Jump To <input id="jump" style="width:6em" id='jump-to'></input>
                 </div>
                 <div id='right-buttons' style="float:right; margin-right:10px">
-                   <div class='viewerButtonRight' style="position:relative;margin-right:10px; z-index:100"><a  href="#" onClick='toggleLinkUrl()' title="Link to current view">Link</a>
+                   <div class='viewerButtonRight' title="Link to current view" style="position:relative;margin-right:10px; z-index:100" onClick='toggleLinkUrl()'>Link
                       <div id="link-url">
                          <div style="box-shadow: 4px 4px 4px -2px rgb(170,170,170);">
                             <div>Link to current view</div><input id="link-url-input"></input><br/>
@@ -481,8 +481,8 @@
                          </div>
                       </div>
                    </div>
-                   <div class='viewerButtonRight'><a href="#" onClick='exportToFigureMaker()' title="Export view to Figure Maker"style="margin-right:10px">Figurize</a></div>
-                   <div class='viewerButtonRight'><a href='#' onClick="rover.newTrack()">+ Track</a></div>
+                   <div class='viewerButtonRight' onClick='exportToFigureMaker()' title="Export view to Figure Maker">Figurize</div>
+                   <div class='viewerButtonRight'onClick="rover.newTrack()">+ Track</div>
                 </div>
                 <div style="clear:both"></div>
           </div>
@@ -523,7 +523,7 @@
        <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking +Track at the top right of the viewer.</p>
        <p>Source code is available <a href='https://github.com/chmille4/Rover'>here</a>. Feel free to use, modify, and contribute.</p>
        <br/>
-       <a href="#" class="myButton" onClick="toggleAbout()" >X</a>
+       <a style='cursor:pointer' class="myButton" onClick="toggleAbout()" >X</a>
     </div>
     <div id='scroll-slider-container'>
        <div style="width:350px; margin-left:auto; margin-right:auto">
@@ -537,12 +537,14 @@
     </div>
     
     <div id="aboutLink">
-       <a href="#" onClick="toggleAbout()">About</a>
+       <a style='cursor:pointer' onClick="toggleAbout()">About</a>
     </div>
-    <!-- <div id="copyright">
+    <div id="copyright">
        
-       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a> <span style='margin-left:6px'>&copy; </span><a href="http://github.com/chmille4">Chase Miller</a> 2011
-    </div> -->
+       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
+       <span id='chase'><span style='margin-left:6px'>&copy; </span>
+       <a href="http://github.com/chmille4">Chase Miller</a> 2011</span>
+    </div>
     
 
 
