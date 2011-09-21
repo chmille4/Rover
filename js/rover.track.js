@@ -152,7 +152,7 @@ var RoverTrack = Class.extend({
 
       $(trackMenuDiv).html(' \
            <ul class="dropdown">                                                       \
-           	<li><a style="margin-top:-4px"><img style="float:left" width="16" src="./images/gear_white.png"</img>   \
+           	<li><a style="margin-top:-4px; width: 32px"><img style="float:left" width="16" src="./images/gear_white.png"</img>   \
              	<div class="ui-icon ui-icon-triangle-1-s"></div></a>              \
            		<ul class="sub_menu" style="text-align: center">                                          			 \
                   <div id ="top-border"></div>                                                           \
