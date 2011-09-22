@@ -70,6 +70,12 @@ body {
    height: 150px;
 }
 
+#title #social {
+   padding-top: 50px;
+   float:right;
+   text-align: right;
+}
+
 .break {
    width: 100%; 
    height: 2px;

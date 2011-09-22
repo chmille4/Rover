@@ -28,6 +28,14 @@
 
    </script>
    
+   <script type="text/javascript">
+     (function() {
+       var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+       po.src = 'https://apis.google.com/js/plusone.js';
+       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+     })();
+   </script>
+   
 </head> 
      
 <body onload='ieswap()'> 
@@ -44,17 +52,20 @@
          <div class='link'><a href='#detailsv'>More Info</a></div>
          <div class='vbreak'>.</div>         
          <div class='link'><a href='home.html'>Home</a></div>
+         <div style='clear:both'></div>
       </div>
       <div id='title'>
          <!-- Rover -->
          <img src='images/rover_full_logo.png'/>
-         <!-- <div style="position:relative; display:inline">
-            <div style='display:inline; font: italic 20px ubuntu; color: #474747; position: absolute; width: 500px; top: 55px; left: 30px'>
-               HTML5 Canvas Genome Browser
-            </div>
-         </div>    -->      
-         <!-- <div style="display:inline; border-left: 2px solid rgb(210,210,210); color:white; margin-left: 550px">.</div>
-         <div style="display:inline" id='tryit'>Try it</div> -->
+         <span id='social'>
+            <span>
+               <a  href="https://twitter.com/share" class="twitter-share-button" data-text="Rover - HTML5 Genome Browser Framework, powered by Scribl Graphics" data-count="horizontal" data-via="chmille4">Tweet</a><script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
+            </span>
+            <span style='margin-left: -30px'>
+               <g:plusone size="medium" annotation="none"></g:plusone>
+            </span>
+            <div style='clear:both'></div>
+         </span>
          <div class='break'>.</div>
       </div>
       <div id='view1'>
