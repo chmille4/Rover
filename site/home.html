@@ -56,7 +56,7 @@
       </div>
       <div id='title'>
          <!-- Rover -->
-         <img src='images/rover_full_logo.png'/>
+         <img src='images/rover_full_logo_1.png'/>
          <span id='social'>
             <span>
                <a  href="https://twitter.com/share" class="twitter-share-button" data-text="Rover - HTML5 Genome Browser Framework, powered by Scribl Graphics" data-count="horizontal" data-via="chmille4">Tweet</a><script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
@@ -74,11 +74,15 @@
            <iframe id='rover-iframe' onClick='alert("hi");' width="730" height="368" style="border:1px solid rgb(220,220,220); border-radius: 4px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://chmille4.github.com/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18,http://das.sanger.ac.uk/das/ens_36_refseq,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18&names=Ensembl NCBI36/hg18,UCSC NCBI36/hg18 refGene,ens_NCBI36_refseq,UCSC NCBI36/hg18 snp130&min=1149729&max=1162457&display=collapse,collapse,collapse,line&segment=1&types=refGene,refGene,refGene,snp130&embed=true&header=true&controls=true"></iframe>
          </div>
          <div id='features'>
-            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Web based - access anywhere<span></div>
-            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Share - link to any data or view<span></div>  
-            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Integrate data from multiple databases<span></div>
-            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Smooth Scroll/Zoom<span></div>
-            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Lightweight - 100% javascript and no server<span></div>
+            <!-- <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Web based - access anywhere<span></div>
+                        <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Share - link to any data or view<span></div>  
+                        <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Integrate data from multiple databases<span></div>
+                        <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Smooth Scroll/Zoom<span></div>
+                        <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Lightweight - 100% javascript and no server<span></div> -->
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Framework to build custom genomic tools<span></div>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Focus on core functionality - sharing, ui, panning/zooming, performance<span></div>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Developer resources - official API and tutorials (coming soon)<span></div>
+            <div><span id='asterisk'><sub>*</sub></span><span class='feature'>Lightweight - 100% JavaScript, server optional<span></div>
          </div>
          <div style="clear:both"></div>
          <div style='text-align:center'><a id='tryit' href='http://chmille4.github.com/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18,http://das.sanger.ac.uk/das/ens_36_refseq,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18&names=Ensembl NCBI36/hg18,UCSC NCBI36/hg18 refGene,ens_NCBI36_refseq,UCSC NCBI36/hg18 snp130&min=1149729&max=1162457&display=collapse,collapse,collapse,line&segment=1&types=refGene,refGene,refGene,snp130'>Try it</a></div>
@@ -92,7 +96,7 @@
          <div id='details'>
             <div class='title'>Motivation</div>
             <div>
-               Rover was built to take advantage of the latest in web technology, separate the graphics and the genome browser, and create a lightweight browser with developer resources (comming soon).
+               Rover was built to facilitate the creation of custom genomic tools, take advantage of the latest in web technology (HTML5 Canvas), and separate the graphics and the genome browser.
             </div>
             <div class ='title'>DAS</div>
             <div>
@@ -100,7 +104,7 @@
             </div>
             <div class ='title'>Graphics</div>
             <div>
-               For graphics Rover uses <a href='chmille4.github.com/Scribl/'>Scribl</a>, genomics graphics library, also developed in the Marth Lab. Separating the graphics and the genome browser is a major motivation for Scribl and allows both projects to progress independently.  Rover benefits from any work done to Scribl, however Scribl does not become tangled with Rover and can be used as the basis for other projects.
+               For graphics, Rover uses <a href='chmille4.github.com/Scribl/'>Scribl</a>, genomics graphics library, also developed in the Marth Lab. Separating the graphics and the genome browser is a major motivation for Scribl as it allows an easy and documented way to extend Rover by adding new glyphs and draw styles to Scribl.  Additionally, Scribl does not become tangled with Rover and can be used as the basis for other projects.
             </div>
             <div class ='title'>API</div>
             <div>
