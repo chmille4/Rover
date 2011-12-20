@@ -472,6 +472,11 @@ a {
    border-radius:4px;
    -moz-border-radius: 4px;
    border: 2px solid rgb(100,100,100);
+   
+}
+
+.track-edit-div input {
+   width: 125px;
 }
 
 .track-edit-div .columns {

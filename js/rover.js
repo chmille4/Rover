@@ -27,14 +27,11 @@ var Rover = Class.extend({
    
    newTrack: function() {
      var rover = this;
-     var track = rover.addTrack("", "", "", "collapse", rover.getChromosome());
+     var track = rover.addTrack("collapse");
      track.showEditPanel();
    },
    
-   addTrack: function(name, url, type, display, chromosome) {
-      
-      // create source
-      var source = new DasSource(name, url, type, chromosome);
+   addTrack: function(display) {
       
       // set up divs
       var rover = this;
@@ -65,11 +62,11 @@ var Rover = Class.extend({
       
       
       // create track
-      var track = new RoverTrack(source, newCanvas, rover.getWidthWithBuffers());
+      var track = new RoverTrack(newCanvas, rover.getWidthWithBuffers());
       //newCanvas.id = track.id;
       track.rover = rover;
       track.drawStyle = display;
-      source.track = track;            
+      
 
       // associate elements
       canvasList.appendChild(parentDiv);
@@ -93,8 +90,7 @@ var Rover = Class.extend({
       spinner.className = 'spinner';
       spinner.innerHTML = " <img src='images/spinner.gif'/> retrieving from: ";
       var nameDiv = document.createElement('span');
-      nameDiv.innerHTML = source.name;
-      //label.innerHTML = "<span class='spinner'> <img src='images/spinner.gif'/> retrieving from: </span>" + source.name;
+
       label.appendChild(spinner);
       label.appendChild(nameDiv);
       label.className = "canvas-label";
@@ -142,11 +138,9 @@ var Rover = Class.extend({
  //     trackMenuDiv.onmouseout  = function() { track.hideMenu() };
 
       rover.tracks[track.id] = track;
-      if ( track.source.url )
-         track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);
       
       // call onAddTrack function if set
-      if (rover.onAddTrack) rover.onAddTrack(track);
+      if (rover.onAddTrack) rover.onAddTrack(track);      
       
       return track;   
    },
@@ -471,9 +465,20 @@ var Rover = Class.extend({
 
       // set display
       for (var i=0; i < displays.length; i++) {   
+         if( /json/.exec(urls[i]) )
+            var protocol = 'json';
+         else
+            var protocol = 'das';
+            
          var display = displays[i].toLowerCase();
          if (display == 'none') display = 'collapse';
-         rover.addTrack(names[i], urls[i], types[i], display, querys['segment']);
+         var track = rover.addTrack(display);         
+         if (protocol == 'json')
+            track.setSource(new JsonSource(names[i], urls[i], querys['segment']));
+         else
+            track.setSource(new DasSource(names[i], urls[i], types[i], querys['segment']));
+         if ( track.source.url )
+            track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);         
       }
       
       // success
@@ -500,6 +505,15 @@ var Rover = Class.extend({
    getChromosome: function() {
       for ( var i in this.tracks )
          return this.tracks[i].source.chromosome;
+   },
+   
+   setViewMinMax: function(min, max) {
+      var rover = this;
+      
+      for (var i in rover.tracks){
+         rover.tracks[i].center.chart.scale.min = min;
+         rover.tracks[i].center.chart.scale.max = max;
+      }
    }
    
    

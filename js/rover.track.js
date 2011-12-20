@@ -1,7 +1,7 @@
 var RoverTrack = Class.extend({
-   init: function(source, canvas, canWidth) {
+   init: function(canvas, canWidth) {
       this.id = _uniqueId('roverTrack');
-      this.source = source;
+      this.source = undefined;
       this.displayMin = undefined;
       this.displayMax = undefined;
       this.rover = undefined;
@@ -65,6 +65,12 @@ var RoverTrack = Class.extend({
       this.typeFilterInput = undefined;
    },
    
+   setSource: function(source) {
+      this.source = source;      
+      source.track = this;
+      this.setName(source.name);
+   },
+   
    draw: function(min, max, widthPx) {                         
       var view = this.center.chart;
       
@@ -72,11 +78,13 @@ var RoverTrack = Class.extend({
          view = view.slice(min, max);                        
          view.width = widthPx;
          view.canvas.width = widthPx;
+         // set events to already added
+         view.events.added = true;
       }
       
       view.scale.off = true;
       view.scale.pretty = false;
-      view.laneSizes = 13;
+      view.laneSizes = 18;
       view.ctx.clearRect(0, 0, view.canvas.width, view.canvas.height);                
       view.scale.min = min;
       view.scale.max = max;
@@ -237,6 +245,13 @@ var RoverTrack = Class.extend({
       urlLabel.innerHTML = 'Source URL'
       urlLabel.className = 'labels';
       
+      track.fileInput = document.createElement('input');
+      track.fileInput.type = 'file';
+      track.fileInput.multiple = true;
+      var fileLabel = document.createElement('span');
+      fileLabel.innerHTML = 'Source File(s)'
+      fileLabel.className = 'labels';
+      
       track.chromoInput = document.createElement('input');
       var chromoLabel = document.createElement('span');
       chromoLabel.innerHTML = 'Chromosome';
@@ -258,14 +273,23 @@ var RoverTrack = Class.extend({
       var saveButton = document.createElement('button');
       saveButton.innerHTML = 'Save';
       saveButton.onclick = function(e) {
+         if ( !track.source && $(track.urlInput).val().match('das') )
+            track.setSource( new DasSource("", "", "", "", ""))
+         else if ( !track.source && $(track.urlInput).val().match('json') )
+               track.setSource( new JsonSource("", "", "", "", ""))
+         else if ( !track.source && track.fileInput.files.length > 0 )
+            track.setSource( new BamSource("", "", "", "", ""));
          track.setName( $(track.nameInput).val() );
          
+         var change = false;
+         change = track.setUrl( $(track.urlInput).val() ) || change;
+         change = track.setFiles( track.fileInput.files ) || change;
+         change = track.setChromosome( $(track.chromoInput).val() ) || change;
+         change = track.setTypeFilter( $(track.typeFilterInput).val() ) || change;
+         
          // check if any attributes are changed that require seq data to be refetched
-         if (  track.setUrl( $(track.urlInput).val() ) ||
-               track.setChromosome( $(track.chromoInput).val() ) ||
-               track.setTypeFilter( $(track.typeFilterInput).val() ) ) {
-                  track.source.refetch();
-               }
+         if (change)
+            track.source.refetch();
          
          track.hideEditPanel();
       }
@@ -293,6 +317,9 @@ var RoverTrack = Class.extend({
             <span class='info-title'>Source Url</span><span>the DAS url to the data. How annotations are retrieved</span>\
          </div>\
          <div>\
+            <span class='info-title'>Source File(s)</span><span>Path to file. <a href='site/supportedFormats.html'>More Info</a></span>\
+         </div>\
+         <div>\
             <span class='info-title'>Chromosome</span><span>the chromosome or segment</span>\
          </div>\
          <div>\
@@ -301,7 +328,10 @@ var RoverTrack = Class.extend({
       
       
       // add elements
-      $(leftColumn).append( $('<div></div>').append(nameLabel, this.nameInput), $('<div></div>').append(urlLabel, this.urlInput) );
+      $(leftColumn).append( $('<div></div>').append(nameLabel, this.nameInput), 
+                            $('<div></div>').append(urlLabel, this.urlInput),
+                            $('<div></div>').append(fileLabel, this.fileInput)
+                           );
       $(rightColumn).append( $('<div></div>').append(chromoLabel, this.chromoInput), $('<div></div>').append(typeFilterLabel, this.typeFilterInput) );
       formColumn.appendChild(leftColumn);
       formColumn.appendChild(rightColumn);
@@ -316,7 +346,7 @@ var RoverTrack = Class.extend({
    
    showEditPanel: function() {
       // edit panel height
-      var panelHeight = '100px';
+      var panelHeight = '130px';
       
       // update position
       var top = $(this.parentDiv).position().top + $('#main').scrollTop();
@@ -327,10 +357,12 @@ var RoverTrack = Class.extend({
       $(this.editDiv).height( panelHeight );
       
       // set inputs
-      $(this.nameInput).val(this.source.name);
-      $(this.urlInput).val(this.source.url);
-      $(this.chromoInput).val(this.source.chromosome);
-      $(this.typeFilterInput).val(this.source.typeFilter);      
+      $(this.chromoInput).val( $("#chromosome").val() );
+      if (this.source) {
+         $(this.nameInput).val(this.source.name);
+         $(this.urlInput).val(this.source.url);         
+         $(this.typeFilterInput).val(this.source.typeFilter);      
+      }
       
       // show edit panel      
       $(this.editDiv).css('display', 'inline');
@@ -383,6 +415,18 @@ var RoverTrack = Class.extend({
          return true;
       }
    },
+   
+   setFiles: function(files) {
+      if (files.length == 0)
+         return false;
+      else {
+         var fileType0 = /[^.]+$/.exec(files[0].name)[0];
+         var fileType1 = /[^.]+$/.exec(files[1].name)[0];         
+         this.source.paths[fileType0] = files[0];
+         this.source.paths[fileType1] = files[1];
+         return true;
+      }
+   },   
    
    
    setChromosome: function(chromosome) {

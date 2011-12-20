@@ -5,9 +5,9 @@
 
     <title></title> 
     <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
-    <script src="js/Scribl.min.js"></script>
+    <!-- <script src="js/Scribl.min.js"></script> -->
     <script src="js/changecssjs.js" type="text/javascript"></script>
-      <!-- <script src="../Scribl/src/Scribl.class.js" ></script>
+      <script src="../Scribl/src/Scribl.class.js" ></script>
       <script src="../Scribl/src/Scribl.js" ></script>
       <script src="../Scribl/src/Scribl.track.js" ></script>
       <script src="../Scribl/src/Scribl.lane.js" ></script>
@@ -20,7 +20,11 @@
       <script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
       <script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
       <script src="../Scribl/src/glyph/Scribl.line.js" ></script>
-      <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>     -->
+      <script src="../Scribl/src/glyph/Scribl.complex.js" ></script>
+      <script src="../Scribl/src/glyph/Scribl.seq.js" ></script>
+      <script src="../Scribl/lib/inflate.js" ></script>
+      <script src="../Scribl/lib/bam.js" ></script>    
+      <script src="../Scribl/lib/bin.js" ></script>
 	
 		
    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
@@ -49,6 +53,9 @@
     
     <script src="js/rover.js" ></script>
     <script src="js/rover.source.js" ></script>
+    <script src="js/sources/rover.source.das.js" ></script>
+    <script src="js/sources/rover.source.bam.js" ></script>
+    <script src="js/sources/rover.source.json.js" ></script>
     <script src="js/rover.track.js" ></script>
     
     <script>
@@ -59,7 +66,7 @@
                   var bufferSize = undefined;
                   var bufferMultiple = 6;
                   var minBufferSize = 50000;
-                  var zoomMin = 1000;
+                  var zoomMin = 100;
                   var zoomMax = 100000;
                   var zoomValue = undefined;
                   var updatingLeft = updatingRight = false;
@@ -113,6 +120,7 @@
                                  rover.draw(newMin, newMax, totalPx, leftNts, false);
                               rover.min = newMin;
                               rover.max = newMax;
+                              rover.setViewMinMax(newMin, newMax)
                               //var leftPx = leftNts / totalNts * $('.canvas-div canvas').width();
                             //  document.getElementById('canvas-content').scrollLeft = leftPx;                       
                           }
