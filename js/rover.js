@@ -12,6 +12,10 @@ var Rover = Class.extend({
       this.displayMax;
       this.displayMin;
       
+      this.thousandGUrl = "http://bioinformatics.bc.edu/ngsserver";
+      //this.thousandGUrl = "http://0.0.0.0:4569";
+      this.thousandGSources = [];
+      
       // create container divs
       this.setupDivs();
       
@@ -513,6 +517,24 @@ var Rover = Class.extend({
       for (var i in rover.tracks){
          rover.tracks[i].center.chart.scale.min = min;
          rover.tracks[i].center.chart.scale.max = max;
+      }
+   },
+   
+   init1000GSources: function() {
+      
+      var types = [this.thousandGUrl + "/json/sources/bam", this.thousandGUrl + "/json/sources/vcf.gz"];
+      var sources = this.thousandGSources;
+      
+      for (var i=0; i<types.length; i++) {
+         var xhr = new XMLHttpRequest();
+         xhr.open('GET', types[i]);
+         xhr.onreadystatechange = function () {
+           if (this.status == 200 && this.readyState == 4) {
+             var responseSources = jQuery.parseJSON(this.responseText);
+             sources = jQuery.merge(sources, responseSources);             
+           }
+         };
+         xhr.send();
       }
    }
    

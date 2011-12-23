@@ -252,6 +252,33 @@ var RoverTrack = Class.extend({
       fileLabel.innerHTML = 'Source File(s)'
       fileLabel.className = 'labels';
       
+      
+      // <form>
+      // Select your favorite browser:
+      // <select id="myList" onchange="favBrowser()">
+      //   <option></option>
+      //   <option>Google Chrome</option>
+      //   <option>Firefox</option>  
+      //   <option>Internet Explorer</option>
+      //   <option>Safari</option>
+      //   <option>Opera</option>
+      // </select>
+      // <p>Your favorite browser is: <input type="text" id="favorite" size="20"></p>
+      // </form>
+
+      track.thousandGForm = document.createElement('form');
+      var thousandGLabel = document.createElement('span');
+      thousandGLabel.innerHTML = "1000G Data";
+      thousandGLabel.className = 'labels';
+      track.thousandGSelect = document.createElement('select');
+      track.thousandGSelect.onchange = function() {track.updateNewTrackFrom(track)};
+      track.thousandGSelect.style.width = "130px";      
+      $(track.thousandGSelect).append('<option></option>');
+      for (var i=0; i<this.rover.thousandGSources.length; i++) {
+         $(track.thousandGSelect).append('<option>' + this.rover.thousandGSources[i] + '</option');
+      }
+      $(track.thousandGForm).append(thousandGLabel,track.thousandGSelect);
+      
       track.chromoInput = document.createElement('input');
       var chromoLabel = document.createElement('span');
       chromoLabel.innerHTML = 'Chromosome';
@@ -314,10 +341,13 @@ var RoverTrack = Class.extend({
             <span class='info-title'>Name</span><span>the display name for the track</span>\
          </div>\
          <div>\
-            <span class='info-title'>Source Url</span><span>the DAS url to the data. How annotations are retrieved</span>\
+            <span class='info-title'>Source Url</span><span>the url to the remote data via <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> or <a href='https://github.com/chmille4/Ngs_server'>Ngs Server</a></span>\
          </div>\
          <div>\
             <span class='info-title'>Source File(s)</span><span>Path to file. <a href='site/supportedFormats.html'>More Info</a></span>\
+         </div>\
+         <div>\
+            <span class='info-title'>1000G</span><span>subset of the 1000G dataset - 1000genomes.org</span>\
          </div>\
          <div>\
             <span class='info-title'>Chromosome</span><span>the chromosome or segment</span>\
@@ -328,11 +358,15 @@ var RoverTrack = Class.extend({
       
       
       // add elements
-      $(leftColumn).append( $('<div></div>').append(nameLabel, this.nameInput), 
+      $(leftColumn).append( $('<div></div>').append(this.thousandGForm),       
                             $('<div></div>').append(urlLabel, this.urlInput),
                             $('<div></div>').append(fileLabel, this.fileInput)
                            );
-      $(rightColumn).append( $('<div></div>').append(chromoLabel, this.chromoInput), $('<div></div>').append(typeFilterLabel, this.typeFilterInput) );
+      $(rightColumn).append( 
+                            $('<div></div>').append(nameLabel, this.nameInput),
+                            $('<div></div>').append(chromoLabel, this.chromoInput), 
+                            $('<div></div>').append(typeFilterLabel, this.typeFilterInput)
+                           );
       formColumn.appendChild(leftColumn);
       formColumn.appendChild(rightColumn);
       $(formColumn).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton), helpDiv );
@@ -457,6 +491,18 @@ var RoverTrack = Class.extend({
       this.source.request.error = false;      
    },
    
+   updateNewTrackFrom: function() {
+      var select = this.thousandGSelect;
+      var data = select.options[select.selectedIndex].text;
+      var meta = /(^.+)\.((vcf.gz)?(bam)?)$/.exec(data);
+      var filename = meta[1];
+      var filetype = meta[2]
+      if (filetype == 'vcf.gz') {filetype = 'vcf';}
+      var url = this.rover.thousandGUrl + "/json/" + filetype + "/"
+      url += data;
+      this.urlInput.value = url;
+      this.nameInput.value = filename;
+   },
    
    handleError: function() {
 
