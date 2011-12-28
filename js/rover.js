@@ -12,8 +12,7 @@ var Rover = Class.extend({
       this.displayMax;
       this.displayMin;
       
-      this.thousandGUrl = "http://bioinformatics.bc.edu/ngsserver";
-      //this.thousandGUrl = "http://0.0.0.0:4569";
+      this.thousandGUrl = "http://bayes.bc.edu/ngsserver";
       this.thousandGSources = [];
       
       // create container divs
@@ -526,16 +525,39 @@ var Rover = Class.extend({
       var sources = this.thousandGSources;
       
       for (var i=0; i<types.length; i++) {
-         var xhr = new XMLHttpRequest();
-         xhr.open('GET', types[i]);
-         xhr.onreadystatechange = function () {
-           if (this.status == 200 && this.readyState == 4) {
-             var responseSources = jQuery.parseJSON(this.responseText);
-             sources = jQuery.merge(sources, responseSources);             
-           }
-         };
-         xhr.send();
+         var xhr = this.createCORSRequest('GET', types[i]);
+            xhr.onload = function () {
+                var responseSources = jQuery.parseJSON(this.responseText);
+                sources = jQuery.merge(sources, responseSources);             
+            };
+            xhr.send();
       }
+   },
+   
+   createCORSRequest: function(method, url) {
+     var xhr = new XMLHttpRequest();
+     if ("withCredentials" in xhr) {
+
+       // Check if the XMLHttpRequest object has a "withCredentials" property.
+       // "withCredentials" only exists on XMLHTTPRequest2 objects.
+       xhr.open(method, url, true);
+       //xhr.setRequestHeader('Accept', 'application/json,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8');
+       //application/json;charset=utf-8
+
+     } else if (typeof XDomainRequest != "undefined") {
+
+       // Otherwise, check if XDomainRequest.
+       // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+       xhr = new XDomainRequest();
+       xhr.open(method, url);
+
+     } else {
+
+       // Otherwise, CORS is not supported by the browser.
+       xhr = null;
+
+     }
+     return xhr;
    }
    
    
