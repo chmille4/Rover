@@ -12,7 +12,7 @@ var Rover = Class.extend({
       this.displayMax;
       this.displayMin;
       
-      this.thousandGUrl = "http://bayes.bc.edu/ngsserver";
+      this.thousandGUrl = "http://bioinformatics.bc.edu/ngsserver";
       this.thousandGSources = [];
       
       // create container divs
