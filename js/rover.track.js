@@ -79,7 +79,7 @@ var RoverTrack = Class.extend({
          view.width = widthPx;
          view.canvas.width = widthPx;
          // set events to already added
-         view.events.added = true;
+         //view.events.added = true;
       }
       
       view.scale.off = true;

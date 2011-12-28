@@ -86,19 +86,25 @@ var JsonSource = RoverSource.extend({
              for(var k=0; k< cigar.length; k++){
                 var op = parseInt(cigar[k].match(/\d+/)[0]);
                 var opLtr = cigar[k].match(/[A-Z]/)[0];
-                if (opLtr == 'M')
+                if (opLtr == 'M') {
                    seq += fullSeq.slice(pos,pos+op);
-                else if (opLtr == 'D')
-                   for(var j=0; j<op; j++) { seq += '-'; }
-                else if (opLtr == 'N')
+                   pos += op;
+                }
+                else if (opLtr == 'D') 
+                   for(var j=0; j<op; j++) { seq += '-'; }                   
+                else if (opLtr == 'N') {
                    for(var j=0; j<op; j++) { seq += 'N'; }
-                else if (opLtr == 'I')
-                   insertions.push( {'pos':pos-softClipping, 'seq':fullSeq.slice(pos,pos+op)} );                        
+                   var h = 1;
+                }
+                else if (opLtr == 'I') {
+                   insertions.push( {'pos':pos-softClipping, 'seq':fullSeq.slice(pos,pos+op)} );
+                   pos += op;
+                }
                 else if (opLtr == 'S' && pos == 0) {
                   softClipping = op;
-                  position += op;
+                  pos += op;
                 }
-                pos += op;
+                
              }
              opts['insertions'] = insertions;
              opts['seq'] = seq;

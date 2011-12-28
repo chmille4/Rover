@@ -160,7 +160,7 @@ var Rover = Class.extend({
       
 
  	   // abort in progress das requests
- 	   track.source.request.xhr.abort();
+ 	   if (track.source.request.xhr) {track.source.request.xhr.abort();}
  	                   	   
  	   // delete chart from list
  	   delete rover.tracks[id];
@@ -287,6 +287,7 @@ var Rover = Class.extend({
       
       for (var i in rover.tracks) {
          rover.tracks[i][direction].chart.drawStyle = rover.tracks[i].center.chart.drawStyle;         
+         rover.tracks[i].center.chart.removeEventListeners('mouseover');
          rover.tracks[i].center = rover.tracks[i][direction];
       }      
    },
