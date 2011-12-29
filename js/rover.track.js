@@ -6,6 +6,7 @@ var RoverTrack = Class.extend({
       this.displayMax = undefined;
       this.rover = undefined;
       this.canvas = canvas;
+      this.laneSizes = 18;
       
       //default options
       this.drawStyle = 'collapsed';
@@ -13,6 +14,8 @@ var RoverTrack = Class.extend({
       // current view
       this.center = {};
       this.center.chart = new Scribl(canvas, canWidth);
+      this.center.chart.offset = 0;
+      this.center.chart.laneSizes = this.laneSizes;
       this.center.chart.glyph.text.color = 'white';
       this.center.chart.glyph.color = function(lineargradient) {
          lineargradient.addColorStop(0, 'rgb(125,125,125)');
@@ -21,11 +24,14 @@ var RoverTrack = Class.extend({
          lineargradient.addColorStop(1, 'rgb(80,80,80)');
          return lineargradient
       };
-      this.center.chart.scale.off = true;      
+      this.center.chart.scale.off = true;
+      this.center.chart.scale.pretty = false;      
 
       // right buffer
       this.right = {};
       this.right.chart = new Scribl(canvas, canWidth);
+      this.right.chart.offset = 0;
+      this.right.chart.laneSizes = this.laneSizes;
       this.right.chart.glyph.text.color = 'white';
       this.right.chart.glyph.color = function(lineargradient) {
          lineargradient.addColorStop(0, 'rgb(125,125,125)');
@@ -35,10 +41,13 @@ var RoverTrack = Class.extend({
          return lineargradient
       };		
       this.right.chart.scale.off = true;
+      this.right.chart.scale.pretty = false;
 
       // left buffer
       this.left = {};
       this.left.chart = new Scribl(canvas, canWidth);
+      this.left.chart.offset = 0;
+      this.left.chart.laneSizes = this.laneSizes;
       this.left.chart.glyph.text.color = 'white';
       this.left.chart.glyph.color = function(lineargradient) {
          lineargradient.addColorStop(0, 'rgb(125,125,125)');
@@ -47,7 +56,8 @@ var RoverTrack = Class.extend({
          lineargradient.addColorStop(1, 'rgb(80,80,80)');
          return lineargradient
       };		
-      this.left.chart.scale.off = true;            
+      this.left.chart.scale.off = true; 
+      this.left.chart.scale.pretty = false;           
       
       // html elements
       this.parentDiv = undefined;
@@ -73,6 +83,8 @@ var RoverTrack = Class.extend({
    
    draw: function(min, max, widthPx) {                         
       var view = this.center.chart;
+      view.scale.min = min;
+      view.scale.max = max;
       
       if (widthPx) {
          view = view.slice(min, max);                        
@@ -82,12 +94,7 @@ var RoverTrack = Class.extend({
          //view.events.added = true;
       }
       
-      view.scale.off = true;
-      view.scale.pretty = false;
-      view.laneSizes = 18;
       view.ctx.clearRect(0, 0, view.canvas.width, view.canvas.height);                
-      view.scale.min = min;
-      view.scale.max = max;
       if(view.drawStyle != this.drawStyle) {
          view.drawStyle = this.drawStyle;
          view.canvas.height = view.getHeight();
@@ -107,7 +114,7 @@ var RoverTrack = Class.extend({
 
       // defaults
       track.center.chart.drawStyle = 'collapse';
-      track.center.chart.laneSizes = 13; // set lanesizes so getHeight will be accurate
+     // track.center.chart.laneSizes = 13; // set lanesizes so getHeight will be accurate
       track.center.chart.canvas.height = track.center.chart.getHeight();    				
 
 

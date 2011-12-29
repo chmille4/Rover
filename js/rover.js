@@ -190,8 +190,8 @@ var Rover = Class.extend({
 
       // draw tracks
         for (i in rover.tracks)  {
-           if (rover.tracks[i].source.request.status == 'received') {
-              rover.tracks[i].draw(min, max, widthPx);
+           if (rover.tracks[i].source.request.status == 'received') {              
+              rover.tracks[i].draw(min, max, widthPx);               
            } else {
               // show spinner
               if ( rover.tracks[i].source.request.error )
@@ -218,6 +218,7 @@ var Rover = Class.extend({
        $(this.scaleDiv).prepend(canvas);
 
  	   this.scale = new Scribl(canvas, this.getWidthWithBuffers());
+ 	   this.scale.offset = 0;
  	   this.scale.scale.font.size = 11;
       this.scale.scale.font.color = 'rgb(220,220,220)';
       this.scale.tick.major.color = 'rgb(220,220,220)';
