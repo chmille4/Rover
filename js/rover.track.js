@@ -81,18 +81,22 @@ var RoverTrack = Class.extend({
       this.setName(source.name);
    },
    
-   draw: function(min, max, widthPx) {                         
+   draw: function(min, max, widthPx, zooming) {                         
       var view = this.center.chart;
       view.scale.min = min;
       view.scale.max = max;
       
       if (widthPx) {
-         view = view.slice(min, max);                        
+         view = view.slice(min, max);
          view.width = widthPx;
          view.canvas.width = widthPx;
-         // set events to already added
-         //view.events.added = true;
       }
+      
+      if (zooming) {
+         // set events to already added
+         // so mulitple Listeners don't get added to the canvas element
+         view.events.added = true;
+      }   
       
       view.ctx.clearRect(0, 0, view.canvas.width, view.canvas.height);                
       if(view.drawStyle != this.drawStyle) {

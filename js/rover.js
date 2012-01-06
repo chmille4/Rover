@@ -191,7 +191,8 @@ var Rover = Class.extend({
       // draw tracks
         for (i in rover.tracks)  {
            if (rover.tracks[i].source.request.status == 'received') {              
-              rover.tracks[i].draw(min, max, widthPx);               
+              //rover.tracks[i].draw(min, max, widthPx);
+              rover.tracks[i].draw(min, max, widthPx, zooming);
            } else {
               // show spinner
               if ( rover.tracks[i].source.request.error )
@@ -394,7 +395,7 @@ var Rover = Class.extend({
       var minNts = centerNts - numNtsToShow/2;
       var maxNts = centerNts + numNtsToShow/2;
 
-      rover.draw( minNts, maxNts, this.getDisplayWidth() );
+      rover.draw( minNts, maxNts, this.getDisplayWidth(), undefined, true );
       
    },
    
