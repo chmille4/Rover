@@ -13,51 +13,13 @@ var RoverTrack = Class.extend({
 
       // current view
       this.center = {};
-      this.center.chart = new Scribl(canvas, canWidth);
-      this.center.chart.offset = 0;
-      this.center.chart.laneSizes = this.laneSizes;
-      this.center.chart.glyph.text.color = 'white';
-      this.center.chart.glyph.color = function(lineargradient) {
-         lineargradient.addColorStop(0, 'rgb(125,125,125)');
-         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
-         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
-         lineargradient.addColorStop(1, 'rgb(80,80,80)');
-         return lineargradient
-      };
-      this.center.chart.scale.off = true;
-      this.center.chart.scale.pretty = false;      
-
+      this.center.chart = this.setupDefaultScribl( new Scribl(this.canvas, canWidth) );    
       // right buffer
       this.right = {};
-      this.right.chart = new Scribl(canvas, canWidth);
-      this.right.chart.offset = 0;
-      this.right.chart.laneSizes = this.laneSizes;
-      this.right.chart.glyph.text.color = 'white';
-      this.right.chart.glyph.color = function(lineargradient) {
-         lineargradient.addColorStop(0, 'rgb(125,125,125)');
-         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
-         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
-         lineargradient.addColorStop(1, 'rgb(80,80,80)');
-         return lineargradient
-      };		
-      this.right.chart.scale.off = true;
-      this.right.chart.scale.pretty = false;
-
+      this.right.chart = this.setupDefaultScribl( new Scribl(this.canvas, canWidth) );
       // left buffer
       this.left = {};
-      this.left.chart = new Scribl(canvas, canWidth);
-      this.left.chart.offset = 0;
-      this.left.chart.laneSizes = this.laneSizes;
-      this.left.chart.glyph.text.color = 'white';
-      this.left.chart.glyph.color = function(lineargradient) {
-         lineargradient.addColorStop(0, 'rgb(125,125,125)');
-         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
-         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
-         lineargradient.addColorStop(1, 'rgb(80,80,80)');
-         return lineargradient
-      };		
-      this.left.chart.scale.off = true; 
-      this.left.chart.scale.pretty = false;           
+      this.left.chart = this.setupDefaultScribl( new Scribl(this.canvas, canWidth) );
       
       // html elements
       this.parentDiv = undefined;
@@ -527,5 +489,29 @@ var RoverTrack = Class.extend({
       
       // update xhr request status
       this.source.request.error = true;
+   },
+   
+   setupDefaultScribl: function(chart) {
+      chart.offset = 0;
+      chart.trackHooks.push( function(track) { 
+         if (track.chart.ntsToPixels() > 70)
+            track.drawStyle = 'line';
+         else
+            track.drawStyle = 'expand';
+         // return false to allow normal draing of glyph
+         return false;
+      });
+      chart.laneSizes = this.laneSizes;
+      chart.glyph.text.color = 'white';
+      chart.glyph.color = function(lineargradient) {
+         lineargradient.addColorStop(0, 'rgb(125,125,125)');
+         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+         lineargradient.addColorStop(1, 'rgb(80,80,80)');
+         return lineargradient
+      };
+      chart.scale.off = true;
+      chart.scale.pretty = false;
+      return chart;
    }
 });
