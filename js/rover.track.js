@@ -49,7 +49,11 @@ var RoverTrack = Class.extend({
       view.scale.max = max;
       
       if (widthPx) {
+         // TODO: figure out someway to move this slice to zoom only
+         // so it doesn't cause all these copying problems!
          view = view.slice(min, max);
+         view.scale.min = min;
+         view.scale.max = max;
          view.width = widthPx;
          view.canvas.width = widthPx;
       }
