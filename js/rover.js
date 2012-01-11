@@ -290,7 +290,9 @@ var Rover = Class.extend({
       for (var i in rover.tracks) {
          rover.tracks[i][direction].chart.drawStyle = rover.tracks[i].center.chart.drawStyle;         
          rover.tracks[i].center.chart.removeEventListeners('mouseover');
+         var center = rover.tracks[i].center;         
          rover.tracks[i].center = rover.tracks[i][direction];
+         rover.tracks[i][direction] = center;
       }      
    },
    
@@ -394,7 +396,7 @@ var Rover = Class.extend({
       // get min max nt
       var minNts = centerNts - numNtsToShow/2;
       var maxNts = centerNts + numNtsToShow/2;
-
+            
       rover.draw( minNts, maxNts, this.getDisplayWidth(), undefined, true );
       
    },
