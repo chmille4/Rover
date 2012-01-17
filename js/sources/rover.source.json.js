@@ -22,13 +22,6 @@ var JsonSource = RoverSource.extend({
       this.request.max = max = parseInt(max);        
       
       var fullUrl = this.url + '?segment=' + this.chromosome + '&min='  + this.request.min + "&max=" + this.request.max;     
-      //this.request.xhr = JSDAS.features(fullUrl, function(response, track, direction) { callback(response, track, direction) }, function(){ track.handleError(); }, "", [track,direction]);      
-      // $.ajax({
-      //   url: fullUrl,
-      //   success: function(data){
-      //     alert(data);
-      //   }
-      // });
 
       var xhr = new XMLHttpRequest();
       xhr.open('GET', fullUrl);
