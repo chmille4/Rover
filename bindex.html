@@ -1,0 +1,280 @@
+<!DOCTYPE HTML>
+<html lang="en"> 
+
+<head> 
+
+   <title>Rover</title> 
+   <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
+   <script src="assets/js/Scribl.1.1.2.min.js"></script>
+   <script src="assets/js/changecssjs.js" type="text/javascript"></script>		
+   <script src="assets/js/jquery.1.7.min.js"></script>
+   <script src="assets/js/underscore-min.js"></script>
+	<script src="assets/js/backbone.js"></script> 
+   <link rel="stylesheet" href="css/jquery.ui.aristo.all.css">
+   <link rel="stylesheet" type="text/css" href="css/rover.css" />
+   <link rel="stylesheet" type="text/css" href="css/index.css" />
+   <link rel="stylesheet" type="text/css" href="assets/js/SimplejQueryDropdowns/css/dropdown.css" />
+   
+   
+   <script src="assets/js/jquery-ui.chase.min.js"></script>
+   <script src="assets/js/jsdas.0.1.6.js" ></script>
+   <script src="assets/js/SimplejQueryDropdowns/js/jquery.dropdownPlain.js"></script>
+	
+	<script type="text/javascript">
+
+     var _gaq = _gaq || [];
+     _gaq.push(['_setAccount', 'UA-21069282-2']);
+     _gaq.push(['_trackPageview']);
+
+     (function() {
+       var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+       ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+     })();
+
+   </script>
+    
+    <script src="js/rover.js" ></script>
+    <script src="js/rover.source.js" ></script>
+    <script src="js/rover.btrack.js" ></script>
+    <script src="js/sources/rover.source.das.js" ></script>
+    <script src="js/sources/rover.source.bam.js" ></script>
+    <script src="js/sources/rover.source.json.js" ></script>
+    <script src="js/rover.track.js" ></script>
+    
+    <script>
+      // initilization variables
+      var splash = true;
+      var rover = undefined;
+
+
+	   $(document).ready(function() {  
+	      rover = new Rover( {
+	         viewer: document.getElementById('rover'),
+	         zoomer: document.getElementById('zoom-slider'),
+	         scroller: document.getElementById('scroll-slider'),
+	         zoomMin: 100,
+	         zoomMax: 100000,
+	      });
+	      // test if there are any tracks left after track remove
+	      rover.onRemoveTrack = function(id) { if (rover.isEmpty()) {toggleSplashPage(true)} };
+
+         // turn on splash page
+	      toggleSplashPage();
+      
+	      // inital 1000G sources
+         rover.init1000GSources();
+
+         loadUrlQuery();
+
+         // watch for enter key on jump input box
+         $("#jump").keyup(function(event) {
+            // check for enter key
+            if(event.keyCode == 13) {     
+               var jumpToPos = parseInt($('#jump').val());
+               rover.jumpTo(jumpToPos);
+            }
+         });                
+
+         // watch for enter key on chromosome box
+         $("#chromosome").keyup(function(event) {
+            // check for enter key
+            if(event.keyCode == 13) {
+               // change chromosome for all tracks
+               for (var i in rover.tracks)
+                  rover.tracks[i].setChromosome( $("#chromosome").val() );
+         
+               // fetch and draw new data
+               rover.fetchAll(rover.min, rover.max, 'center');    
+               rover.draw(rover.min, rover.max, $('.canvas-div canvas').width(), rover.getDisplayMinNts());
+            }
+         });
+
+	   });
+
+    	function toggleSplashPage(force){
+    	   splash = force || splash;
+    	   if (!splash) {
+    	      $('#splash').css('display', 'none')
+    	      $('#viewer').css('display', 'inline')
+    	      splash = false
+   	      } else {
+   	         $('#splash').css('display', 'inline')
+    	      $('#viewer').css('display', 'none')
+    	      splash = true;
+   	      }
+    	}
+
+
+       function toggleAbout() {
+          var about = document.getElementById('about');
+          if (about.style.display == 'none' || about.style.display == "")
+            about.style.display = "inline";
+          else
+            about.style.display = "none"; 
+       }
+
+
+      function toggleLinkUrl() {
+
+         if( $('#link-url').css('display') == 'none' ) {
+            $('#link-url-input').val(rover.toURL());
+            $('#link-url').css('display', 'inherit');                  
+            $('#embed-url-input').val(rover.toIframe());
+         }
+         else
+            $('#link-url').css('display', 'none')
+      }
+
+
+       function maximizeViewer(header, controls, copyright) {
+          if (!header) $('#header').css('display', 'none');
+
+          if (!copyright) {
+             $('#chase').css('display', 'none');                         
+             $('#copyright').css('text-align', 'right');
+             $('#copyright').css('padding-right', '10px');
+          }
+          if (!controls) $('#right-buttons').css('display', 'none');
+       
+          // make controls text smaller
+          changecss('.controls', 'font-size', '17px');
+          changecss('#top-controls .viewerButtonLeft', 'padding', '0px 10px');
+          changecss('#top-controls .viewerButtonRight', 'padding', '0px 10px');
+       
+          // hide track edit panel help div
+          changecss('.info-div', 'display', 'none');
+       }
+
+       function exportToFigureMaker() {
+          var figureMakerUrl = "http://chmille4.github.com/figureMaker/index.html";
+          window.open(figureMakerUrl + rover.toURLParams());
+       }
+
+       function loadUrlQuery() {                      
+          if (rover.loadFromURL(location.href)) {                      
+            if (rover.urlQuerys['embed'])
+               maximizeViewer(rover.urlQuerys['header'], rover.urlQuerys['controls'], rover.urlQuerys['copyright']);                                                      
+            // set chromosome
+            $('#chromosome').val( rover.getChromosome() );  
+          }
+       }
+      
+    </script>
+
+    <!-- <script type="application/javascript">
+      jQuery(function() {
+         window.btracks.fetch();
+      });
+    </script>> -->
+
+</head> 
+     
+<body> 
+
+   <!--    Header     -->
+   <div id="header">
+      Rover <span style="font-style: italic; font-size: 11px; color:#bbbfc3; text-shadow: 0 0px 0px black;">HTML5 Genome Browser</span>
+   </div>
+    
+   <!--    Controls    -->
+   <div id="top-controls" class="controls">
+      <ul class='left'>
+         <li>Chromosome <input id='chromosome'></input></li>
+         <li>Jump To <input id='jump-to'></input></li>
+      </ul>
+      <ul class='right'>
+         <li onClick="rover.newTrack()">+ Track</li>
+         <li onClick='exportToFigureMaker()' title="Export view to Figure Maker">Figurize</li>                   
+         <li style="width: 2em" onClick='toggleLinkUrl()' title="Link to current view">Link
+            <div onClick='' id="link-url">
+               <div style="box-shadow: 4px 4px 4px -2px rgb(170,170,170);">
+               <div>Link to current view</div><input id="link-url-input"></input><br/>
+               <div>Embed in website</div><input id="embed-url-input"></input>
+            </div>
+         </li>
+      </ul>
+   </div>
+
+
+   <!-- container  -->
+   <div id='container'>
+      
+      <!-- <ul>
+         <li>hi<div>bye</div></li>
+         <li>hi</li>
+      </ul> -->
+      
+      <!-- splash screen/no-data  -->
+      <div id='splash'>
+         <p>To get started <a href="#" onClick="toggleDasSources()">add DAS sources</a> to see annotation data</p>
+         <p>Or</p>
+         <p>Try out a <a href='http://chmille4.github.com/Rover/index.html?urls=http://useast.ensembl.org/das/Homo_sapiens.NCBI36.transcript,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18,http://das.sanger.ac.uk/das/ens_36_refseq,http://genome.cse.ucsc.edu:80/cgi-bin/das/hg18&names=Ensembl NCBI36/hg18,UCSC NCBI36/hg18 refGene,ens_NCBI36_refseq,UCSC NCBI36/hg18 snp130&min=1149729&max=1162457&display=Collapse,Collapse,Collapse,Collapse&segment=1&types=refGene,refGene,refGene,snp130' onClick='location.reload(true)'>demo</a> with pre-selected sources</p>
+         <p style="font-size: 13px"><a href="#" onClick="toggleAbout()">About DAS Browser</a></p>
+      </div>
+
+      <!--   Viewer    -->
+      <div id='viewer'>                      
+         <div id='rover'></div>
+      </div>
+ 
+      <!-- Zoom Slider -->
+      <div id='zoom'>
+         <div style="float:left; height:100%">
+            <div class="ui-icon ui-icon-circle-plus"></div>
+            <div id="zoom-slider"></div>
+            <div class="ui-icon ui-icon-circle-minus"></div>
+         </div>
+         <div class='slider-title' style="float:right; margin-top:50px;">
+            z<br/>o<br/>o<br/>m
+         </div>
+      </div>
+                       
+   </div> <!--  close container div >
+         
+   
+   <!--    footer     -->
+   <div id='footer'>
+      <div style="width:350px; margin-left:auto; margin-right:auto">
+         <div style="margin-top:8px; float:left" class="ui-icon ui-icon-circle-minus"></div>
+         <div style="margin-top: 11px" id='scroll-slider'></div>
+         <div style="margin-top:8px; float:right" class="ui-icon ui-icon-circle-plus"></div>
+         <div style="clear:both"></div>
+      </div>
+       
+
+   </div>
+    
+   <div id="aboutLink">
+      <a style='cursor:pointer' onClick="toggleAbout()">About</a>
+   </div>
+   <div id='about'>
+      <span style="width:100%">About</span>
+      <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking +Track at the top right of the viewer.</p>
+      <p>Source code is available <a href='https://github.com/chmille4/Rover'>here</a>. Feel free to use, modify, and contribute.</p>
+      <br/>
+      <a style='cursor:pointer' class="myButton" onClick="toggleAbout()" >X</a>
+   </div>   
+   
+   <div id="copyright">
+      Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
+      <span id='chase'><span style='margin-left:6px'>&copy; </span>
+      <a href="http://github.com/chmille4">Chase Miller</a> 2011</span>
+   </div>
+
+<!--              <br/>
+             <div id='bcontainer'>
+
+             </div>
+             <script type="text/template" id="tracks-template">
+               <h1>Tracks</h1>
+               <ul class="tracks"></ul>
+             </script>>
+             <script type="text/template" id="track-template">
+                <span> <%= title %> </span>
+                <span> <%= url %> </span>
+             </script> -->
+
+</body> 
+
+</html>

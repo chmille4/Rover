@@ -1,0 +1,32 @@
+[{
+    "title": "TrackA",
+    "url": "URLA",
+    "view": {
+      "features": [{
+         "pos": 1,
+         "length": 1000,
+         "strand": "+"
+      },
+      {
+         "pos": 500,
+         "length": 1000,
+         "strand": "+"      
+      }]
+    }
+},
+{
+   "title": "TrackB",
+   "url": "URLB",
+   "view": {
+     "features": [{
+        "pos": 1,
+        "length": 1000,
+        "strand": "+"
+     },
+     {
+        "pos": 500,
+        "length": 1000,
+        "strand": "+"      
+     }]
+   }
+}]
