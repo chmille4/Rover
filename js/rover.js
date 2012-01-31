@@ -526,7 +526,7 @@ var Rover = Class.extend({
    
    init1000GSources: function() {
       
-      var types = [this.thousandGUrl + "/json/sources/bam", this.thousandGUrl + "/json/sources/vcf.gz"];
+      var types = [this.thousandGUrl + "/json/sources/public/bam", this.thousandGUrl + "/json/sources/public/vcf.gz"];
       var sources = this.thousandGSources;
       
       for (var i=0; i<types.length; i++) {
