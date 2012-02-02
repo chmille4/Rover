@@ -42,15 +42,15 @@ var Rover = Class.extend({
            value: 0,
            start: function(event, ui) {
               rover.scrollFunc = setInterval( function() {
-                 var scrollPixels = $('#scroll-slider').slider('option', 'value') / 100 * rover.maxScrollSpeed;
+                 var scrollPixels = $(rover.scroller).slider('option', 'value') / 100 * rover.maxScrollSpeed;
                  rover.canvasContentDiv.scrollLeft += scrollPixels;
       		  },20)
            },
-           stop: function() { window.clearInterval(rover.scrollFunc); $("#scroll-slider" ).slider('option', 'value', 0);},
+           stop: function() { window.clearInterval(rover.scrollFunc); $(rover.scroller ).slider('option', 'value', 0);},
        });
       
       // make tracks sortable
-      $('#canvasList').sortable({
+      $(rover.canvasListDiv).sortable({
          update: function() { rover.updateLabelPositions(); }
       });
       
@@ -75,9 +75,9 @@ var Rover = Class.extend({
 
       // create elements
       var parentDiv = document.createElement('div');
-      parentDiv.className = "canvas-div";
+      parentDiv.className = "rover-canvas-div";
       var trackMenuDiv = document.createElement('div');
-      trackMenuDiv.className = "option-control";
+      trackMenuDiv.className = "rover-track-menu";
       trackMenuDiv.style.display = 'none';
       
       var removeTrackDiv = document.createElement('div');
@@ -91,7 +91,7 @@ var Rover = Class.extend({
       
       // add meta-data editing capabilities
       var trackEditDiv = document.createElement("div");
-      trackEditDiv.className = 'track-edit-div';
+      trackEditDiv.className = 'rover-track-edit-div';
       $(trackEditDiv).width( this.getDisplayWidth() );
       
       
@@ -114,7 +114,7 @@ var Rover = Class.extend({
       
       // error label
       var errorLabel = document.createElement('a');
-      errorLabel.className = 'error';
+      errorLabel.className = 'rover-error';
       errorLabel.innerHTML = 'Error, Retry  '
       errorLabel.onclick = function() { track.hideErrorLabel(); track.source.refetch(); };
       label.appendChild(errorLabel);
@@ -127,7 +127,7 @@ var Rover = Class.extend({
 
       label.appendChild(spinner);
       label.appendChild(nameDiv);
-      label.className = "canvas-label";
+      label.className = "rover-canvas-label";
       
       if (this.scaleDiv.childElementCount == 0) {
          rover.initScale();
@@ -143,7 +143,7 @@ var Rover = Class.extend({
       newCanvas.width = this.getWidthWithBuffers();
       $(newCanvas).parent().width(this.getWidthWithBuffers());
       newCanvas.height = '20px';
-      newCanvas.className = "canvas";   		      
+      newCanvas.className = "rover-canvas";   		      
 
       // place title/spinner
       var top = $(parentDiv).position().top;
@@ -243,8 +243,8 @@ var Rover = Class.extend({
    
    initScale: function() {
        var canvas = document.createElement("canvas");
-       canvas.id = 'scale';
-       canvas.className = 'canvas';
+       canvas.id = 'rover-scale';
+       canvas.className = 'rover-canvas';
        canvas.height = 20;
        canvas.width = this.getWidthWithBuffers();
        $(this.scaleDiv).prepend(canvas);
@@ -258,8 +258,8 @@ var Rover = Class.extend({
       this.scale.tick.halfColor = 'rgb(220,220,220)';
       this.scale.scale.size = 8;
  	   this.scale.scale.auto = false;
-		this.scale.scale.min = rover.min; //$('#slider-range').slider('values',0);
-		this.scale.scale.max = rover.max;//$('#slider-range').slider('values',1);
+		this.scale.scale.min = rover.min; 
+		this.scale.scale.max = rover.max;
 		this.scale.draw();
 		// set scroll
       var scrollLeft = (this.displayMin - rover.min) / (rover.max - rover.min) * this.getWidthWithBuffers();
@@ -279,20 +279,16 @@ var Rover = Class.extend({
       this.scale.draw();  
       var scrollLeft = (scrollLeftNts - min) / (max - min) * rover.getWidthWithBuffers();      
       if (zooming)                          
-        $('.canvas-div').css('margin-left', scrollLeft);
+        $('.rover-canvas-div').css('margin-left', scrollLeft);
       this.canvasContentDiv.scrollLeft = scrollLeft; 
    },
    
    updateLabelPositions: function() {      
       for( var i in this.tracks ) {
          var canvasDiv = this.tracks[i].parentDiv;
-         var top = $(canvasDiv).position().top;// + $('#main').scrollTop();
-//         alert(top);
+         var top = $(canvasDiv).position().top;
          this.tracks[i].labelDiv.style.top = top + 'px';
          this.tracks[i].editDiv.style.top = top + 'px';
-         
-         // var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
-         // document.getElementById(labelId).style.top = top + 'px';
       }
    },
    
@@ -346,8 +342,8 @@ var Rover = Class.extend({
    hideScrollBar: function() {
       // set custom scrollbar position and width based on current users scrollbar width
       var scrollBarWidthPx = this.getScrollerWidth();
-      $('#cover-scroll-bar').css('height', scrollBarWidthPx);
-      $('#cover-scroll-bar').css('margin-top', -scrollBarWidthPx);      
+      $(this.coverScrollBarDiv).css('height', scrollBarWidthPx);
+      $(this.coverScrollBarDiv).css('margin-top', -scrollBarWidthPx);      
    },
    
    getScrollerWidth: function() {
@@ -398,8 +394,10 @@ var Rover = Class.extend({
    },
    
    setupDivs: function() {
+      var rover = this;
+      
       this.canvasContentDiv = document.createElement('div');
-      this.canvasContentDiv.id = 'canvas-content';
+      this.canvasContentDiv.id = 'rover-canvas-content';
       this.roverDiv.appendChild(this.canvasContentDiv);
       
       this.scaleDiv = document.createElement('div');
@@ -407,23 +405,23 @@ var Rover = Class.extend({
       this.canvasContentDiv.appendChild(this.scaleDiv);
       
       this.canvasListDiv = document.createElement('div');
-      this.canvasListDiv.id = 'canvasList';
+      this.canvasListDiv.id = 'rover-canvas-list';
       this.canvasContentDiv.appendChild(this.canvasListDiv);
       
       this.coverScrollBarDiv = document.createElement('div');
-      this.coverScrollBarDiv.id = 'cover-scroll-bar';
+      this.coverScrollBarDiv.id = 'rover-cover-scroll-bar';
       this.roverDiv.appendChild(this.coverScrollBarDiv);   
       
       $(this.canvasContentDiv).scroll(function(){
-         if (!this.scrollInitialized) {
-            this.scrollInitialized = true;
+         if (!rover.scrollInitialized) {
+            rover.scrollInitialized = true;
             return;
          }
 
-         var scrollPos = $('#canvas-content').scrollLeft(); 
-         var canvasWidth = $('.canvas-div canvas').width();
+         var scrollPos = $(rover.canvasContentDiv).scrollLeft(); 
+         var canvasWidth = $('.rover-canvas-div canvas').width();
          if (canvasWidth == 0) canvasWidth = 14700;   
-         var viewerWidth = $('#canvas-content').width();
+         var viewerWidth = $(rover.canvasContentDiv).width();
 
          // check for case when zooming and chartview has been shrunk to just viewable width for performance
          if (canvasWidth != viewerWidth) {
@@ -432,7 +430,7 @@ var Rover = Class.extend({
                rover.shiftBufferToCenter('right');
                var min = rover.max-rover.bufferSize;
                var max = rover.max+rover.bufferSize;             
-               var scrollPos = $('#canvas-content').scrollLeft();  
+               var scrollPos = $(rover.canvasContentDiv).scrollLeft();  
                var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;                                               
                rover.draw(min, max, canvasWidth, scrollLeftNts);
                rover.updatingRight = false;
@@ -442,7 +440,7 @@ var Rover = Class.extend({
                rover.shiftBufferToCenter('left');
                var min = Math.max(rover.min-rover.bufferSize, 1);
                var max = rover.min+rover.bufferSize;
-               var scrollPos = $('#canvas-content').scrollLeft();  
+               var scrollPos = $(rover.canvasContentDiv).scrollLeft();  
                var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;                              
                rover.draw(min, max, canvasWidth, scrollLeftNts);
                rover.updatingLeft = false;
@@ -491,7 +489,7 @@ var Rover = Class.extend({
                   var newMax = rover.scale.scale.max+rover.bufferSize;
                   var totalNts = newMax - newMin;
                   var widthNts = rover.scale.scale.max - rover.scale.scale.min;
-                  var widthPx = $('#canvas-content').width();
+                  var widthPx = $(rover.canvasContentDiv).width();
                   var totalPx = widthPx / (widthNts / totalNts);
                   var leftNts = rover.scale.scale.min;
 
@@ -504,8 +502,6 @@ var Rover = Class.extend({
                   rover.max = newMax;
                   rover.setViewMinMax(newMin, newMax)
                }
-               //var leftPx = leftNts / totalNts * $('.canvas-div canvas').width();
-             //  document.getElementById('canvas-content').scrollLeft = leftPx;                       
            }
         });      
    },
@@ -666,8 +662,8 @@ var Rover = Class.extend({
    jumpTo: function(position) {
       var rover = this;
 
-      var canvasWidth = $('.canvas-div canvas').width();   
-      var viewerWidth = $('#canvas-content').width();
+      var canvasWidth = rover.getWidthWithBuffers();   
+      var viewerWidth = $(this.canvasContentDiv).width();
       var viewerWidthNts = viewerWidth / canvasWidth * (rover.max - rover.min);
       var min = Math.max( position - (rover.max-rover.min)/2, 1 );
       var max = min + (rover.max - rover.min);

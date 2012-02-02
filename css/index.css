@@ -1,3 +1,20 @@
+body 
+{ 
+    height:100%; 
+    margin:0px; 
+    padding:0px; 
+    border-left:0px; 
+    border-right:0px; 
+    overflow:hidden; 
+    font-size: 13px;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+a {
+   color: rgb(106,122,142);
+}
+
+
 /****** Header ******/
    #header 
    { 
@@ -115,16 +132,65 @@
       text-align: center;
       z-index: 0;
    }
-
+   
    #zoom-slider {
       font-size:9.5px;
       display:inline-block; 
       height: 80%;
    }
+   
+   #zoom{
+      position: absolute;
+      right: 0px;
+      margin-right:0px;   
+      z-index: 2;
+      height: 180px;
+      width: 28px;
+
+      -moz-border-radius-topleft:3px;
+      -moz-border-radius-bottomleft:3px;   
+      border-top-left-radius:3px;
+      border-bottom-left-radius:3px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      padding-right: 2px;
+      padding-left: 2px;
+
+      color: #333333;
+      font-weight: bold;
+      text-shadow: 0 1px 1px #ffffff;
+      font-size: 12px;
+      border: 1px solid rgba(0, 0, 0, 0.3);
+      background: #ffffff;
+      background: -webkit-gradient(linear, left top, right top, from(#ffffff), to(#e0e0e1));
+      background: -moz-linear-gradient(top, #ffffff, #e0e0e1);
+      background: linear-gradient(top, #ffffff, #e0e0e1);
+      -moz-box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
+      -webkit-box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
+      box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
+      -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);
+
+   }   
 
    #zoom .ui-icon, #footer .ui-icon, #plus .ui-icon {
       background-image: url(../images/ui-icons_000000_256x240.png);
+   }
+   
+   #zoom-title {
+      font-weight: bold;
+      float:right;
+      margin-top:50px;
    } 
+   
+   #scroll-slider {
+      margin-top: 11px
+      margin-right: auto;
+      font-size:9.5px;
+      width: 310px;
+      margin-top: 10px;
+      float: left;
+   }
+   
    
    #splash {
        width: 60%;
@@ -202,4 +268,31 @@
 
    #about a{
        color: rgb(106,122,142);
+   }
+
+   #copyright {
+      color: rgb(60, 60, 60);
+      text-shadow: 1px 1px 1px white;
+      color: #333333;
+      font-weight: bold;
+      text-shadow: 0 1px 1px #ffffff;
+      width: 350px;
+      position: absolute;
+      bottom: 2px;
+      right: 0px;
+      font-weight: bold; 
+      text-align:center;
+   }
+
+   #aboutLink {
+      color: rgb(60, 60, 60);
+      text-shadow: 1px 1px 1px white;
+      color: #333333;
+      font-weight: bold;
+      text-shadow: 0 1px 1px #ffffff;
+      position: absolute;
+      bottom: 2px;
+      left: 20px;
+      font-weight: bold; 
+      text-align:center;   
    }

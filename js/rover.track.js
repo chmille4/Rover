@@ -312,7 +312,7 @@ var RoverTrack = Class.extend({
       rightColumn.style.cssFloat = 'right';
       rightColumn.style.textAlign = 'right';
       var infoDiv = document.createElement('div');
-      infoDiv.className = 'info-div';
+      infoDiv.className = 'rover-info-div';
       infoDiv.innerHTML = "\
          <div>\
             <span class='info-title'>Name</span><span>the display name for the track</span>\

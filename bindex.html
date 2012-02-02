@@ -86,7 +86,7 @@
          
                // fetch and draw new data
                rover.fetchAll(rover.min, rover.max, 'center');    
-               rover.draw(rover.min, rover.max, $('.canvas-div canvas').width(), rover.getDisplayMinNts());
+               rover.draw(rover.min, rover.max, rover.getWidthWithBuffers(), rover.getDisplayMinNts());
             }
          });
 
@@ -143,7 +143,7 @@
           changecss('#top-controls .viewerButtonRight', 'padding', '0px 10px');
        
           // hide track edit panel help div
-          changecss('.info-div', 'display', 'none');
+          changecss('.rover-info-div', 'display', 'none');
        }
 
        function exportToFigureMaker() {
@@ -200,10 +200,6 @@
    <!-- container  -->
    <div id='container'>
       
-      <!-- <ul>
-         <li>hi<div>bye</div></li>
-         <li>hi</li>
-      </ul> -->
       
       <!-- splash screen/no-data  -->
       <div id='splash'>
@@ -225,7 +221,7 @@
             <div id="zoom-slider"></div>
             <div class="ui-icon ui-icon-circle-minus"></div>
          </div>
-         <div class='slider-title' style="float:right; margin-top:50px;">
+         <div id="zoom-title">
             z<br/>o<br/>o<br/>m
          </div>
       </div>
@@ -235,16 +231,19 @@
    
    <!--    footer     -->
    <div id='footer'>
-      <div style="width:350px; margin-left:auto; margin-right:auto">
-         <div style="margin-top:8px; float:left" class="ui-icon ui-icon-circle-minus"></div>
-         <div style="margin-top: 11px" id='scroll-slider'></div>
-         <div style="margin-top:8px; float:right" class="ui-icon ui-icon-circle-plus"></div>
+      
+      <!--  Scroll Slider  -->
+      <div style="width:342px; margin-left:auto; margin-right:auto">
+         <div style="margin-top:4px; float:left" class="ui-icon ui-icon-circle-minus"></div>
+         <div id='scroll-slider'></div>
+         <div style="margin-top:4px; float:right" class="ui-icon ui-icon-circle-plus"></div>
          <div style="clear:both"></div>
       </div>
        
 
    </div>
     
+   <!--  About  --> 
    <div id="aboutLink">
       <a style='cursor:pointer' onClick="toggleAbout()">About</a>
    </div>
@@ -256,6 +255,7 @@
       <a style='cursor:pointer' class="myButton" onClick="toggleAbout()" >X</a>
    </div>   
    
+   <!--  Copyright   -->
    <div id="copyright">
       Powered By <a href="http://chmille4.github.com/Scribl/">Scribl</a>
       <span id='chase'><span style='margin-left:6px'>&copy; </span>
