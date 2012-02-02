@@ -222,12 +222,12 @@ var RoverTrack = Class.extend({
       urlLabel.innerHTML = 'Source URL'
       urlLabel.className = 'labels';
       
-      track.fileInput = document.createElement('input');
-      track.fileInput.type = 'file';
-      track.fileInput.multiple = true;
-      var fileLabel = document.createElement('span');
-      fileLabel.innerHTML = 'Source File(s)'
-      fileLabel.className = 'labels';
+      // track.fileInput = document.createElement('input');
+      // track.fileInput.type = 'file';
+      // track.fileInput.multiple = true;
+      // var fileLabel = document.createElement('span');
+      // fileLabel.innerHTML = 'Source File(s)'
+      // fileLabel.className = 'labels';
       
       
       // <form>
@@ -320,9 +320,9 @@ var RoverTrack = Class.extend({
          <div>\
             <span class='info-title'>Source Url</span><span>the url to the remote data via <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> or <a href='https://github.com/chmille4/Ngs_server'>Ngs Server</a></span>\
          </div>\
-         <div>\
+         <!-- <div>\
             <span class='info-title'>Source File(s)</span><span>Path to file. <a href='site/supportedFormats.html'>More Info</a></span>\
-         </div>\
+         </div> -->\
          <div>\
             <span class='info-title'>1000G</span><span>subset of the 1000G dataset - 1000genomes.org</span>\
          </div>\
@@ -336,8 +336,8 @@ var RoverTrack = Class.extend({
       
       // add elements
       $(leftColumn).append( $('<div></div>').append(this.thousandGForm),       
-                            $('<div></div>').append(urlLabel, this.urlInput),
-                            $('<div></div>').append(fileLabel, this.fileInput)
+                            $('<div></div>').append(urlLabel, this.urlInput)
+                            // $('<div></div>').append(fileLabel, this.fileInput)
                            );
       $(rightColumn).append( 
                             $('<div></div>').append(nameLabel, this.nameInput),
