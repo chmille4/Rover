@@ -22,7 +22,7 @@ ul.dropdown li:last-child a         { border-right: none; } /* Doesn't work in I
 ul.dropdown li.hover,
 ul.sub_menu li:hover                { background: #D7ECFF;}
 ul.dropdown li:hover                { color: black; position: relative; }
-ul.dropdown li div:hover            { background-image: url(../../../images/ui-icons_ffffff_256x240.png) }
+/*ul.dropdown li div:hover            { background-image: url(../../../../images/ui-icons_ffffff_256x240.png) }*/
 ul.dropdown li.hover a              { color: black; }
 
 

@@ -122,6 +122,14 @@ a {
 
 /***** viewer/sliders *****/
 
+   
+   #rover { /* viewer */
+      position: absolute;
+      left: 6px;
+      right: 41px;
+   }
+   
+
    #container{
       top: 95px; 
       bottom: 31px; 

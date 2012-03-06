@@ -22,8 +22,7 @@ var JsonSource = RoverSource.extend({
       this.request.max = max = parseInt(max);        
       
       var fullUrl = this.url + '?segment=' + this.chromosome + '&min='  + this.request.min + "&max=" + this.request.max;  
-      alert(fullUrl);   
-
+      
       var xhr = new XMLHttpRequest();
       xhr.open('GET', fullUrl);
       xhr.onreadystatechange = function () {

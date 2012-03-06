@@ -1,5 +1,6 @@
 var RoverTrack = Class.extend({
    init: function(canvas, canWidth) {
+      var track = this;
       this.id = _uniqueId('roverTrack');
       this.source = undefined;
       this.displayMin = undefined;
@@ -31,10 +32,13 @@ var RoverTrack = Class.extend({
       this.errorLabel = undefined;
       this.nameDiv = undefined;
       this.editDiv = undefined;
-      this.nameInput = undefined;
-      this.urlInput = undefined;
-      this.chromoInput = undefined;
-      this.typeFilterInput = undefined;
+      
+      this.__defineGetter__("$thousandGSelect", function(){return $('#' +track.id+ "-edit-thousandG");});
+      // inputs
+      this.__defineGetter__("$nameInput", function(){return $('#' +track.id+ "-edit-name");});
+      this.__defineGetter__("$urlInput", function(){return $('#' +track.id+ "-edit-urlInput");});
+      this.__defineGetter__("$chromosomeInput", function(){return $('#' +track.id+ "-edit-chromosome");});
+      this.__defineGetter__("$typeFilterInput", function(){return $('#' +track.id+ "-edit-typeFilter");});
    },
    
    setSource: function(source) {
@@ -134,26 +138,13 @@ var RoverTrack = Class.extend({
    
    createMenu: function(trackMenuDiv, display) {
       var track = this;
+      
+      // generate track menu html from template
+      $('#templates').load("app/templates/trackMenu.handlebars", function(){
+          // handle everything after you have your templates loaded...
 
-      $(trackMenuDiv).html(' \
-           <ul class="dropdown">                                                       \
-           	<li><a style="margin-top:-4px; width: 32px"><img style="float:left" width="16" src="./images/gear_white.png"</img>   \
-             	<div class="ui-icon ui-icon-triangle-1-s"></div></a>              \
-           		<ul class="sub_menu" style="text-align: center">                                          			 \
-                  <div id ="top-border"></div>                                                           \
-           			 <li>                                                       \
-           				<span style="padding-left:8px">View As ></span>                                     \
-           				<ul>                                                              \
-           					<li><a class="'+track.id+'-drawStyle" name="collapse">Collapsed</a></li>                                \
-           					<li><a class="'+track.id+'-drawStyle" name="expand" >Expanded</a></li>                               \
-                        <li><a class="'+track.id+'-drawStyle" name="line">Line Chart</a></li>                               \
-           				</ul>                                                             \
-           			 </li>                                                               \
-           			 <li><a class="'+track.id+'-edit">Edit</a></li>                            \
-           		</ul>                                                                   \
-           	</li>                                                                      \
-         </ul>                                                                         \
-      ');
+      var template = Handlebars.compile( $("#track-menu-template").html() );
+      $(trackMenuDiv).html( template({ trackId : track.id }) );
       
       // set menu actions
       $('[class=' + track.id + '-drawStyle]').click([track], function(event) { 
@@ -168,11 +159,6 @@ var RoverTrack = Class.extend({
          track.showEditPanel();
       });
       
-      
-      
-      
-//      document.getElementById('collapsed').onclick = function() {alert('hi');};
-      
       // set click and hover behavior
       $(trackMenuDiv).unbind('click').click( function(event) {
         $(trackMenuDiv).find('.sub_menu').css('visibility', 'visible');
@@ -181,6 +167,7 @@ var RoverTrack = Class.extend({
       $(trackMenuDiv).unbind('mouseleave').mouseleave( function(event){
          $(trackMenuDiv).find('.sub_menu').css('visibility', 'hidden');
       });
+   });
    },
    
    showMenu: function() {
@@ -211,148 +198,31 @@ var RoverTrack = Class.extend({
    createEditPanel: function(editDiv) {
       var track = this;
       
-      // create inputs
-      track.nameInput = document.createElement('input');
-      var nameLabel = document.createElement('span');
-      nameLabel.innerHTML = 'Name';
-      nameLabel.className = 'labels';
-      
-      track.urlInput = document.createElement('input');
-      var urlLabel = document.createElement('span');
-      urlLabel.innerHTML = 'Source URL'
-      urlLabel.className = 'labels';
-      
-      track.fileInput = document.createElement('input');
-      track.fileInput.type = 'file';
-      track.fileInput.multiple = true;
-      var fileLabel = document.createElement('span');
-      fileLabel.innerHTML = 'Source File(s)'
-      fileLabel.className = 'labels';
-      
-      
-      // <form>
-      // Select your favorite browser:
-      // <select id="myList" onchange="favBrowser()">
-      //   <option></option>
-      //   <option>Google Chrome</option>
-      //   <option>Firefox</option>  
-      //   <option>Internet Explorer</option>
-      //   <option>Safari</option>
-      //   <option>Opera</option>
-      // </select>
-      // <p>Your favorite browser is: <input type="text" id="favorite" size="20"></p>
-      // </form>
-
-      track.thousandGForm = document.createElement('form');
-      var thousandGLabel = document.createElement('span');
-      thousandGLabel.innerHTML = "1000G Data";
-      thousandGLabel.className = 'labels';
-      track.thousandGSelect = document.createElement('select');
-      track.thousandGSelect.onchange = function() {track.updateNewTrackFrom(track)};
-      track.thousandGSelect.style.width = "130px";      
-      $(track.thousandGSelect).append('<option></option>');
-      for (var i=0; i<this.rover.thousandGSources.length; i++) {
-         $(track.thousandGSelect).append('<option>' + this.rover.thousandGSources[i] + '</option');
-      }
-      $(track.thousandGForm).append(thousandGLabel,track.thousandGSelect);
-      
-      track.chromoInput = document.createElement('input');
-      var chromoLabel = document.createElement('span');
-      chromoLabel.innerHTML = 'Chromosome';
-      chromoLabel.className = 'labels';
-      
-      track.typeFilterInput = document.createElement('input');
-      var typeFilterLabel = document.createElement('span');
-      typeFilterLabel.innerHTML = 'Type Filter';
-      typeFilterLabel.className = 'labels';
-      
-      var helpDiv = document.createElement('div');
-      helpDiv.innerHTML = 'More DAS sources can be found at the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a>';
-      helpDiv.style.fontSize = '10px';
-      
-      // create controls
-      var cancelButton = document.createElement('button');
-      cancelButton.innerHTML = 'X';
-      cancelButton.onclick = function(e) { track.hideEditPanel(); };
-      var saveButton = document.createElement('button');
-      saveButton.innerHTML = 'Save';
-      saveButton.onclick = function(e) {
-         if ( !track.source && $(track.urlInput).val().match('das') )
-            track.setSource( new DasSource("", "", "", "", ""))
-         else if ( !track.source && $(track.urlInput).val().match('json') )
-               track.setSource( new JsonSource("", "", "", "", ""))
-         else if ( !track.source && track.fileInput.files.length > 0 )
-            track.setSource( new BamSource("", "", "", "", ""));
-         track.setName( $(track.nameInput).val() );
+      // generate track menu html from template
+      // template located in app/views/trackMenu.handlebars
+      $('#templates').load("app/templates/editTrack.handlebars", function() {
+         // create html
+         var template = Handlebars.compile( $('#edit-track-template').html() );
+         $(editDiv).html( template( {track:track} ) );
          
-         var change = false;
-         change = track.setUrl( $(track.urlInput).val() ) || change;
-         change = track.setFiles( track.fileInput.files ) || change;
-         change = track.setChromosome( $(track.chromoInput).val() ) || change;
-         change = track.setTypeFilter( $(track.typeFilterInput).val() ) || change;
+         // add functonality
+         $('#' + track.id + '-edit-close').click([track], function(event) { 
+            var track = event.data[0];
+            track.hideEditPanel();
+         });
          
-         // check if any attributes are changed that require seq data to be refetched
-         if (change)
-            track.source.refetch();
+         $('#' + track.id + '-edit-save').click([track], function(event) { 
+            var track = event.data[0];
+            track.saveEditPanel();
+         });
          
-         track.hideEditPanel();
-      }
-      
-      // columns
-      var columnsDiv = document.createElement('div');
-      columnsDiv.className = 'columns';
-      var formColumn = document.createElement('div');
-      formColumn.style.cssFloat = 'left';
-      formColumn.style.textAlign = 'center';
-      formColumn.style.width = '430px';
-      var leftColumn = document.createElement('div');
-      leftColumn.style.cssFloat = 'left';
-      leftColumn.style.textAlign = 'right';
-      var rightColumn = document.createElement('div');
-      rightColumn.style.cssFloat = 'right';
-      rightColumn.style.textAlign = 'right';
-      var infoDiv = document.createElement('div');
-      infoDiv.className = 'rover-info-div';
-      infoDiv.innerHTML = "\
-         <div>\
-            <span class='info-title'>Name</span><span>the display name for the track</span>\
-         </div>\
-         <div>\
-            <span class='info-title'>Source Url</span><span>the url to the remote data via <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> or <a href='https://github.com/chmille4/Ngs_server'>Ngs Server</a></span>\
-         </div>\
-         <div>\
-            <span class='info-title'>Source File(s)</span><span>Path to file. <a href='site/supportedFormats.html'>More Info</a></span>\
-         </div>\
-         <div>\
-            <span class='info-title'>1000G</span><span>subset of the 1000G dataset - 1000genomes.org</span>\
-         </div>\
-         <div>\
-            <span class='info-title'>Chromosome</span><span>the chromosome or segment</span>\
-         </div>\
-         <div>\
-            <span class='info-title'>Type Filter</span><span>annotation types of biological significance that correspond roughly to EMBL/GenBank feature table tags (e.g. exon, refGene). However each database can use their own</span>\
-         </div>"         
-      
-      
-      // add elements
-      $(leftColumn).append( $('<div></div>').append(this.thousandGForm),       
-                            $('<div></div>').append(urlLabel, this.urlInput),
-                            $('<div></div>').append(fileLabel, this.fileInput)
-                           );
-      $(rightColumn).append( 
-                            $('<div></div>').append(nameLabel, this.nameInput),
-                            $('<div></div>').append(chromoLabel, this.chromoInput), 
-                            $('<div></div>').append(typeFilterLabel, this.typeFilterInput)
-                           );
-      formColumn.appendChild(leftColumn);
-      formColumn.appendChild(rightColumn);
-      $(formColumn).append( "<div style='clear:both'></div>", $("<div style='margin-top:5px'></div>").append(saveButton, cancelButton), helpDiv );
-      columnsDiv.appendChild(formColumn);
-      columnsDiv.appendChild(infoDiv);      
-      editDiv.appendChild(columnsDiv);            
-      
-      
-      this.chromoInput.disabled = true;      
+         track.$thousandGSelect.change([track], function(event) { 
+            var track = event.data[0];
+            track.updateNewTrackFrom(track);
+         });
+         var t = '#' + track.id + "-edit-chromosome";
+         $(t).attr('disabled','disabled');
+      });
    },
    
    showEditPanel: function() {
@@ -367,18 +237,10 @@ var RoverTrack = Class.extend({
       $(this.parentDiv).height( panelHeight );
       $(this.editDiv).height( panelHeight );
       
-      // set inputs
-      $(this.chromoInput).val( $("#chromosome").val() );
-      if (this.source) {
-         $(this.nameInput).val(this.source.name);
-         $(this.urlInput).val(this.source.url);         
-         $(this.typeFilterInput).val(this.source.typeFilter);      
-      }
-      
       // show edit panel      
       $(this.editDiv).css('display', 'inline');
      
-     this.rover.updateLabelPositions()
+      this.rover.updateLabelPositions()
    },
    
    hideEditPanel: function() {
@@ -389,6 +251,30 @@ var RoverTrack = Class.extend({
        $(this.editDiv).css('display', 'none');
 
       this.rover.updateLabelPositions()
+   },
+   
+   saveEditPanel: function() {
+      var track = this;
+      if ( !track.source && track.urlInput.val().match('das') )
+          track.setSource( new DasSource("", "", "", "", ""))
+       else if ( !track.source && $(track.urlInput).val().match('json') )
+             track.setSource( new JsonSource("", "", "", "", ""))
+       // else if ( !track.source && track.fileInput.files.length > 0 )
+       //    track.setSource( new BamSource("", "", "", "", ""));
+       
+       track.setName( track.$nameInput.val() );
+       
+       var change = false;
+       change = track.setUrl( track.$urlInput.val() ) || change;
+       //change = track.setFiles( track.fileInput.files ) || change;
+       change = track.setChromosome( track.$chromosomeInput.val() ) || change;
+       change = track.setTypeFilter( track.$typeFilterInput.val() ) || change;
+       
+       // check if any attributes are changed that require seq data to be refetched
+       if (change)
+          track.source.refetch();
+       
+       track.hideEditPanel();
    },
    
    clickMenu: function() {
@@ -469,16 +355,15 @@ var RoverTrack = Class.extend({
    },
    
    updateNewTrackFrom: function() {
-      var select = this.thousandGSelect;
-      var data = select.options[select.selectedIndex].text;
+      var data = this.$thousandGSelect.find(":selected").text();
       var meta = /(^.+)\.((vcf.gz)?(bam)?)$/.exec(data);
       var filename = meta[1];
       var filetype = meta[2]
       if (filetype == 'vcf.gz') {filetype = 'vcf';}
       var url = this.rover.thousandGUrl + "/json/" + filetype + "/"
       url += data;
-      this.urlInput.value = url;
-      this.nameInput.value = filename;
+      this.$urlInput.val(url);
+      this.$nameInput.val(filename);
    },
    
    handleError: function() {

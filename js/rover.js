@@ -30,7 +30,7 @@ var Rover = Class.extend({
       
       // create container divs
       this.scrollInitialized = false;
-      this.setupDivs();
+     // this.setupDivs();
       
       // setup zoom slider
       this.setupZoomSlider()
@@ -57,6 +57,20 @@ var Rover = Class.extend({
       this.hideScrollBar();
       // see if browser is internet explorer and if so give alert
       this.testIE();
+      
+      var querys = rover.getUrlQuerys(location.href);
+      // set region
+      rover.displayMin = parseInt(querys['min']);
+      rover.displayMax = parseInt(querys['max']);
+      
+      // set value of bufferSize
+      rover.bufferSize = (rover.displayMax - rover.displayMin) * rover.bufferMultiple;
+      
+      // set rover min/max
+      if(querys['min'] && querys['max']) {
+         rover.min = Math.max(rover.displayMin - rover.bufferSize,1);
+         rover.max = parseInt(rover.displayMax + rover.bufferSize);
+      }
    },
    
    newTrack: function() {
@@ -82,7 +96,7 @@ var Rover = Class.extend({
       
       var removeTrackDiv = document.createElement('div');
       removeTrackDiv.innerHTML = 'X';
-      removeTrackDiv.className = "removeTrackButton";
+      removeTrackDiv.className = "rover-remove-track-button";
 //      removeTrackDiv.style.display = 'none';
       
       var newCanvas = document.createElement("canvas");
@@ -96,7 +110,8 @@ var Rover = Class.extend({
       
       
       // create track
-      var track = new RoverTrack(newCanvas, rover.getWidthWithBuffers());
+      //var track = new RoverTrack(newCanvas, rover.getWidthWithBuffers());
+      var track = new window.BTrack({canvas:newCanvas, canWidth:rover.getWidthWithBuffers()});
       //newCanvas.id = track.id;
       track.rover = rover;
       track.drawStyle = display;
@@ -241,15 +256,8 @@ var Rover = Class.extend({
         }
    },
    
-   initScale: function() {
-       var canvas = document.createElement("canvas");
-       canvas.id = 'rover-scale';
-       canvas.className = 'rover-canvas';
-       canvas.height = 20;
-       canvas.width = this.getWidthWithBuffers();
-       $(this.scaleDiv).prepend(canvas);
-
- 	   this.scale = new Scribl(canvas, this.getWidthWithBuffers());
+   initScale: function(canvas) {
+ 	   this.scale = new Scribl(undefined, rover.getWidthWithBuffers());
  	   this.scale.offset = 0;
  	   this.scale.scale.font.size = 11;
       this.scale.scale.font.color = 'rgb(220,220,220)';
@@ -258,12 +266,8 @@ var Rover = Class.extend({
       this.scale.tick.halfColor = 'rgb(220,220,220)';
       this.scale.scale.size = 8;
  	   this.scale.scale.auto = false;
-		this.scale.scale.min = rover.min; 
-		this.scale.scale.max = rover.max;
-		this.scale.draw();
-		// set scroll
-      var scrollLeft = (this.displayMin - rover.min) / (rover.max - rover.min) * this.getWidthWithBuffers();
-      this.canvasContentDiv.scrollLeft = scrollLeft;
+      this.scale.scale.min = rover.min; 
+      this.scale.scale.max = rover.max;
    },
    
    redrawScale: function(min, max, scrollLeftNts, zooming) {                
@@ -280,6 +284,7 @@ var Rover = Class.extend({
       var scrollLeft = (scrollLeftNts - min) / (max - min) * rover.getWidthWithBuffers();      
       if (zooming)                          
         $('.rover-canvas-div').css('margin-left', scrollLeft);
+      //this.canvasContentDiv.scrollLeft = scrollLeft; 
       this.canvasContentDiv.scrollLeft = scrollLeft; 
    },
    
@@ -301,8 +306,8 @@ var Rover = Class.extend({
    
    getWidthWithBuffers: function() {
       // set canvas attributes
-      if (this.width == undefined) 
-         this.width = parseInt( (rover.max - rover.min) / ( (this.displayMax - this.displayMin) / $(this.canvasContentDiv).width() ) );
+      if (this.width == undefined)
+         this.width = parseInt( (rover.max - rover.min) / ( (this.displayMax - this.displayMin) / $('#rover').actual('width') ) );
 
       return this.width;      
    },
@@ -520,7 +525,6 @@ var Rover = Class.extend({
       var maxNts = centerNts + numNtsToShow/2;
             
       rover.draw( minNts, maxNts, this.getDisplayWidth(), undefined, true );
-      
    },
    
    toURLParams: function() {
@@ -600,19 +604,20 @@ var Rover = Class.extend({
       // keep track of querys
       rover.urlQuerys = querys;
       
-      // set region
-      rover.displayMin = parseInt(querys['min']);
-      rover.displayMax = parseInt(querys['max']);
-      
-      // set value of zoom slider
+      // // set region
+      // rover.displayMin = parseInt(querys['min']);
+      // rover.displayMax = parseInt(querys['max']);
+      // 
+      // // set value of zoom slider
       var zoomValue = rover.zoomMax - (rover.displayMax-rover.displayMin) + rover.zoomMin;
       $(rover.zoomer).slider("option", "value", zoomValue);
-      rover.bufferSize = (rover.displayMax - rover.displayMin) * rover.bufferMultiple;
-
-      if(querys['min'] && querys['max']) {
-         rover.min = Math.max(rover.displayMin - rover.bufferSize,1);
-         rover.max = parseInt(rover.displayMax + rover.bufferSize);
-      }
+      // rover.bufferSize = (rover.displayMax - rover.displayMin) * rover.bufferMultiple;
+      // 
+      // // set rover min/max
+      // if(querys['min'] && querys['max']) {
+      //    rover.min = Math.max(rover.displayMin - rover.bufferSize,1);
+      //    rover.max = parseInt(rover.displayMax + rover.bufferSize);
+      // }
 
       // add Das sources                   
       var urls = querys['urls'].split(',');
@@ -629,13 +634,25 @@ var Rover = Class.extend({
             
          var display = displays[i].toLowerCase();
          if (display == 'none') display = 'collapse';
-         var track = rover.addTrack(display);         
-         if (protocol == 'json')
-            track.setSource(new JsonSource(names[i], urls[i], querys['segment']));
-         else
-            track.setSource(new DasSource(names[i], urls[i], types[i], querys['segment']));
-         if ( track.source.url )
-            track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);         
+        // var track = rover.addTrack(display);      
+        var track = new window.BTrack({
+           url: urls[i],
+           chromosome: querys['segment'],
+           name: names[i],
+           typefilter: types[i]
+         });
+                  
+         rover.add( track );
+         
+         //track.center.chart.fetch( {data: $.param({min:rover.min, max:rover.max})} );
+         track.center.chart.fetch({data: $.param({segment:track.get('chromosome'), min:rover.min, max:rover.max}) });
+         
+         // if (protocol == 'json')
+         //    track.setSource(new JsonSource(names[i], urls[i], querys['segment']));
+         // else
+         //    track.setSource(new DasSource(names[i], urls[i], types[i], querys['segment']));
+         // if ( track.source.url )
+         //    track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);         
       }
       
       // success
@@ -675,8 +692,9 @@ var Rover = Class.extend({
    },   
    
    getChromosome: function() {
-      for ( var i in this.tracks )
-         return this.tracks[i].source.chromosome;
+      rover.models[0].get('chromosome');
+      // for ( var i in this.tracks )
+      //    return this.tracks[i].source.chromosome;
    },
    
    setViewMinMax: function(min, max) {

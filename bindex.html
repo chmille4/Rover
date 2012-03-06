@@ -5,7 +5,23 @@
 
    <title>Rover</title> 
    <link href='http://fonts.googleapis.com/css?family=Ubuntu:400,700&v2' rel='stylesheet' type='text/css'>    
-   <script src="assets/js/Scribl.1.1.2.min.js"></script>
+   <!-- <script src="assets/js/Scribl.1.1.2.min.js"></script> -->
+   <script src="../Scribl/src/Scribl.class.js" ></script>
+	<script src="../Scribl/src/Scribl.js" ></script>
+	<script src="../Scribl/src/Scribl.track.js" ></script>
+	<script src="../Scribl/src/Scribl.lane.js" ></script>
+	<script src="../Scribl/src/Scribl.tooltips.js" ></script>		
+	<script src="../Scribl/src/Scribl.events.js" ></script>
+	<script src="../Scribl/src/Scribl.utils.js" ></script>
+	<script src="../Scribl/src/Scribl.svg.js" ></script>
+	<script src="../Scribl/src/Scribl.glyph.js" ></script>
+	<script src="../Scribl/src/glyph/Scribl.blockarrow.js" ></script>
+	<script src="../Scribl/src/glyph/Scribl.arrow.js" ></script>
+	<script src="../Scribl/src/glyph/Scribl.rect.js" ></script>
+	<script src="../Scribl/src/glyph/Scribl.line.js" ></script>
+	<script src="../Scribl/src/glyph/Scribl.complex.js" ></script>
+	<script src="../Scribl/src/glyph/Scribl.seq.js" ></script>		
+   
    <script src="assets/js/changecssjs.js" type="text/javascript"></script>		
    <script src="assets/js/jquery.1.7.min.js"></script>
    <script src="assets/js/underscore-min.js"></script>
@@ -33,14 +49,22 @@
      })();
 
    </script>
-    
+   <script src="assets/js/handlebars-1.0.0.beta.6.js"></script>
+   
+       
     <script src="js/rover.js" ></script>
+    <script src="js/rover.utils.js" ></script>
     <script src="js/rover.source.js" ></script>
+    <script src="js/rover.bsource.js" ></script>
     <script src="js/rover.btrack.js" ></script>
+    <script src="js/rover.btracks.js" ></script>
     <script src="js/sources/rover.source.das.js" ></script>
     <script src="js/sources/rover.source.bam.js" ></script>
     <script src="js/sources/rover.source.json.js" ></script>
     <script src="js/rover.track.js" ></script>
+    
+
+    
     
     <script>
       // initilization variables
@@ -49,23 +73,52 @@
 
 
 	   $(document).ready(function() {  
-	      rover = new Rover( {
-	         viewer: document.getElementById('rover'),
-	         zoomer: document.getElementById('zoom-slider'),
-	         scroller: document.getElementById('scroll-slider'),
-	         zoomMin: 100,
-	         zoomMax: 100000,
-	      });
+         rover = new window.Rover({
+            viewer: document.getElementById('rover'),
+            zoomer: document.getElementById('zoom-slider'),
+            scroller: document.getElementById('scroll-slider'),
+            zoomMin: 100,
+            zoomMax: 100000,
+         });
 	      // test if there are any tracks left after track remove
 	      rover.onRemoveTrack = function(id) { if (rover.isEmpty()) {toggleSplashPage(true)} };
 
          // turn on splash page
 	      toggleSplashPage();
+	      
+	      window.RoverRouter = Backbone.Router.extend({
+            routes: {
+               '': 'home'
+            },
+
+            initialize: function() {
+               this.trackView = new BTracksView({ collection: rover.get('tracks') });
+               this.controlsView = new ControlsView({ model: rover });
+            },
+
+            home: function() {
+               var $container = $('#rover');
+               var $zoom = $('#zoom-slider');
+               $container.empty();          
+               $container.append(this.trackView.render().el);
+               this.controlsView.render();
+               //$zoom.html(this.controlsView.render().el);
+               loadUrlQuery();
+            }
+
+         });
+
+         $(function() {
+            window.App = new RoverRouter();
+            Backbone.history.start();
+            //Backbone.history.start({pushState:true});
+         });
+         
       
 	      // inital 1000G sources
          rover.init1000GSources();
 
-         loadUrlQuery();
+         //loadUrlQuery();
 
          // watch for enter key on jump input box
          $("#jump").keyup(function(event) {
@@ -91,18 +144,27 @@
          });
 
 	   });
+	   
+	   function addTrack() {
+	      if (rover.isEmpty())
+	         toggleSplashPage(false);
+	      rover.newTrack();
+	   }
 
     	function toggleSplashPage(force){
-    	   splash = force || splash;
+    	   if (force != undefined)
+    	      splash = force;
     	   if (!splash) {
     	      $('#splash').css('display', 'none')
     	      $('#viewer').css('display', 'inline')
+    	      $('#zoom').css('display', 'inline')
     	      splash = false
-   	      } else {
-   	         $('#splash').css('display', 'inline')
-    	      $('#viewer').css('display', 'none')
-    	      splash = true;
-   	      }
+	      } else {
+	         $('#splash').css('display', 'inline')
+ 	         $('#viewer').css('display', 'none')
+ 	         $('#zoom').css('display', 'none')
+ 	         splash = true;
+	      }
     	}
 
 
@@ -156,17 +218,17 @@
             if (rover.urlQuerys['embed'])
                maximizeViewer(rover.urlQuerys['header'], rover.urlQuerys['controls'], rover.urlQuerys['copyright']);                                                      
             // set chromosome
-            $('#chromosome').val( rover.getChromosome() );  
+            //$('#chromosome').val( rover.getChromosome() );  
           }
        }
       
     </script>
 
-    <!-- <script type="application/javascript">
+    <script type="application/javascript">
       jQuery(function() {
-         window.btracks.fetch();
+ //        window.btracks.fetch();
       });
-    </script>> -->
+    </script>>
 
 </head> 
      
@@ -184,7 +246,7 @@
          <li>Jump To <input id='jump-to'></input></li>
       </ul>
       <ul class='right'>
-         <li onClick="rover.newTrack()">+ Track</li>
+         <li onClick="addTrack()">+ Track</li>
          <li onClick='exportToFigureMaker()' title="Export view to Figure Maker">Figurize</li>                   
          <li style="width: 2em" onClick='toggleLinkUrl()' title="Link to current view">Link
             <div onClick='' id="link-url">
@@ -251,8 +313,7 @@
       <span style="width:100%">About</span>
       <p>Rover is a HTML5 Genome Browser that displays annotation data from any database that supports the <a href='http://www.biodas.org/wiki/Main_Page'>DAS</a> protocol.</p><p>DAS sources can be added from the <a href="http://www.dasregistry.org/listSources.jsp?organism=any&CSName=any&CSTypes=any&capabilities=features&labels=any&spec=any&cmd=find">DAS registry</a> by clicking +Track at the top right of the viewer.</p>
       <p>Source code is available <a href='https://github.com/chmille4/Rover'>here</a>. Feel free to use, modify, and contribute.</p>
-      <br/>
-      <a style='cursor:pointer' class="myButton" onClick="toggleAbout()" >X</a>
+      <button onClick="toggleAbout()">Close</button>
    </div>   
    
    <!--  Copyright   -->
@@ -261,19 +322,53 @@
       <span id='chase'><span style='margin-left:6px'>&copy; </span>
       <a href="http://github.com/chmille4">Chase Miller</a> 2011</span>
    </div>
+   
+   <div id="templates"></div> <!-- empty div to load templates in for access -->
 
-<!--              <br/>
-             <div id='bcontainer'>
-
-             </div>
-             <script type="text/template" id="tracks-template">
-               <h1>Tracks</h1>
-               <ul class="tracks"></ul>
-             </script>>
-             <script type="text/template" id="track-template">
-                <span> <%= title %> </span>
-                <span> <%= url %> </span>
-             </script> -->
+             
+             <script id="tracks-template" type="text/x-handlebars-template">
+                <div id="scaleDiv">
+                   <canvas id="rover-scale" class="rover-canvas" height="20"/>
+                </div>
+                <div id="rover-canvas-list">
+                </div>
+             </script>
+             
+             <script id="track-template" type="text/x-handlebars-template">
+                <div class="rover-canvas-div">
+                  <br/>
+                  <canvas class="rover-canvas">
+                </div>
+                <div class="rover-track-menu">
+                  <ul class="dropdown">                                                                                                             
+                       <li><a style="margin-top:-4px; width: 32px"><img style="float:left" width="16" src="./images/gear_white.png"</img>     
+                          <div class="ui-icon ui-icon-triangle-1-s"></div></a>                                                                      
+                          <ul class="sub_menu" style="text-align: center">                                                                        
+                             <div id ="top-border"></div>                                                                                           
+                              <li>                                                                                                                    
+                                <span style="padding-left:8px">View As ></span>                                                                     
+                                <ul class="draw-style">                                                                                                                  
+                                   <li><a data-drawstyle="collapse">Collapsed</a></li>                                        
+                                   <li><a data-drawstyle="expand" >Expanded</a></li>                                          
+                                   <li><a data-drawstyle="line">Line Chart</a></li>
+                                </ul>                                                                                                                 
+                              </li>                                                                                                                   
+                              <li><a class="{{trackId}}-edit">Edit</a></li>                                                                         
+                          </ul>                                                                                                                       
+                       </li>                                                                                                                          
+                    </ul>
+                </div>
+                <div class="rover-remove-track-button">X</div>
+                <span class="rover-canvas-label" style="top:22px">
+                   <a class="rover-error">Error, Retry</a>
+                   <span class="spinner">
+                      <img src="images/spinner.gif">
+                         retrieving from:
+                      </img>
+                   </span>{{name}}
+                </span>
+                <div class="rover-track-edit-div"/>                
+             </script>
 
 </body> 
 

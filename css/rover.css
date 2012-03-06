@@ -1,10 +1,4 @@
-
-
-#rover {
-   position: absolute;
-   left: 6px;
-   right: 41px;
-}
+/** Rover CSS  - contains styling only for the main viewer element **/
 
 #rover-canvas-content {
    background-image: url(../images/gray-xgrid-small.png);
@@ -19,7 +13,8 @@
     position: absolute;
     left: 5px;
     width:auto;
-    display:none;
+    top: 22px;
+    visibility: hidden;
     border-radius: 3px;
     -moz-border-radius: 3px;
     background-color: rgb(180,180,180);
@@ -162,18 +157,11 @@
     background-color: white;
 }
 
-.ui-icon {
-    background-image: url(../images/ui-icons_d8e7f3_256x240.png);
-}
-
-.option-hover .ui-icon, .ui-state-focus .ui-icon {
-    background-image: url(../images/ui-icons_ffffff_256x240.png);
-}
-
-
-.removeTrackButton{
+.rover-remove-track-button{
    position: absolute;
-   right: 0px;
+   visibility: hidden;
+   right: 5px;
+   top: 22px;
    cursor: pointer;
    background-color: rgb(180,180,180);
    border: 2px solid rgb(100,100,100);
@@ -182,63 +170,10 @@
    border-radius: 10px;
    width: 14px;
    color: white;
-   display: none;
    font-weight: bold;
    -moz-border-radius: 10px;    
 }
 
-.removeTrackButton:hover{
+.rover-remove-track-button:hover{
    opacity: 1;
 }
-
-/*ul.subnav {
-    list-style: none;
-    font: 10px ubuntu;
-    margin: 0px;
-    margin-top: 2px;
-    padding: 0px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    width: 100%;
-    height: 100%;
-    background-color: rgb(174, 208, 255);
-    background-color: rgb(240, 240, 240);
-}
-
-ul.subnav a {
-    text-decoration: none;
-    color: black;
-    font-weight: bold;
-}*/
-
-
-/*       Button      */
-.myButton {
-    -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-    -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-    box-shadow:inset 0px 1px 0px 0px #ffffff;
-    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
-    background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
-    background-color:#ededed;
-    -moz-border-radius:6px;
-    -webkit-border-radius:6px;
-    border-radius:6px;
-    border:1px solid #dcdcdc;
-    display:inline-block;
-    color:#777777;
-    font-family:ubuntu;
-    font-size:15px;
-    font-weight:bold;
-    padding:6px 24px;
-    text-decoration:none;
-    text-shadow:1px 1px 0px #ffffff;
-}.myButton:hover {
-    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
-    background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
-    background-color:#dfdfdf;
-}.myButton:active {
-    position:relative;
-    top:1px;
-}  
