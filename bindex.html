@@ -52,7 +52,7 @@
    <script src="assets/js/handlebars-1.0.0.beta.6.js"></script>
    
        
-    <script src="js/rover.js" ></script>
+    <!-- <script src="js/rover.js" ></script> -->
     <script src="js/rover.utils.js" ></script>
     <script src="js/rover.source.js" ></script>
     <script src="js/rover.bsource.js" ></script>
@@ -92,16 +92,24 @@
             },
 
             initialize: function() {
-               this.trackView = new BTracksView({ collection: rover.get('tracks') });
-               this.controlsView = new ControlsView({ model: rover });
+               this.tracksView = new BTracksView({ collection: rover.tracks, rover: rover });
+               // this.viewerView = new ViewerView({ model: rover });
+               this.zoomView = new ZoomView({ model: rover });
+               this.scaleView = new ScaleView({ model: rover });
+               // this.scaleView = new ScaleView({ model: rover });
             },
 
             home: function() {
-               var $container = $('#rover');
+               var $roverDiv = $('#rover');
                var $zoom = $('#zoom-slider');
-               $container.empty();          
-               $container.append(this.trackView.render().el);
-               this.controlsView.render();
+               $roverDiv.empty();          
+               //$container.append(this.viewerView.render().el);
+               // this.viewerView.render();
+//               $('#viewer').append(this.tracksView.render().el);
+               $('#viewer').prepend(this.scaleView.render().el);
+               $roverDiv.append(this.tracksView.render().el);               
+               //$container.append( this.zoomView.render().el);
+               //this.controlsView.render();
                //$zoom.html(this.controlsView.render().el);
                loadUrlQuery();
             }
@@ -156,12 +164,12 @@
     	      splash = force;
     	   if (!splash) {
     	      $('#splash').css('display', 'none')
-    	      $('#viewer').css('display', 'inline')
+    	      $('#viewer').css('visibility', 'visible')
     	      $('#zoom').css('display', 'inline')
     	      splash = false
 	      } else {
 	         $('#splash').css('display', 'inline')
- 	         $('#viewer').css('display', 'none')
+ 	         $('#viewer').css('visbility', 'hidden')
  	         $('#zoom').css('display', 'none')
  	         splash = true;
 	      }
@@ -272,7 +280,7 @@
       </div>
 
       <!--   Viewer    -->
-      <div id='viewer'>                      
+      <div id='viewer'>
          <div id='rover'></div>
       </div>
  
@@ -325,11 +333,12 @@
    
    <div id="templates"></div> <!-- empty div to load templates in for access -->
 
-             
+            <script id="scale-template" type="text/x-handlebars-template">
+               <canvas class="rover-canvas" height="20"/>
+            </script>
+
              <script id="tracks-template" type="text/x-handlebars-template">
-                <div id="scaleDiv">
-                   <canvas id="rover-scale" class="rover-canvas" height="20"/>
-                </div>
+
                 <div id="rover-canvas-list">
                 </div>
              </script>

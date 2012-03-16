@@ -37,7 +37,15 @@
       
       defaults: {
         laneSizes: 18,
-        drawStyle: 'collapsed',
+        drawStyle: 'expand',
+        textColor: 'white',
+        glyphColor: function(lineargradient) {
+           lineargradient.addColorStop(0, 'rgb(125,125,125)');
+           lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+           lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+           lineargradient.addColorStop(1, 'rgb(80,80,80)');
+           return lineargradient;
+        },
         changer: true
       }, 
        
@@ -65,7 +73,7 @@
           var view = this.center.chart.get('scribl');
           view.scale.min = min;
           view.scale.max = max;
-
+          alert('btrack darw');
           if (widthPx) {
              // TODO: figure out someway to move this slice to zoom only
              // so it doesn't cause all these copying problems!
@@ -432,19 +440,6 @@
 //     
 //     window.btracks = new window.BTracks();
 
-   window.ControlsView = Backbone.View.extend({
-      initialize: function() {
-         _.bindAll(this, 'render');
-         this.model.bind("change:nucleotideWidth", this.zoom);
-         // change this so it uses this.el instead of rover.zoomer inside setupZoomSlider
-         rover.setupZoomSlider();
-      },
-      
-      zoom: function(b,c,e,g,h,i) {
-         rover.zoom(this.model.get('nucleotideWidth'));
-      },
-      
-   });
     
     window.BTrackView = Backbone.View.extend({
       
@@ -459,9 +454,11 @@
        
        initialize: function() {
           var trackView;
-          _.bindAll(this, 'render');
-          this.model.bind('change', this.render);
-          this.model.bind('change:min', this.test);
+          _.bindAll(this, 'render', 'draw');
+          this.model.bind('change', this.draw);
+          this.rover = this.options.rover;
+          this.rover.bind('change:min change:max', this.draw);
+          // this.model.bind('change:min', this.test);
          // this.template = _.template($('#track-template').html());
           // $('#templates').load("app/templates/track.handlebars", function() {
               // create html
@@ -473,14 +470,25 @@
           var scribl = this.model.center.chart.get('scribl');          
           var renderedContent = this.template(this.model.toJSON());
           $(this.el).html(renderedContent);
-          scribl.setCanvas(this.$('canvas')[0]); 
-          if (scribl.width == undefined){
-             scribl.width = rover.getWidth();
-          }
-          scribl.canvas.width = rover.getWidth();
-          scribl.draw();
-          this.$('.spinner').css('display', 'none');
+          scribl.setCanvas(this.$('canvas')[0]);
           return this;
+       },
+       
+       draw: function() {      
+          var scribl = this.model.center.chart.get('scribl');
+          scribl.drawStyle = this.model.get('drawStyle');
+          scribl.glyph.text.color = this.model.get('textColor');
+          scribl.glyph.color = this.model.get('glyphColor');
+          var width = rover.getWidth();
+          scribl.width = width;
+          scribl.scale.min = rover.get('min');
+          scribl.scale.max = rover.get('max');            
+          scribl.canvas.width = width;
+          var scrollLeft = (rover.get('displayMin') - rover.get('min')) / (rover.get("max") - rover.get('min')) * rover.getWidth();
+          rover.canvasContentDiv.scrollLeft = scrollLeft;
+          scribl.canvas.height = scribl.getHeight();
+          scribl.draw();
+          this.$('.spinner').css('display', 'none');      
        },
        
        test: function() {
@@ -520,22 +528,24 @@
         id: 'rover-canvas-content',
         
         initialize: function() {
-           _.bindAll(this, 'render');
+           _.bindAll(this, 'render', 'scroll');
            this.template = Handlebars.compile( $('#tracks-template').html() );
            this.collection.bind('reset', this.render);           
            this.collection.bind('add', this.render);
-           this.collection.bind('add', this.updateScroll);
+         //  this.collection.bind('add', this.updateScroll);
+           this.rover = this.options.rover;
+           this.rover.bind('change:displayMin', this.scroll)
            rover.canvasContentDiv = this.el;
-           rover.initScale();
+     //      rover.initScale();
         },
         
         render: function() {
            var $tracks,
                collection = this.collection;
-                  
+            
            $(this.el).html(this.template({}));
-           rover.scale.setCanvas(this.$('#rover-scale')[0]);
-           rover.redrawScale(rover.get('min'), rover.get('max'), rover.get('displayMin'));
+         //  rover.scale.setCanvas(this.$('#rover-scale')[0]);
+       //    rover.redrawScale(rover.get('min'), rover.get('max'), rover.get('displayMin'));
            
 //           rover.scale.canvas.width = rover.scale.width;
            
@@ -544,16 +554,21 @@
            collection.each(function(track){
               var view = new BTrackView({
                  model: track,
-                 collection: collection
+                 collection: collection,
+                 rover: rover
               });
               $tracks.append(view.render().el);
            });
-           
-           //rover.draw(rover.min, rover.max, rover.getWidthWithBuffers(), rover.getDisplayMinNts());
+
            return this;
         },
         
+        scroll: function() {
+           this.el.scrollLeft = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
+        },
+        
         updateScroll: function() {
+           alert('update');
            // set scroll
            var scrollLeft = (rover.get('displayMin') - rover.get('min')) / (rover.get("max") - rover.get('min')) * rover.getWidth();
            rover.canvasContentDiv.scrollLeft = scrollLeft;

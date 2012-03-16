@@ -42,7 +42,12 @@
    padding-top: 4px;
 }
 
-#rover-scale {
+#rover-scale{
+   overflow:auto;
+   border: 1px solid red;
+}
+
+#rover-scale canvas{
 /*   background: -moz-linear-gradient(top, rgb(95, 95, 95), rgb(70,70,70));
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(95,95,95)), to(rgb(70, 70, 70)));   
 */

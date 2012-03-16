@@ -123,7 +123,7 @@ a {
 /***** viewer/sliders *****/
 
    
-   #rover { /* viewer */
+   #viewer { /* viewer */
       position: absolute;
       left: 6px;
       right: 41px;

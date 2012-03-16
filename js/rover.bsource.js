@@ -15,15 +15,15 @@ window.BSource = Backbone.Model.extend({
       //    }
       //    return false;
       // });
-      chart.drawStyle = "collapse";
-      chart.glyph.text.color = 'white';
-      chart.glyph.color = function(lineargradient) {
-         lineargradient.addColorStop(0, 'rgb(125,125,125)');
-         lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
-         lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
-         lineargradient.addColorStop(1, 'rgb(80,80,80)');
-         return lineargradient
-      };
+      //chart.drawStyle = "collapse";
+      
+      // chart.glyph.color = function(lineargradient) {
+      //          lineargradient.addColorStop(0, 'rgb(125,125,125)');
+      //          lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+      //          lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+      //          lineargradient.addColorStop(1, 'rgb(80,80,80)');
+      //          return lineargradient
+      //       };
       chart.scale.off = true;
       chart.scale.pretty = false;
       this.set({scribl: chart});
@@ -128,7 +128,7 @@ window.BSource = Backbone.Model.extend({
              scriblTrack.addFeature( ft );          
           }
           
-          var track = rover.get('tracks').getByCid(this.get('trackId'));
+          var track = rover.tracks.getByCid(this.get('trackId'));
           scribl.laneSizes = track.get('laneSizes');
           track.forceChange();
           return {};
@@ -198,9 +198,10 @@ window.BSource = Backbone.Model.extend({
    //url: "http://bioinformatics.bc.edu/ngsserver/json/bam/public/NA06985.chrom1.LS454.ssaha2.CEU.exon_targetted.20100311.bam?segment=1&min=800000&max=860000"
    //url: "http://0.0.0.0:4569/json/bam/data/NA06985.chrom1.LS454.ssaha2.CEU.exon_targetted.20100311.bam?segment=1&min=800000&max=860000",
    url: function() {
-      var track = rover.get('tracks').getByCid(this.get('trackId'));
+      var track = rover.tracks.getByCid(this.get('trackId'));
       //var fullurl = track.get('url')  + '/features?segment=' + track.get('chromosome') + ':'  + 20994399.5 + "," + 21023983.5 + ';type=' + track.get('typeFilter');
       var fullurl = track.get('url') + '?' + $.param({segment:track.get('chromosome'), min:track.get('min'), max:track.get('max')});
+      var fullurl = track.get('url') + '?' + $.param({segment:track.get('chromosome'), min:rover.get('min'), max:rover.get('max')});
 
       return fullurl;
    },

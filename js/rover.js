@@ -1,7 +1,7 @@
-var Rover = Class.extend({
-   init: function(args) {
+var Rover = Backbone.Model.extend({
+   initialize: function(args) {
       var rover = this;
-      this.tracks = new Array();
+//      this.tracks = new Array();
 
       this.roverDiv = args['viewer'];
       this.zoomer = args['zoomer'];
