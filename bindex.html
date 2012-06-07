@@ -26,6 +26,8 @@
    <script src="assets/js/jquery.1.7.min.js"></script>
    <script src="assets/js/underscore-min.js"></script>
 	<script src="assets/js/backbone.js"></script> 
+	<script src="assets/js/backbone.getters.setters.js"></script> 
+	<script type="text/javascript" src="dragscrollable.js"></script>
    <link rel="stylesheet" href="css/jquery.ui.aristo.all.css">
    <link rel="stylesheet" type="text/css" href="css/rover.css" />
    <link rel="stylesheet" type="text/css" href="css/index.css" />
@@ -56,6 +58,8 @@
     <script src="js/rover.utils.js" ></script>
     <script src="js/rover.source.js" ></script>
     <script src="js/rover.bsource.js" ></script>
+    <script src="js/sources/rover.bsource.json.js" ></script>
+    <script src="js/sources/rover.bsource.das.js" ></script>
     <script src="js/rover.btrack.js" ></script>
     <script src="js/rover.btracks.js" ></script>
     <script src="js/sources/rover.source.das.js" ></script>
@@ -79,7 +83,8 @@
             scroller: document.getElementById('scroll-slider'),
             zoomMin: 100,
             zoomMax: 100000,
-         });
+         });         
+         
 	      // test if there are any tracks left after track remove
 	      rover.onRemoveTrack = function(id) { if (rover.isEmpty()) {toggleSplashPage(true)} };
 
@@ -92,7 +97,8 @@
             },
 
             initialize: function() {
-               this.tracksView = new BTracksView({ collection: rover.tracks, rover: rover });
+               this.tracksView = new BTracksView({ collection: rover.tracks, rover: rover });               
+         		
                // this.viewerView = new ViewerView({ model: rover });
                this.zoomView = new ZoomView({ model: rover });
                this.scaleView = new ScaleView({ model: rover });
@@ -107,7 +113,24 @@
                // this.viewerView.render();
 //               $('#viewer').append(this.tracksView.render().el);
                $('#viewer').prepend(this.scaleView.render().el);
-               $roverDiv.append(this.tracksView.render().el);               
+               $roverDiv.append(this.tracksView.render().el);     
+               $('#rover-canvas-list').dragscrollable({
+                  dragSelector: '.rover-canvas-div',
+                  acceptPropagatedEvent: true,
+                  stop: function(event) {
+                     var currPx = $('#'+event.data.scrollable).scrollLeft();
+                     var currPx = event.data.prevScrolls[0].left;
+                     var prevPx = event.data.prevScrolls[1].left;
+                     var time = event.data.prevScrolls[0].timeStamp - event.data.prevScrolls[1].timeStamp;
+                     var rate = (currPx - prevPx) / time;
+                     var inertialTime = 400;                     
+                     var inertialPx = rate * inertialTime + currPx;
+                     if(Math.abs(currPx - prevPx) > 20) {
+                        $('#rover-canvas-list').animate({scrollLeft:inertialPx}, inertialTime, 'easeOutQuad');
+                        // $('#rover-canvas-list').stop();
+                     }
+                  }
+               });          
                //$container.append( this.zoomView.render().el);
                //this.controlsView.render();
                //$zoom.html(this.controlsView.render().el);
@@ -129,10 +152,10 @@
          //loadUrlQuery();
 
          // watch for enter key on jump input box
-         $("#jump").keyup(function(event) {
+         $("#jump-to").keyup(function(event) {
             // check for enter key
             if(event.keyCode == 13) {     
-               var jumpToPos = parseInt($('#jump').val());
+               var jumpToPos = parseInt($('#jump-to').val());
                rover.jumpTo(jumpToPos);
             }
          });                
@@ -141,22 +164,30 @@
          $("#chromosome").keyup(function(event) {
             // check for enter key
             if(event.keyCode == 13) {
+               rover.tracks.each( function(track) {
+                  track.set({ chromosome: $("#chromosome").val() });
+               });
                // change chromosome for all tracks
-               for (var i in rover.tracks)
-                  rover.tracks[i].setChromosome( $("#chromosome").val() );
-         
-               // fetch and draw new data
-               rover.fetchAll(rover.min, rover.max, 'center');    
-               rover.draw(rover.min, rover.max, rover.getWidthWithBuffers(), rover.getDisplayMinNts());
+               // for (var i in rover.tracks)
+               //    rover.tracks[i].setChromosome( $("#chromosome").val() );
+               //          
+               // // fetch and draw new data
+               // rover.fetchAll(rover.min, rover.max, 'center');    
+               // rover.draw(rover.min, rover.max, rover.getWidthWithBuffers(), rover.getDisplayMinNts());
             }
          });
-
+         
+         // stupid hack to fix dragscrollable eating the click events on the edit div
+         $('input').live('click', function(){$(this).focus()});
+         $('select').live('click', function(){$(this).focus();});
 	   });
 	   
 	   function addTrack() {
 	      if (rover.isEmpty())
 	         toggleSplashPage(false);
-	      rover.newTrack();
+	      var newTrack = new window.BTrack;
+	      rover.tracks.add( newTrack );
+	      newTrack.set({ edit:true });
 	   }
 
     	function toggleSplashPage(force){
@@ -257,7 +288,7 @@
          <li onClick="addTrack()">+ Track</li>
          <li onClick='exportToFigureMaker()' title="Export view to Figure Maker">Figurize</li>                   
          <li style="width: 2em" onClick='toggleLinkUrl()' title="Link to current view">Link
-            <div onClick='' id="link-url">
+            <div onClick='event.stopPropagation()' id="link-url">
                <div style="box-shadow: 4px 4px 4px -2px rgb(170,170,170);">
                <div>Link to current view</div><input id="link-url-input"></input><br/>
                <div>Embed in website</div><input id="embed-url-input"></input>
@@ -303,12 +334,12 @@
    <div id='footer'>
       
       <!--  Scroll Slider  -->
-      <div style="width:342px; margin-left:auto; margin-right:auto">
+      <!-- <div style="width:342px; margin-left:auto; margin-right:auto">
          <div style="margin-top:4px; float:left" class="ui-icon ui-icon-circle-minus"></div>
          <div id='scroll-slider'></div>
          <div style="margin-top:4px; float:right" class="ui-icon ui-icon-circle-plus"></div>
          <div style="clear:both"></div>
-      </div>
+      </div> -->
        
 
    </div>
@@ -331,7 +362,6 @@
       <a href="http://github.com/chmille4">Chase Miller</a> 2011</span>
    </div>
    
-   <div id="templates"></div> <!-- empty div to load templates in for access -->
 
             <script id="scale-template" type="text/x-handlebars-template">
                <canvas class="rover-canvas" height="20"/>
@@ -345,38 +375,124 @@
              
              <script id="track-template" type="text/x-handlebars-template">
                 <div class="rover-canvas-div">
-                  <br/>
-                  <canvas class="rover-canvas">
+                   <div class="rover-track-menu">
+                     <ul class="dropdown">                                                                                                             
+                          <li><a style="margin-top:-4px; width: 32px"><img style="float:left" width="16" src="./images/gear_white.png"</img>     
+                             <div class="ui-icon ui-icon-triangle-1-s"></div></a>                                                                      
+                             <ul class="sub_menu" style="text-align: center">                                                                        
+                                <div id ="top-border"></div>                                                                                           
+                                 <li>                                                                                                                    
+                                   <span style="padding-left:8px">View As ></span>                                                                     
+                                   <ul class="draw-style">                                                                                                                  
+                                      <li><a data-drawstyle="collapse">Collapsed</a></li>                                        
+                                      <li><a data-drawstyle="expand" >Expanded</a></li>                                          
+                                      <li><a data-drawstyle="line">Line Chart</a></li>
+                                   </ul>                                                                                                                 
+                                 </li>                                                                                                                   
+                                 <li><a class="edit">Edit</a></li>                                                                         
+                             </ul>                                                                                                                       
+                          </li>                                                                                                                          
+                       </ul>
+                   </div>
+                   <div class="rover-remove-track-button">X</div>
+                   <span class="rover-canvas-label">
+                      <a class="rover-error">Error, Retry</a>
+                      <span class="spinner">
+                         <img src="images/spinner.gif">
+                            retrieving from:
+                         </img>
+                      </span><span class='track-edit-label'>{{name}}</span>
+                   </span>
+                   <div class="rover-track-edit-div">
+                     <div class="columns">
+                       <div style="float: left; text-align: center; width: 430px;">
+                         <div style="float: left; text-align: right;">
+                           <div>
+                             <form>
+
+                               <span class="labels">1000G Data</span>
+                               <select id="{{track.id}}-edit-thousandG" style="width:130px">
+                                 <option></option>
+                                 {{#each thousandGSources}}
+                                    <option>{{this}}</option>                                    
+                                 {{/each}}
+                               </select>
+                             </form>
+                           </div>
+
+                           <div>
+                             <span class="labels">Source URL</span><input class="track-edit-urlInput" value={{url}} />
+                           </div>
+
+                           <!-- <div>
+                             <span class="labels">Source File(s)</span><input type="file" multiple=
+                             "multiple" />
+                           </div> -->
+                         </div>
+
+                         <div style="float: right; text-align: right;">
+                           <div>
+                             <span class="labels">Name</span><input class="track-edit-name" value={{name}} />
+                           </div>
+
+                           <!-- <div>
+                             <span class="labels">Chromosome</span><input class="track-edit-chromosome" value={{chromosome}} disabled="disabled" />
+                           </div> -->
+
+                           <div>
+                             <span class="labels">Type Filter</span><input class="track-edit-typefilter" value={{typefilter}} />
+                           </div>
+                         </div>
+
+                         <div style="clear:both"></div>
+
+                         <div style="margin-top:5px">
+                           <button class="track-edit-save">Save</button>
+                           <button class="track-edit-close" >X</button>
+                         </div>
+
+                         <div style="font-size: 10px;">
+                           More DAS sources can be found at the <a href=
+                           "http://www.dasregistry.org/listSources.jsp?organism=any&amp;CSName=any&amp;CSTypes=any&amp;capabilities=features&amp;labels=any&amp;spec=any&amp;cmd=find">
+                           DAS registry</a>
+                         </div>
+                       </div>
+
+                       <div class="rover-info-div">
+                         <div>
+                           <span class="info-title">Name</span><span>the display name for the track</span>
+                         </div>
+
+                         <div>
+                           <span class="info-title">Source Url</span><span>the url to the remote data via
+                           <a href="http://www.biodas.org/wiki/Main_Page">DAS</a> or <a href=
+                           "https://github.com/chmille4/Ngs_server">Ngs Server</a></span>
+                         </div>
+
+                         <div>
+                           <span class="info-title">Source File(s)</span><span>Path to file. <a href=
+                           "site/supportedFormats.html">More Info</a></span>
+                         </div>
+
+                         <div>
+                           <span class="info-title">1000G</span><span>subset of the 1000G dataset -
+                           1000genomes.org</span>
+                         </div>
+
+                         <div>
+                           <span class="info-title">Chromosome</span><span>the chromosome or segment</span>
+                         </div>
+
+                         <div>
+                           <span class="info-title">Type Filter</span><span>annotation types of biological
+                           significance that correspond roughly to EMBL/GenBank feature table tags (e.g.
+                           exon, refGene). However each database can use their own</span>
+                         </div>
+                       </div>
+                     </div>
+                   </div>                
+                   <canvas class="rover-canvas">
                 </div>
-                <div class="rover-track-menu">
-                  <ul class="dropdown">                                                                                                             
-                       <li><a style="margin-top:-4px; width: 32px"><img style="float:left" width="16" src="./images/gear_white.png"</img>     
-                          <div class="ui-icon ui-icon-triangle-1-s"></div></a>                                                                      
-                          <ul class="sub_menu" style="text-align: center">                                                                        
-                             <div id ="top-border"></div>                                                                                           
-                              <li>                                                                                                                    
-                                <span style="padding-left:8px">View As ></span>                                                                     
-                                <ul class="draw-style">                                                                                                                  
-                                   <li><a data-drawstyle="collapse">Collapsed</a></li>                                        
-                                   <li><a data-drawstyle="expand" >Expanded</a></li>                                          
-                                   <li><a data-drawstyle="line">Line Chart</a></li>
-                                </ul>                                                                                                                 
-                              </li>                                                                                                                   
-                              <li><a class="{{trackId}}-edit">Edit</a></li>                                                                         
-                          </ul>                                                                                                                       
-                       </li>                                                                                                                          
-                    </ul>
-                </div>
-                <div class="rover-remove-track-button">X</div>
-                <span class="rover-canvas-label" style="top:22px">
-                   <a class="rover-error">Error, Retry</a>
-                   <span class="spinner">
-                      <img src="images/spinner.gif">
-                         retrieving from:
-                      </img>
-                   </span>{{name}}
-                </span>
-                <div class="rover-track-edit-div"/>                
              </script>
 
 </body> 

@@ -641,7 +641,7 @@ var Rover = Backbone.Model.extend({
            name: names[i],
            typefilter: types[i]
          });
-                  
+  
          rover.add( track );
          
          //track.center.chart.fetch( {data: $.param({min:rover.min, max:rover.max})} );

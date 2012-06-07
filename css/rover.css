@@ -6,14 +6,14 @@
    -moz-border-radius-topleft:3px;
    border-top-right-radius:3px;
    -moz-border-radius-topright:3px;
-    overflow: auto;
+/*    overflow: auto;*/
+    position: relative;
 }
 
 .rover-track-menu {
     position: absolute;
     left: 5px;
     width:auto;
-    top: 22px;
     visibility: hidden;
     border-radius: 3px;
     -moz-border-radius: 3px;
@@ -43,14 +43,19 @@
 }
 
 #rover-scale{
-   overflow:auto;
-   border: 1px solid red;
+   overflow:hidden;
+   border-top-left-radius:3px;
+   -moz-border-radius-topleft:3px;
+   border-top-right-radius:3px;
+   -moz-border-radius-topright:3px;
 }
 
 #rover-scale canvas{
 /*   background: -moz-linear-gradient(top, rgb(95, 95, 95), rgb(70,70,70));
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(95,95,95)), to(rgb(70, 70, 70)));   
 */
+
+   margin: 0px;
    background-color: rgb(68,76,84);
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(86,98,109)), to(rgb(68,76,84)) );   
    background: -moz-linear-gradient(top, rgb(86,98,109), rgb(68,76,84));
@@ -61,7 +66,7 @@
     width: auto;
     margin-left: auto;
     margin-right: auto;
-   
+    overflow:auto;
 }
 
 .rover-canvas-label {
@@ -87,9 +92,8 @@
    background: rgb(253, 253, 253);
    position: absolute;
    left: 0px;
-   display:none;
+   visibility: hidden;
    width: 500px;
-/*   height: 400px; // determined by var panelHeight in rover.showEditPanel()*/
    border-radius:4px;
    -moz-border-radius: 4px;
    border: 2px solid rgb(100,100,100);
@@ -139,7 +143,7 @@
 
 .rover-canvas {
     margin-bottom: 0px;
-    margin-top: 0px;    
+    margin-top: 18px;    
     padding: 0px;    
     float: left;
 }
@@ -148,7 +152,7 @@
 
     border-radius:4px;
     -moz-border-radius: 4px;
-    position:relative;
+/*    position:relative;*/
     padding-top: 5px;
 /*    display:table;*/
         display:inline-block;
@@ -166,7 +170,6 @@
    position: absolute;
    visibility: hidden;
    right: 5px;
-   top: 22px;
    cursor: pointer;
    background-color: rgb(180,180,180);
    border: 2px solid rgb(100,100,100);

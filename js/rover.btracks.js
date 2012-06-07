@@ -9,7 +9,7 @@ window.BTracks = Backbone.Collection.extend({
       zoomMin: 100,
       zoomMax: 100000,
       maxScrollSpeed: 200,
-      bufferMultiple: 6
+      bufferMultiple: 5
       //width: 0 // in pixels
     },
  
@@ -30,6 +30,7 @@ window.BTracks = Backbone.Collection.extend({
 
 
        this.thousandGUrl = "http://bioinformatics.bc.edu/ngsserver";
+       this.thousandGUrl = "http://0.0.0.0:4569";       
        this.thousandGSources = [];
 
        // create container divs
@@ -70,6 +71,18 @@ window.BTracks = Backbone.Collection.extend({
           
           // set value of bufferSize
           var bufferSize = (displayMax - displayMin) * rover.get('bufferMultiple');
+//          bufferSize = 16000/2;
+          var min = displayMin - bufferSize;
+          var max = displayMax + bufferSize;
+          var width = parseInt( (max - min) / (displayMax - displayMin) * this.getDisplayWidth() );
+          // check size of canvas b\c of a bug with chrome
+          // canvases over 16000 px do not display correctly
+          // if (width > 16000) {
+          //    var bufferWidthPx = (16000 - this.getDisplayWidth()) / 2;
+          //    bufferSize = parseInt( bufferWidthPx / this.getDisplayWidth() * (displayMax - displayMin) ); 
+          //    var bufferMultiple = bufferSize / (displayMax - displayMin);
+          //    // rover.set({ 'bufferMultiple' : bufferMultiple });
+          // }
           
           rover.set({ min: Math.max(displayMin - bufferSize,1),
                       max: parseInt(displayMax + bufferSize),
@@ -93,6 +106,10 @@ window.BTracks = Backbone.Collection.extend({
       var rover = this;
       var track = rover.addTrack("collapse");
       track.showEditPanel();
+    },
+    
+    getBufferWidth: function() {
+      return ( this.get('displayMax') - this.get('displayMin') ) * this.get('bufferMultiple');
     },
 
     addTrack: function(display) {
@@ -307,7 +324,7 @@ window.BTracks = Backbone.Collection.extend({
     //    this.canvasContentDiv.scrollLeft = scrollLeft; 
     // },
 
-    updateLabelPositions: function() {      
+    updateLabelPositions: function() {   
        for( var i in this.tracks ) {
           var canvasDiv = this.tracks[i].parentDiv;
           var top = $(canvasDiv).position().top;
@@ -555,26 +572,19 @@ window.BTracks = Backbone.Collection.extend({
 
        // get urls
        var sourceUrls = [];
-       for ( var i in rover.tracks )
-          sourceUrls.push( rover.tracks[i].source.url );
-
-       // get names
        var sourceNames = [];
-       for ( var i in rover.tracks )
-          sourceNames.push( rover.tracks[i].source.name );
-
-       // get types
-       var types = [];
-       for ( var i in rover.tracks )
-          types.push( rover.tracks[i].source.typeFilter );
-
+       var sourceTypes = [];
        var trackOptions = [];
-       for ( var i in rover.tracks )
-            trackOptions.push( rover.tracks[i].drawStyle );                                    
+       rover.tracks.each( function(track) {
+          sourceUrls.push(   track.get('url')        );
+          sourceNames.push(  track.get('name')       );
+          sourceTypes.push(  track.get('typeFilter') );
+          trackOptions.push( track.get('drawStyle')  );
+       })
 
        // get min, max, chromosome      
-       var min = rover.getDisplayMinNts();
-       var max = rover.getDisplayMaxNts();
+       var min = rover.get('displayMin')
+       var max = rover.get('displayMax')
        var chr = rover.getChromosome();
 
        // construct query string
@@ -585,7 +595,7 @@ window.BTracks = Backbone.Collection.extend({
        queryStr += "&max=" + max;
        queryStr += "&display=" + trackOptions.join(',');
        queryStr += "&segment=" + chr;
-       queryStr += "&types=" + types.join(',');
+       queryStr += "&types=" + sourceTypes.join(',');
 
        return queryStr;
     },
@@ -651,6 +661,15 @@ window.BTracks = Backbone.Collection.extend({
        var names = querys['names'].split(',');
        var types = querys['types'].split(',');
        var displays = querys['display'].split(',');
+       var displayMin = querys['min'];
+       var displayMax = querys['max'];
+       var tracks = [];
+       
+       // set viewable region
+       rover.set({
+          displayMin: displayMin,
+          displayMax: displayMax
+       });
 
        // set display
        for (var i=0; i < displays.length; i++) {   
@@ -662,19 +681,21 @@ window.BTracks = Backbone.Collection.extend({
           var display = displays[i].toLowerCase();
           if (display == 'none') display = 'collapse';
          // var track = rover.addTrack(display);      
-         var track = new window.BTrack({
+         var track = new window.BTrack();
+         track.set({
             url: urls[i],
             chromosome: querys['segment'],
             name: names[i],
             typefilter: types[i],
+            drawStyle: display
           //  min: rover.get('min'),
           //  max: rover.get('max')
           });
 
-          rover.tracks.add( track );
+          tracks.push( track )
 
           //track.center.chart.fetch( {data: $.param({min:rover.min, max:rover.max})} );
-          track.center.chart.fetch();
+          //track.center.chart.fetch();
 
           // if (protocol == 'json')
           //    track.setSource(new JsonSource(names[i], urls[i], querys['segment']));
@@ -682,8 +703,12 @@ window.BTracks = Backbone.Collection.extend({
           //    track.setSource(new DasSource(names[i], urls[i], types[i], querys['segment']));
           // if ( track.source.url )
           //    track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);         
-       }
-
+       }       
+       
+       rover.tracks.reset( tracks );
+       _.each(tracks, function(track) { track.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})}); } );
+       
+       
        // success
        return true;
     },
@@ -708,20 +733,34 @@ window.BTracks = Backbone.Collection.extend({
     jumpTo: function(position) {
        var rover = this;
 
-       var canvasWidth = rover.getWidthWithBuffers();   
-       var viewerWidth = $(this.canvasContentDiv).width();
-       var viewerWidthNts = viewerWidth / canvasWidth * (rover.max - rover.min);
-       var min = Math.max( position - (rover.max-rover.min)/2, 1 );
-       var max = min + (rover.max - rover.min);
-       var scrollLeftNts = position - viewerWidthNts/2;
-       rover.fetchAll( parseInt(min), parseInt(max), 'center');    
-       rover.draw(min, max, canvasWidth, scrollLeftNts);
-       rover.min = min;
-       rover.max = max;
+       // var canvasWidth = rover.getWidthWithBuffers();   
+       // var viewerWidth = $(this.canvasContentDiv).width();
+       // var viewerWidthNts = viewerWidth / canvasWidth * (rover.max - rover.min);
+       var displayNts = rover.get('displayMax') - rover.get('displayMin');
+       var dispMin = Math.max( position - displayNts/2, 1 );
+       var dispMax = dispMin + displayNts;
+       var bufferSize = rover.getBufferWidth();
+      // var allNts = rover.get('max') - rover.get('min');
+       var min = Math.max(dispMin - bufferSize, 1);
+       var max = dispMax + bufferSize
+       rover.set({
+          displayMin: dispMin, 
+          displayMax: dispMax,
+          min: min,
+          max: max
+       });
+       // var scrollLeftNts = position - viewerWidthNts/2;
+       // rover.fetchAll( parseInt(min), parseInt(max), 'center');    
+       // rover.draw(min, max, canvasWidth, scrollLeftNts);
+       // rover.min = min;
+       // rover.max = max;
     },   
 
     getChromosome: function() {
-       rover.models[0].get('chromosome');
+       if (rover.models)
+         return rover.models[0].get('chromosome');
+       else
+         return 1;
        // for ( var i in this.tracks )
        //    return this.tracks[i].source.chromosome;
     },
@@ -801,9 +840,10 @@ window.ScaleView = Backbone.View.extend({
    id: 'rover-scale',
    
    initialize: function() {
+      this.el.dataset.uid = _.uniqueId();
       _.bindAll(this, 'render', 'draw', 'scroll');
       this.model.bind('change:min change:max', this.draw);
-   //   this.model.bind('change:displayMin', this.scroll)
+      this.model.bind('change:displayMin change:displayMax change:min change:max', this.scroll)
       this.template = Handlebars.compile( $('#scale-template').html() );
       this.scribl = new Scribl(undefined, rover.getWidth());
       this.scribl.offset = 0;
@@ -814,20 +854,23 @@ window.ScaleView = Backbone.View.extend({
       this.scribl.tick.halfColor = 'rgb(220,220,220)';
       this.scribl.scale.size = 8;
       this.scribl.scale.auto = false;
-
-      this.$el.scroll(function(event) {
-         var h = (rover.get('max') - rover.get('min')) * this.scrollLeft / rover.getWidth() + rover.get('min');
-         var w = rover.getWidth();
-         if ( w < 0){
-            alert('hi');
-         }
+      
+      // keeps displayMin and displayMax in sync as this
+      // view scrolls
+      this.$el.scroll( function(event) {
          var displayWidthNts = rover.get('displayMax') - rover.get('displayMin');
          var displayMin = (rover.get('max') - rover.get('min')) * this.scrollLeft / rover.getWidth() + rover.get('min');
-         rover.set({ 
-            displayMin: displayMin,
-            displayMax: displayMin + displayWidthNts
+
+         rover.set(
+            { 
+               displayMin: displayMin,
+               displayMax: displayMin + displayWidthNts,
+            },
+            {
+               uid: event.currentTarget.dataset.uid
          });
       });
+      
    },
    
    render: function() {
@@ -842,26 +885,88 @@ window.ScaleView = Backbone.View.extend({
       var max = rover.get('max');   
       var width = rover.getWidth();
       this.scribl.width = width;
-      this.scribl.canvas.width = width;
+      this.scribl.canvas.width = width;      
 
       // hack to fix scale bug
       if (min == 1) min = 0;
       this.scribl.scale.min = min;
       this.scribl.scale.max = max;
+      
       this.scribl.draw();  
-      var scrollLeft = (rover.get('displayMin') - rover.get('min')) / (rover.get("max") - rover.get('min')) * width;
-      this.$el.scrollLeft(scrollLeft);
+      // var scrollLeft = (rover.get('displayMin') - rover.get('min')) / (rover.get("max") - rover.get('min')) * width;
+      // this.$el.scrollLeft(scrollLeft);
    },
    
-   scroll: function() {
-      this.el.scrollLeft = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
+   scroll: function(model,changes,options) {
+      // check if this view is being scrolled by the user
+      // if so, do nothing
+      if (options.uid != this.el.dataset.uid) {
+         // the fetching and buffering logic needs to be refactored out of here. possible to the btracks model
+         
+         if ( rover.get('displayMin') != rover.get('min') && rover.get('displayMax') != rover.get('max')) {
+            var sl = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
+            sl = Math.round(sl*100) / 100;
+            this.el.scrollLeft = sl;
+
+            var bufferSize = rover.getBufferWidth();
+            // buffer if getting close to left edge
+            if ( !rover.updatingLeft && (rover.get('displayMin') - rover.get('min')) < ( bufferSize*0.20 ) ) {
+               rover.updatingLeft = true;
+               var newMin = Math.max( rover.get('min')-bufferSize, 1);
+               var newMax = newMin + (rover.get('max')-rover.get('min'));
+               _.each(rover.tracks.models, function(track) {
+                  track.left.chart.fetch({
+                     data: $.param({min:newMin, max:newMax}),
+                     error: function(){alert('error fetching');}
+                  });
+               });               
+            } 
+            // buffer if getting close to right edge
+            else if ( !rover.updatingRight && (rover.get('max')-rover.get('displayMax')) < ( bufferSize*0.20 ) ) {
+               rover.updatingRight = true;
+               var newMax = rover.get('min')+bufferSize;
+               var newMin = newMax - (rover.get('max')-rover.get('min'));
+               _.each(rover.tracks.models, function(track) {
+                  track.right.chart.fetch({
+                     data: $.param({min:newMin, max:newMax}),
+                     error: function(){alert('error fetching');}
+                  });
+               });
+
+            }
+            // draw whats in left buffer
+            else if( (rover.get('displayMin') - rover.get('min')) < ( bufferSize*0.05 )) {
+               _(rover.tracks).each( function(track) {
+                  track.center.chart = track.left.chart;
+               });
+               var newMin = Math.max( rover.get('min')-bufferSize, 1);
+               $('#rover-canvas-list').stop();
+               rover.set({ 
+                  min: newMin,
+                  max: newMin + (rover.get('max')-rover.get('min'))
+               });
+            } 
+            // draw whats in right buffer
+            else if( (rover.get('max')-rover.get('displayMax')) < ( bufferSize*0.05 ) ) {
+               _(rover.tracks).each( function(track) {
+                  track.center.chart = track.right.chart;
+               });
+               var newMax = rover.get('max')+bufferSize;
+               $('#rover-canvas-list').stop();
+               rover.set({ 
+                  max: newMax,
+                  min: newMax - (rover.get('max')-rover.get('min'))
+               });
+            }
+         }
+      }
    }
 });
 
 window.ZoomView = Backbone.View.extend({
    initialize: function() {
       _.bindAll(this, 'render');
-      this.model.bind('change', this.update);
+//      this.model.bind('change', this.update);
       
       var rover = this.model;
       // var zoomValue = rover.get('zoomValue') || 1000; 
@@ -871,12 +976,17 @@ window.ZoomView = Backbone.View.extend({
          min: rover.get("zoomMin"),
          max: rover.get('zoomMax'),
          value: zoomValue,
+         start: function() {
+            rover.oldMin = rover.get('min');
+            rover.oldMax = rover.get('max');
+         },
          slide: function(event, ui) { 
              // flip value so slider looks like we are going from max to min;
             var numNtsToShow = rover.get("zoomMax") - ui['value'] + rover.get("zoomMin");
             var middle = (rover.get('max') - rover.get('min'))/2 + rover.get('min');
             var displayMin = Math.max( (middle - numNtsToShow/2), 1);
             var displayMax = middle + numNtsToShow/2;
+            // keep track of current min and max
             rover.set({
                displayMin: displayMin,
                displayMax: displayMax,
@@ -893,28 +1003,31 @@ window.ZoomView = Backbone.View.extend({
             // this stops change from firing when programmatically changing value
             if (event.originalEvent) {
                 //var bufferSize = (rover.scale.scale.max - rover.scale.scale.min) * rover.bufferMultiple;
-                var max = rover.get('max');
-                var min = rover.get('min');
-                var bufferSize = (max - min) * rover.get('bufferMultiple');
-                var newMin = Math.max(min-bufferSize,1);
-                var newMax = max+bufferSize;                
+                // var max = rover.get('max');
+                // var min = rover.get('min');
+                var bufferSize = rover.getBufferWidth();
+                var newMin = Math.max( rover.get('displayMin') - bufferSize, 1 );
+                var newMax = rover.get('displayMax') + bufferSize;
+
                 // var totalNts = newMax - newMin;
                 // var widthNts = max - min;
                 // var widthPx = $(rover.canvasContentDiv).width();
                 // var totalPx = widthPx / (widthNts / totalNts);
                 // var leftNts = min;
                 
-                rover.set({ min:newMin, max:newMax });
-      
-                // if (newMin < min || newMax > max) {
-                //    rover.fetchAll( parseInt(newMin), parseInt(newMax), 'center');
-                //    rover.draw(newMin, newMax, totalPx, leftNts, true);
-                // } else
-                //    rover.draw(newMin, newMax, totalPx, leftNts, false);
-                // rover.set({ min: newMin,
-                //             max: newMax
-                //          });
-      //                   rover.setViewMinMax(newMin, newMax)
+                if ( newMin < rover.oldMin || newMax > rover.oldMax ) {
+                   rover.set( {min:newMin, max:newMax} );
+                   _(rover.tracks.models).each( function(track) {
+                      track.center.chart.fetch({
+                         data: $.param({min:newMin, max:newMax}),
+                         error: function(){alert('error fetching');}
+                      });                      
+                   });
+                } else {
+                   rover.set({ min:newMin, max:newMax });
+                }
+                
+                
              }
          }
       });      

@@ -1,7 +1,7 @@
 (function($) {
    // Keep track of the original sync method so we can
    // delegate to it at the end of our new sync.
-   var originalSync = Backbone.sync
+   var originalSync = Backbone.sync;
 
    // Our new overriding sync with dataType and ContentType
    // that override the default JSON configurations.
@@ -18,20 +18,27 @@
 
      originalSync.apply(Backbone, [ method, model, options ]);
    };
+   
 
-    window.BTrack = Backbone.Model.extend({  
+    window.BTrack = Backbone.GSModel.extend({  
        
       initialize: function() {
+         // setup scribl view up
+         var chart = this.createScribl();        
+         this.set({scribl: chart});         
+         this.set({chromosome: rover.getChromosome() });
+
          // current view
          this.center = {};
 //         this.center.chart = this.setupDefaultScribl( new Scribl(this.get('canvas'), this.get('canWidth')) );
-         this.center.chart = new window.BSource( {trackId: this.cid} );    
+         // this.center.chart = new window.BSource( {trackId: this.cid} );    
+         this.center.chart = undefined;
          // right buffer
          this.right = {};
-         this.right.chart = new window.BSource( {trackId: this.cid} );
+         this.right.chart = undefined; //new window.BSource( {trackId: this.cid} );
          // left buffer
          this.left = {};
-         this.left.chart = new window.BSource( {trackId: this.cid} );
+         this.left.chart = undefined; //new window.BSource( {trackId: this.cid} );
          
       },    
       
@@ -39,6 +46,7 @@
         laneSizes: 18,
         drawStyle: 'expand',
         textColor: 'white',
+        edit: false,
         glyphColor: function(lineargradient) {
            lineargradient.addColorStop(0, 'rgb(125,125,125)');
            lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
@@ -48,19 +56,68 @@
         },
         changer: true
       }, 
-       
-       
-      setAll: function(attrs, options) {
-         for (var i in attrs) {
-            this.center.chart.get('scribl')[i] = attrs[i];
-            this.left.chart.get('scribl')[i] = attrs[i];
-            this.right.chart.get('scribl')[i] = attrs[i];
+      
+      
+      setters: {
+         url: function(value) {            
+            var newProtocol = this.getProtocol(value);
+            var oldProtocol = this.getProtocol(this.get('url'));
+            var sourceType;
+            
+            if (newProtocol == oldProtocol)
+               return value;
+            else if( newProtocol == 'json') {
+               sourceType = window.BSourceJson;
+            }
+            else if ( newProtocol == 'das' )
+               sourceType = window.BSourceDas;
+               
+            this.center.chart = new sourceType({ trackId: this.cid });
+            this.left.chart = new sourceType({ trackId: this.cid });
+            this.right.chart = new sourceType({ trackId: this.cid });
+            
+            return value;
          }
-         this.set(attrs, options);
       },
        
       forceChange: function() {
         this.set( {changer: !this.get('changer')} );
+      },
+      
+      createScribl: function() {
+         // create new scribl;
+         var chart = new Scribl();
+         chart.offset = 0;
+         chart.scale.off = true;
+         chart.scale.pretty = false;
+         chart.trackHooks.push( function(track) { 
+            if (track.chart.ntsToPixels() > 70) {
+               track.chart.previousDrawStyle = track.getDrawStyle();
+               track.chart.drawStyle = 'line';            
+            } else if (track.previousDrawStyle) {
+               track.chart.drawStyle = track.chart.previousDrawStyle;
+               track.chart.previousDrawStyle = undefined;
+            }
+            return false;
+         });
+         
+         return chart;
+      },
+      
+      getProtocol: function(url) {
+        if (url == undefined) return undefined;
+        var a = document.createElement('a');
+        a.href = url;
+        var path = a.pathname;
+        if (path.split("/")[1] == 'ngsserver')
+           return path.split("/")[2];
+        else
+           return path.split("/")[1];
+      },
+      
+      getThis: function(){
+         var t = this;
+         return(t);
       },
          
       // setSource: function(source) {
@@ -400,33 +457,33 @@
 
           // update xhr request status
           this.source.request.error = true;
-       },
-
-       setupDefaultScribl: function(chart) {
-          chart.offset = 0;
-          chart.trackHooks.push( function(track) { 
-             if (track.chart.ntsToPixels() > 70) {
-                track.chart.previousDrawStyle = track.getDrawStyle();
-                track.chart.drawStyle = 'line';            
-             } else if (track.previousDrawStyle) {
-                track.chart.drawStyle = track.chart.previousDrawStyle;
-                track.chart.previousDrawStyle = undefined;
-             }
-             return false;
-          });
-          chart.laneSizes = this.laneSizes;
-          chart.glyph.text.color = 'white';
-          chart.glyph.color = function(lineargradient) {
-             lineargradient.addColorStop(0, 'rgb(125,125,125)');
-             lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
-             lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
-             lineargradient.addColorStop(1, 'rgb(80,80,80)');
-             return lineargradient
-          };
-          chart.scale.off = true;
-          chart.scale.pretty = false;
-          return chart;
        }
+
+       // setupDefaultScribl: function(chart) {
+       //    chart.offset = 0;
+       //    chart.trackHooks.push( function(track) { 
+       //       if (track.chart.ntsToPixels() > 70) {
+       //          track.chart.previousDrawStyle = track.getDrawStyle();
+       //          track.chart.drawStyle = 'line';            
+       //       } else if (track.previousDrawStyle) {
+       //          track.chart.drawStyle = track.chart.previousDrawStyle;
+       //          track.chart.previousDrawStyle = undefined;
+       //       }
+       //       return false;
+       //    });
+       //    chart.laneSizes = this.laneSizes;
+       //    chart.glyph.text.color = 'white';
+       //    chart.glyph.color = function(lineargradient) {
+       //       lineargradient.addColorStop(0, 'rgb(125,125,125)');
+       //       lineargradient.addColorStop(0.48, 'rgb(115,115,115)');
+       //       lineargradient.addColorStop(0.51, 'rgb(90,90,90)');
+       //       lineargradient.addColorStop(1, 'rgb(80,80,80)');
+       //       return lineargradient
+       //    };
+       //    chart.scale.off = true;
+       //    chart.scale.pretty = false;
+       //    return chart;
+       // }
       
     });
     
@@ -449,15 +506,27 @@
          'click .rover-track-menu'  : 'dropdown',
          'mouseleave .rover-track-menu'   : 'hideSubMenu',
          'click .draw-style'  : 'changeDrawStyle',
-         'click .rover-track-remove-button' : 'removeTrack'
+         'click .edit' : 'showEdit',
+         'click .track-edit-close': 'hideEdit',
+         'click .track-edit-save': 'saveEdit',
+         'click .rover-remove-track-button' : 'removeTrack',
+         'change select' : 'thousandGChange'
        },
        
        initialize: function() {
           var trackView;
-          _.bindAll(this, 'render', 'draw');
+          _.bindAll(this, 'render', 'draw', 'edit', 'fetching');
+          var self = this;
           this.model.bind('change', this.draw);
+          this.model.bind('change:name', function(){self.$('.track-edit-label').html(self.model.get('name'));});
+          this.model.bind('change:edit', this.edit);
+          this.model.bind('fetching', this.fetching);
+          this.model.bind('change:chromosome', function() {
+             self.model.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})});
+          });
           this.rover = this.options.rover;
-          this.rover.bind('change:min change:max', this.draw);
+          this.rover.bind('change:min', this.draw);
+          this.model.center.chart.bind('change:features', this.draw);
           // this.model.bind('change:min', this.test);
          // this.template = _.template($('#track-template').html());
           // $('#templates').load("app/templates/track.handlebars", function() {
@@ -467,32 +536,39 @@
        },
        
        render: function() {
-          var scribl = this.model.center.chart.get('scribl');          
-          var renderedContent = this.template(this.model.toJSON());
+          // var scribl = this.model.center.chart.get('scribl');          
+          var scribl = this.model.get('scribl');          
+          var renderedContent = this.template( $.extend(this.model.toJSON(), {thousandGSources:rover.thousandGSources}) );
           $(this.el).html(renderedContent);
           scribl.setCanvas(this.$('canvas')[0]);
-          return this;
+          scribl.canvas.width = rover.getWidth();
+
+          return this;       
        },
        
-       draw: function() {      
-          var scribl = this.model.center.chart.get('scribl');
+       draw: function(e) {      
+          // var scribl = this.model.center.chart.get('scribl');
+          var scribl = this.model.get('scribl');
+          if (scribl.getFeatures().length == 0 && this.model.center.chart != undefined)
+            _.each(this.model.center.chart.get('features'), function(ft) { scribl.addFeature( ft ); });
+          scribl.laneSizes = this.model.get('laneSizes');
           scribl.drawStyle = this.model.get('drawStyle');
           scribl.glyph.text.color = this.model.get('textColor');
           scribl.glyph.color = this.model.get('glyphColor');
           var width = rover.getWidth();
           scribl.width = width;
           scribl.scale.min = rover.get('min');
-          scribl.scale.max = rover.get('max');            
+          scribl.scale.max = rover.get('max');  
+          scribl.setCanvas(this.$('canvas')[0]);          
           scribl.canvas.width = width;
-          var scrollLeft = (rover.get('displayMin') - rover.get('min')) / (rover.get("max") - rover.get('min')) * rover.getWidth();
-          rover.canvasContentDiv.scrollLeft = scrollLeft;
           scribl.canvas.height = scribl.getHeight();
           scribl.draw();
-          this.$('.spinner').css('display', 'none');      
+//          this.$el.css('height', scribl.getHeight() + 10);
+          this.$('.spinner').css('display', 'none');
        },
        
-       test: function() {
-         this.model.fetch();
+       fetching:function() {
+          this.$('.spinner').css('display', 'inline');
        },
        
        dropdown: function() {
@@ -502,7 +578,7 @@
        changeDrawStyle: function(e) {
           var track = this.model;
           var newDrawStyle = e.srcElement.getAttribute('data-drawstyle');          
-          track.setAll( {drawStyle:newDrawStyle} );
+          track.set( {drawStyle:newDrawStyle} );
        },
        
        hideSubMenu: function(e) {
@@ -520,7 +596,53 @@
        },
        
        removeTrack: function(e) {
-          windows.btracks.remove(this.model);
+          this.model.toRemove = this;
+          rover.tracks.remove(this.model);
+       },
+       
+       showEdit: function(e) {
+         this.model.set({ edit:true }) 
+       },
+       
+       hideEdit: function(e) {
+          this.model.set({ edit:false });
+       },
+       
+       saveEdit: function(e) {
+         this.model.set({
+            name: this.$('.track-edit-name').val(),
+            url: this.$('.track-edit-urlInput').val(),
+            typefilter: this.$('.track-edit-typefilter').val(),
+            segment: this.$('.track-edit-chromosome').val(),
+            edit: false
+         });
+         
+         this.model.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})});
+       },
+       
+       edit: function() {
+          var scribl = this.model.get('scribl');
+          if (this.model.get('edit')) {
+             var $edit = this.$('.rover-track-edit-div');
+             $edit.css('width', this.$el.width());
+             this.$el.css('height', $edit.css('height'));
+             $edit.css('visibility', 'visible');
+             $(scribl.canvas).css('visibility', 'hidden');
+          } else {
+             $(scribl.canvas).css('visibility', 'visible');
+             this.$el.css('height', '');
+             this.$('.rover-track-edit-div').css('visibility', 'hidden');
+          }
+          
+       },
+       
+       thousandGChange: function() {
+          var name = this.$('select').val();
+          var ext = /(^.+)\.((vcf.gz)?(bam)?)$/.exec(name);
+          ext = ext[ ext.length-1 ];
+          var url = rover.thousandGUrl + '/json/' + ext + "/" + name;
+          this.$('.track-edit-urlInput').val(url);
+          this.$('.track-edit-name').val(name);
        }
     });
         
@@ -528,26 +650,39 @@
         id: 'rover-canvas-content',
         
         initialize: function() {
-           _.bindAll(this, 'render', 'scroll');
+           this.el.dataset.uid = _.uniqueId();
+           _.bindAll(this, 'render', 'add', 'scroll');
            this.template = Handlebars.compile( $('#tracks-template').html() );
-           this.collection.bind('reset', this.render);           
-           this.collection.bind('add', this.render);
+           this.collection.bind('reset', this.render);
+           this.collection.bind('remove', this.remove);
+           this.collection.bind('add', this.add);
          //  this.collection.bind('add', this.updateScroll);
            this.rover = this.options.rover;
-           this.rover.bind('change:displayMin', this.scroll)
-           rover.canvasContentDiv = this.el;
-     //      rover.initScale();
+           this.rover.bind('change:displayMin change:displayMax change:min change:max', this.scroll)
+           this.rover.canvasContentDiv = this.el;
         },
         
         render: function() {
+
            var $tracks,
                collection = this.collection;
             
+            // keeps displayMin and displayMax in sync as this
+            // view scrolls
            $(this.el).html(this.template({}));
-         //  rover.scale.setCanvas(this.$('#rover-scale')[0]);
-       //    rover.redrawScale(rover.get('min'), rover.get('max'), rover.get('displayMin'));
+           this.$('#rover-canvas-list').scroll(function(event) {
+              var displayWidthNts = rover.get('displayMax') - rover.get('displayMin');
+              var displayMin = (rover.get('max') - rover.get('min')) * this.scrollLeft / rover.getWidth() + rover.get('min');
+              rover.set(
+                 { 
+                    displayMin: displayMin,
+                    displayMax: displayMin + displayWidthNts,
+                 },
+                 {
+                    uid: event.currentTarget.dataset.uid
+              });
+           });           
            
-//           rover.scale.canvas.width = rover.scale.width;
            
            // tracks
            $tracks = this.$('#rover-canvas-list');
@@ -559,34 +694,35 @@
               });
               $tracks.append(view.render().el);
            });
-
            return this;
         },
         
-        scroll: function() {
-           this.el.scrollLeft = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
+        add: function(track) {
+           var collection = this.collection;
+           var view = new BTrackView({
+              model: track,
+              collection: collection,
+              rover: rover
+           });
+           
+           this.$('#rover-canvas-list').append(view.render().el);                     
         },
         
-        updateScroll: function() {
-           alert('update');
-           // set scroll
-           var scrollLeft = (rover.get('displayMin') - rover.get('min')) / (rover.get("max") - rover.get('min')) * rover.getWidth();
-           rover.canvasContentDiv.scrollLeft = scrollLeft;
-        }
+        remove: function(track) {
+           track.toRemove.$el.remove();
+        },
+        
+        scroll: function(model,changes,options) {
+           // check if this view is being scrolled by the user
+           // if so, do nothing
+           if (options.uid != this.el.dataset.uid) {
+              var sl = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
+              sl = Math.round(sl*100) / 100;
+              this.$('#rover-canvas-list')[0].scrollLeft = sl;
+           }
+        },
         
      });
-    // 
-    //  window.Playlist = Albums.extend({
-    //  
-    //      isFirstAlbum: function(index) {
-    //          return (index == 0)
-    //      },
-    //  
-    //      isLastAlbum: function(index) {
-    //          return (index == (this.models.length - 1))
-    //      }
-    //  
-    //  });
  
 
 })(jQuery);
