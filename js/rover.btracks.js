@@ -924,7 +924,7 @@ window.ScaleView = Backbone.View.extend({
             // buffer if getting close to right edge
             else if ( !rover.updatingRight && (rover.get('max')-rover.get('displayMax')) < ( bufferSize*0.20 ) ) {
                rover.updatingRight = true;
-               var newMax = rover.get('min')+bufferSize;
+               var newMax = rover.get('max')+bufferSize;
                var newMin = newMax - (rover.get('max')-rover.get('min'));
                _.each(rover.tracks.models, function(track) {
                   track.right.chart.fetch({
@@ -936,20 +936,23 @@ window.ScaleView = Backbone.View.extend({
             }
             // draw whats in left buffer
             else if( (rover.get('displayMin') - rover.get('min')) < ( bufferSize*0.05 )) {
-               _(rover.tracks).each( function(track) {
-                  track.center.chart = track.left.chart;
+               rover.tracks.each( function(track) {
+                  track.center.chart.set({features: track.left.chart.get('features')});
                });
                var newMin = Math.max( rover.get('min')-bufferSize, 1);
+               var newMax = newMin + (rover.get('max')-rover.get('min'));
                $('#rover-canvas-list').stop();
                rover.set({ 
                   min: newMin,
-                  max: newMin + (rover.get('max')-rover.get('min'))
+                  max: newMax
                });
+               rover.set({min:newMin}, {silent:true});
+               rover.set({max:newMax});
             } 
             // draw whats in right buffer
             else if( (rover.get('max')-rover.get('displayMax')) < ( bufferSize*0.05 ) ) {
-               _(rover.tracks).each( function(track) {
-                  track.center.chart = track.right.chart;
+               rover.tracks.each( function(track) {
+                  track.center.chart.set({features: track.right.chart.get('features')});
                });
                var newMax = rover.get('max')+bufferSize;
                $('#rover-canvas-list').stop();
@@ -983,7 +986,7 @@ window.ZoomView = Backbone.View.extend({
          slide: function(event, ui) { 
              // flip value so slider looks like we are going from max to min;
             var numNtsToShow = rover.get("zoomMax") - ui['value'] + rover.get("zoomMin");
-            var middle = (rover.get('max') - rover.get('min'))/2 + rover.get('min');
+            var middle = (rover.get('displayMax') - rover.get('displayMin'))/2 + rover.get('displayMin');
             var displayMin = Math.max( (middle - numNtsToShow/2), 1);
             var displayMax = middle + numNtsToShow/2;
             // keep track of current min and max

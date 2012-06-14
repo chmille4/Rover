@@ -119,6 +119,8 @@
                   acceptPropagatedEvent: true,
                   stop: function(event) {
                      var currPx = $('#'+event.data.scrollable).scrollLeft();
+                     if(event.data.prevScrolls.length == 0)
+                        return;
                      var currPx = event.data.prevScrolls[0].left;
                      var prevPx = event.data.prevScrolls[1].left;
                      var time = event.data.prevScrolls[0].timeStamp - event.data.prevScrolls[1].timeStamp;
@@ -217,7 +219,7 @@
 
 
       function toggleLinkUrl() {
-
+         
          if( $('#link-url').css('display') == 'none' ) {
             $('#link-url-input').val(rover.toURL());
             $('#link-url').css('display', 'inherit');                  

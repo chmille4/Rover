@@ -525,14 +525,10 @@
              self.model.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})});
           });
           this.rover = this.options.rover;
-          this.rover.bind('change:min', this.draw);
+          this.rover.bind('change', this.draw);
           this.model.center.chart.bind('change:features', this.draw);
-          // this.model.bind('change:min', this.test);
-         // this.template = _.template($('#track-template').html());
-          // $('#templates').load("app/templates/track.handlebars", function() {
-              // create html
+          // create html
           this.template = Handlebars.compile( $('#track-template').html() );
-          // });
        },
        
        render: function() {
@@ -546,25 +542,57 @@
           return this;       
        },
        
-       draw: function(e) {      
-          // var scribl = this.model.center.chart.get('scribl');
-          var scribl = this.model.get('scribl');
-          if (scribl.getFeatures().length == 0 && this.model.center.chart != undefined)
-            _.each(this.model.center.chart.get('features'), function(ft) { scribl.addFeature( ft ); });
-          scribl.laneSizes = this.model.get('laneSizes');
-          scribl.drawStyle = this.model.get('drawStyle');
-          scribl.glyph.text.color = this.model.get('textColor');
-          scribl.glyph.color = this.model.get('glyphColor');
-          var width = rover.getWidth();
-          scribl.width = width;
-          scribl.scale.min = rover.get('min');
-          scribl.scale.max = rover.get('max');  
-          scribl.setCanvas(this.$('canvas')[0]);          
-          scribl.canvas.width = width;
-          scribl.canvas.height = scribl.getHeight();
-          scribl.draw();
-//          this.$el.css('height', scribl.getHeight() + 10);
-          this.$('.spinner').css('display', 'none');
+       draw: function(model, changes,options,x,l) { 
+             // test if rover attr min or max is changing
+             if( model.cid == rover.cid && !("min" in model._changed) && !("max" in model._changed) )
+               return
+          
+             var scribl = this.model.get('scribl');
+             //if (scribl.getFeatures().length == 0 && this.model.center.chart != undefined) {
+             if ( this.model.parsed ) {
+               var scribl = this.model.get('scribl')
+               scribl.setCanvas(this.$('canvas')[0]);
+               if ( scribl.getFeatures().length > 0 ) {
+                  scribl.removeEventListeners('mouseover');
+                  delete this.model.get('scribl')
+               
+                  // create new scribl;
+                  var scribl = this.model.createScribl();         
+                  this.model.set({scribl: scribl}, {silent:true});
+               }
+//               scribl.removeEventListeners('mouseover');
+               _.each(this.model.center.chart.get('features'), function(ft) { scribl.addFeature( ft ); });
+               this.model.parsed = false;
+             }
+
+             scribl.laneSizes = this.model.get('laneSizes');
+             scribl.drawStyle = this.model.get('drawStyle');
+             scribl.glyph.text.color = this.model.get('textColor');
+             scribl.glyph.color = this.model.get('glyphColor');
+             
+             var width = rover.getWidth();
+             scribl.width = width;
+
+             scribl.scale.min = rover.get('min');
+             scribl.scale.max = rover.get('max');  
+
+             scribl.setCanvas(this.$('canvas')[0]);          
+             if (!rover.updatingLeft && !rover.updatingRight) { 
+                scribl.canvas.width = width;                
+             } else {
+                rover.updatingLeft = false;
+                rover.updatingRight = false;
+             }
+//             alert('canvas width = ' + scribl.canvas.width + ' wdith = ' + width);
+             scribl.canvas.height = scribl.getHeight();
+          
+             scribl.draw();
+   //          this.$el.css('height', scribl.getHeight() + 10);
+             this.$('.spinner').css('display', 'none');
+             // trigger scrollLeft to ensure that the div has the correct scrollLeft value
+             this.rover.trigger('scrollLeft');
+         
+//                   $('.rover-track-menu').trigger('mouseover');
        },
        
        fetching:function() {
@@ -651,16 +679,19 @@
         
         initialize: function() {
            this.el.dataset.uid = _.uniqueId();
-           _.bindAll(this, 'render', 'add', 'scroll');
+           _.bindAll(this, 'render', 'add', 'scroll', 'scrollLeft');
            this.template = Handlebars.compile( $('#tracks-template').html() );
            this.collection.bind('reset', this.render);
            this.collection.bind('remove', this.remove);
            this.collection.bind('add', this.add);
          //  this.collection.bind('add', this.updateScroll);
            this.rover = this.options.rover;
-           this.rover.bind('change:displayMin change:displayMax change:min change:max', this.scroll)
+           this.rover.bind('change', this.scroll);
+           this.rover.bind('scrollLeft', this.scrollLeft);
            this.rover.canvasContentDiv = this.el;
         },
+        
+        testIt: function() {alert('testIt');},
         
         render: function() {
 
@@ -712,13 +743,20 @@
            track.toRemove.$el.remove();
         },
         
-        scroll: function(model,changes,options) {
+        scrollLeft: function() {
+           var sl = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
+           sl = Math.round(sl*100) / 100;
+           this.$('#rover-canvas-list')[0].scrollLeft = sl;           
+        },
+        
+        scroll: function(model,options) {
            // check if this view is being scrolled by the user
            // if so, do nothing
-           if (options.uid != this.el.dataset.uid) {
-              var sl = (rover.get('displayMin') - rover.get('min')) * ( rover.getDisplayWidth() / rover.getDisplayWidthNts() );
-              sl = Math.round(sl*100) / 100;
-              this.$('#rover-canvas-list')[0].scrollLeft = sl;
+
+           if (options && options.uid != this.el.dataset.uid) {
+              if("displayMin" in model._changed || "displayMax" in model._changed || "min" in model._changed || "max" in model._changed) {
+                 this.scrollLeft();
+              }
            }
         },
         
