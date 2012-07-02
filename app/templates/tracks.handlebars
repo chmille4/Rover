@@ -1,0 +1,27 @@
+<script id="tracks-template" type="text/x-handlebars-template">
+   <div id="scaleDiv">
+      <canvas id="scale" class="canvas" height="20" width="15587"/>
+   </div>
+   
+   <div id="canvasList">
+      {{#each track}}
+         <div class="rover-canvas-div">
+            <canvas class="rover-canvas">
+         </div>
+      {{/each}}
+   </div>
+
+   {{#each track}}
+      <div class="rover-track-menu" style="top:22px; display:none"/>
+      <div class="rover-remove-track-button" style="top:22px; display:none"/>
+      <span class="rover-canvas-label" style="top:22px">
+         <a class="rover-error">Error, Retry</a>
+         <span> class="spinner">
+            <img src="images/spinner.gif">
+               retrieving from:
+            </img>
+         </span>
+      </span>
+      <div class="rover-track-edit-div"/>
+   {{/each}}
+</script>

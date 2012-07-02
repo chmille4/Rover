@@ -1,0 +1,88 @@
+<script id="edit-track-template" type="text/x-handlebars-template">
+   <div class="columns">
+     <div style="float: left; text-align: center; width: 430px;">
+       <div style="float: left; text-align: right;">
+         <div>
+           <form>
+
+             <span class="labels">1000G Data</span>
+             <select id="{{track.id}}-edit-thousandG" style="width:130px">
+               <option></option>
+               {{#each track.rover.thousandGSources}}
+                  <option>{{this}}</option>
+               {{/each}}
+             </select>
+           </form>
+         </div>
+
+         <div>
+           <span class="labels">Source URL</span><input id="{{track.id}}-edit-urlInput" value="{{track.source.uri}}" />
+         </div>
+
+         <!-- <div>
+           <span class="labels">Source File(s)</span><input type="file" multiple=
+           "multiple" />
+         </div> -->
+       </div>
+
+       <div style="float: right; text-align: right;">
+         <div>
+           <span class="labels">Name</span><input id="{{track.id}}-edit-name" value="{{track.source.name}}" />
+         </div>
+
+         <div>
+           <span class="labels">Chromosome</span><input id="{{track.id}}-edit-chromosome" value="{{track.source.chromosome}}" />
+         </div>
+
+         <div>
+           <span class="labels">Type Filter</span><input id="{{track.id}}-edit-typeFilter" value="{{track.source.typeFilter}}" />
+         </div>
+       </div>
+
+       <div style="clear:both"></div>
+
+       <div style="margin-top:5px">
+         <button id="{{track.id}}-edit-save">Save</button>
+         <button id="{{track.id}}-edit-close" >X</button>
+       </div>
+
+       <div style="font-size: 10px;">
+         More DAS sources can be found at the <a href=
+         "http://www.dasregistry.org/listSources.jsp?organism=any&amp;CSName=any&amp;CSTypes=any&amp;capabilities=features&amp;labels=any&amp;spec=any&amp;cmd=find">
+         DAS registry</a>
+       </div>
+     </div>
+
+     <div class="rover-info-div">
+       <div>
+         <span class="info-title">Name</span><span>the display name for the track</span>
+       </div>
+
+       <div>
+         <span class="info-title">Source Url</span><span>the url to the remote data via
+         <a href="http://www.biodas.org/wiki/Main_Page">DAS</a> or <a href=
+         "https://github.com/chmille4/Ngs_server">Ngs Server</a></span>
+       </div>
+
+       <div>
+         <span class="info-title">Source File(s)</span><span>Path to file. <a href=
+         "site/supportedFormats.html">More Info</a></span>
+       </div>
+
+       <div>
+         <span class="info-title">1000G</span><span>subset of the 1000G dataset -
+         1000genomes.org</span>
+       </div>
+
+       <div>
+         <span class="info-title">Chromosome</span><span>the chromosome or segment</span>
+       </div>
+
+       <div>
+         <span class="info-title">Type Filter</span><span>annotation types of biological
+         significance that correspond roughly to EMBL/GenBank feature table tags (e.g.
+         exon, refGene). However each database can use their own</span>
+       </div>
+     </div>
+   </div>
+</script>

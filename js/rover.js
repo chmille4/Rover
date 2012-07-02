@@ -1,8 +1,21 @@
-var Rover = Class.extend({
-   init: function(roverDiv) {
-      this.tracks = new Array();
+var Rover = Backbone.Model.extend({
+   initialize: function(args) {
+      var rover = this;
+//      this.tracks = new Array();
 
-      this.roverDiv = roverDiv;
+      this.roverDiv = args['viewer'];
+      this.zoomer = args['zoomer'];
+      this.scroller = args['scroller'];
+      this.zoomMin = args['zoomMin'] || 100;
+      this.zoomMax = args['zoomMax'] || 100000;
+      this.maxScrollSpeed = args['maxScrollSpeed'] || 200;
+      this.bufferMultiple = args['bufferMultiple'] || 6;
+//      this.minBufferSize = args['minBufferSize'] || 50000;
+      
+      //
+      this.updatingLeft = false;
+      this.updatingRight = false;
+      this.scrollFunc = undefined;
       
       // max and min pixels including buffers
       this.max;
@@ -16,16 +29,48 @@ var Rover = Class.extend({
       this.thousandGSources = [];
       
       // create container divs
-      this.setupDivs();
+      this.scrollInitialized = false;
+     // this.setupDivs();
+      
+      // setup zoom slider
+      this.setupZoomSlider()
+      
+      // setup scroll slider
+      $(this.scroller ).slider({
+           min: -100,
+           max: 100,
+           value: 0,
+           start: function(event, ui) {
+              rover.scrollFunc = setInterval( function() {
+                 var scrollPixels = $(rover.scroller).slider('option', 'value') / 100 * rover.maxScrollSpeed;
+                 rover.canvasContentDiv.scrollLeft += scrollPixels;
+      		  },20)
+           },
+           stop: function() { window.clearInterval(rover.scrollFunc); $(rover.scroller ).slider('option', 'value', 0);},
+       });
       
       // make tracks sortable
-      $('#canvasList').sortable({
+      $(rover.canvasListDiv).sortable({
          update: function() { rover.updateLabelPositions(); }
       });
       
       this.hideScrollBar();
       // see if browser is internet explorer and if so give alert
       this.testIE();
+      
+      var querys = rover.getUrlQuerys(location.href);
+      // set region
+      rover.displayMin = parseInt(querys['min']);
+      rover.displayMax = parseInt(querys['max']);
+      
+      // set value of bufferSize
+      rover.bufferSize = (rover.displayMax - rover.displayMin) * rover.bufferMultiple;
+      
+      // set rover min/max
+      if(querys['min'] && querys['max']) {
+         rover.min = Math.max(rover.displayMin - rover.bufferSize,1);
+         rover.max = parseInt(rover.displayMax + rover.bufferSize);
+      }
    },
    
    newTrack: function() {
@@ -44,14 +89,14 @@ var Rover = Class.extend({
 
       // create elements
       var parentDiv = document.createElement('div');
-      parentDiv.className = "canvas-div";
+      parentDiv.className = "rover-canvas-div";
       var trackMenuDiv = document.createElement('div');
-      trackMenuDiv.className = "option-control";
+      trackMenuDiv.className = "rover-track-menu";
       trackMenuDiv.style.display = 'none';
       
       var removeTrackDiv = document.createElement('div');
       removeTrackDiv.innerHTML = 'X';
-      removeTrackDiv.className = "removeTrackButton";
+      removeTrackDiv.className = "rover-remove-track-button";
 //      removeTrackDiv.style.display = 'none';
       
       var newCanvas = document.createElement("canvas");
@@ -60,12 +105,13 @@ var Rover = Class.extend({
       
       // add meta-data editing capabilities
       var trackEditDiv = document.createElement("div");
-      trackEditDiv.className = 'track-edit-div';
+      trackEditDiv.className = 'rover-track-edit-div';
       $(trackEditDiv).width( this.getDisplayWidth() );
       
       
       // create track
-      var track = new RoverTrack(newCanvas, rover.getWidthWithBuffers());
+      //var track = new RoverTrack(newCanvas, rover.getWidthWithBuffers());
+      var track = new window.BTrack({canvas:newCanvas, canWidth:rover.getWidthWithBuffers()});
       //newCanvas.id = track.id;
       track.rover = rover;
       track.drawStyle = display;
@@ -83,7 +129,7 @@ var Rover = Class.extend({
       
       // error label
       var errorLabel = document.createElement('a');
-      errorLabel.className = 'error';
+      errorLabel.className = 'rover-error';
       errorLabel.innerHTML = 'Error, Retry  '
       errorLabel.onclick = function() { track.hideErrorLabel(); track.source.refetch(); };
       label.appendChild(errorLabel);
@@ -96,7 +142,7 @@ var Rover = Class.extend({
 
       label.appendChild(spinner);
       label.appendChild(nameDiv);
-      label.className = "canvas-label";
+      label.className = "rover-canvas-label";
       
       if (this.scaleDiv.childElementCount == 0) {
          rover.initScale();
@@ -112,7 +158,7 @@ var Rover = Class.extend({
       newCanvas.width = this.getWidthWithBuffers();
       $(newCanvas).parent().width(this.getWidthWithBuffers());
       newCanvas.height = '20px';
-      newCanvas.className = "canvas";   		      
+      newCanvas.className = "rover-canvas";   		      
 
       // place title/spinner
       var top = $(parentDiv).position().top;
@@ -168,7 +214,7 @@ var Rover = Class.extend({
  	   // update labels/menus
       rover.updateLabelPositions();
       
-      // call onRemoveTrack function if set
+      // call onRemoveTrack function hook if set
       if (rover.onRemoveTrack != undefined) rover.onRemoveTrack(id);
    },
    
@@ -210,15 +256,8 @@ var Rover = Class.extend({
         }
    },
    
-   initScale: function() {
-       var canvas = document.createElement("canvas");
-       canvas.id = 'scale';
-       canvas.className = 'canvas';
-       canvas.height = 20;
-       canvas.width = this.getWidthWithBuffers();
-       $(this.scaleDiv).prepend(canvas);
-
- 	   this.scale = new Scribl(canvas, this.getWidthWithBuffers());
+   initScale: function(canvas) {
+ 	   this.scale = new Scribl(undefined, rover.getWidthWithBuffers());
  	   this.scale.offset = 0;
  	   this.scale.scale.font.size = 11;
       this.scale.scale.font.color = 'rgb(220,220,220)';
@@ -227,12 +266,8 @@ var Rover = Class.extend({
       this.scale.tick.halfColor = 'rgb(220,220,220)';
       this.scale.scale.size = 8;
  	   this.scale.scale.auto = false;
-		this.scale.scale.min = rover.min; //$('#slider-range').slider('values',0);
-		this.scale.scale.max = rover.max;//$('#slider-range').slider('values',1);
-		this.scale.draw();
-		// set scroll
-      var scrollLeft = (this.displayMin - rover.min) / (rover.max - rover.min) * this.getWidthWithBuffers();
-      this.canvasContentDiv.scrollLeft = scrollLeft;
+      this.scale.scale.min = rover.min; 
+      this.scale.scale.max = rover.max;
    },
    
    redrawScale: function(min, max, scrollLeftNts, zooming) {                
@@ -248,20 +283,17 @@ var Rover = Class.extend({
       this.scale.draw();  
       var scrollLeft = (scrollLeftNts - min) / (max - min) * rover.getWidthWithBuffers();      
       if (zooming)                          
-        $('.canvas-div').css('margin-left', scrollLeft);
+        $('.rover-canvas-div').css('margin-left', scrollLeft);
+      //this.canvasContentDiv.scrollLeft = scrollLeft; 
       this.canvasContentDiv.scrollLeft = scrollLeft; 
    },
    
    updateLabelPositions: function() {      
       for( var i in this.tracks ) {
          var canvasDiv = this.tracks[i].parentDiv;
-         var top = $(canvasDiv).position().top;// + $('#main').scrollTop();
-//         alert(top);
+         var top = $(canvasDiv).position().top;
          this.tracks[i].labelDiv.style.top = top + 'px';
          this.tracks[i].editDiv.style.top = top + 'px';
-         
-         // var labelId = canvasDiv.id.replace('parentdiv', 'label');                  
-         // document.getElementById(labelId).style.top = top + 'px';
       }
    },
    
@@ -274,8 +306,8 @@ var Rover = Class.extend({
    
    getWidthWithBuffers: function() {
       // set canvas attributes
-      if (this.width == undefined) 
-         this.width = parseInt( (rover.max - rover.min) / ( (this.displayMax - this.displayMin) / $(this.canvasContentDiv).width() ) );
+      if (this.width == undefined)
+         this.width = parseInt( (rover.max - rover.min) / ( (this.displayMax - this.displayMin) / $('#rover').actual('width') ) );
 
       return this.width;      
    },
@@ -315,8 +347,8 @@ var Rover = Class.extend({
    hideScrollBar: function() {
       // set custom scrollbar position and width based on current users scrollbar width
       var scrollBarWidthPx = this.getScrollerWidth();
-      $('#cover-scroll-bar').css('height', scrollBarWidthPx);
-      $('#cover-scroll-bar').css('margin-top', -scrollBarWidthPx);      
+      $(this.coverScrollBarDiv).css('height', scrollBarWidthPx);
+      $(this.coverScrollBarDiv).css('margin-top', -scrollBarWidthPx);      
    },
    
    getScrollerWidth: function() {
@@ -367,8 +399,10 @@ var Rover = Class.extend({
    },
    
    setupDivs: function() {
+      var rover = this;
+      
       this.canvasContentDiv = document.createElement('div');
-      this.canvasContentDiv.id = 'canvas-content';
+      this.canvasContentDiv.id = 'rover-canvas-content';
       this.roverDiv.appendChild(this.canvasContentDiv);
       
       this.scaleDiv = document.createElement('div');
@@ -376,12 +410,105 @@ var Rover = Class.extend({
       this.canvasContentDiv.appendChild(this.scaleDiv);
       
       this.canvasListDiv = document.createElement('div');
-      this.canvasListDiv.id = 'canvasList';
+      this.canvasListDiv.id = 'rover-canvas-list';
       this.canvasContentDiv.appendChild(this.canvasListDiv);
       
       this.coverScrollBarDiv = document.createElement('div');
-      this.coverScrollBarDiv.id = 'cover-scroll-bar';
-      this.roverDiv.appendChild(this.coverScrollBarDiv);      
+      this.coverScrollBarDiv.id = 'rover-cover-scroll-bar';
+      this.roverDiv.appendChild(this.coverScrollBarDiv);   
+      
+      $(this.canvasContentDiv).scroll(function(){
+         if (!rover.scrollInitialized) {
+            rover.scrollInitialized = true;
+            return;
+         }
+
+         var scrollPos = $(rover.canvasContentDiv).scrollLeft(); 
+         var canvasWidth = $('.rover-canvas-div canvas').width();
+         if (canvasWidth == 0) canvasWidth = 14700;   
+         var viewerWidth = $(rover.canvasContentDiv).width();
+
+         // check for case when zooming and chartview has been shrunk to just viewable width for performance
+         if (canvasWidth != viewerWidth) {
+
+            if (rover.updatingRight && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth) > .98 )) {
+               rover.shiftBufferToCenter('right');
+               var min = rover.max-rover.bufferSize;
+               var max = rover.max+rover.bufferSize;             
+               var scrollPos = $(rover.canvasContentDiv).scrollLeft();  
+               var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;                                               
+               rover.draw(min, max, canvasWidth, scrollLeftNts);
+               rover.updatingRight = false;
+               rover.min = min;
+               rover.max = max;                          
+            } else if (rover.updatingLeft && ( scrollPos / canvasWidth < .02 ) && rover.min > 1 ) {
+               rover.shiftBufferToCenter('left');
+               var min = Math.max(rover.min-rover.bufferSize, 1);
+               var max = rover.min+rover.bufferSize;
+               var scrollPos = $(rover.canvasContentDiv).scrollLeft();  
+               var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;                              
+               rover.draw(min, max, canvasWidth, scrollLeftNts);
+               rover.updatingLeft = false;
+               rover.min = min;
+               rover.max = max;                          
+            } else {
+               if ( !rover.updatingRight && canvasWidth > 0 && ( (scrollPos / canvasWidth + viewerWidth / canvasWidth)  > .7 )) {
+                   var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;
+                   rover.updatingRight = true;
+                   rover.fetchAll( rover.max-rover.bufferSize, rover.max+rover.bufferSize, 'right');                              
+               } else if ( !rover.updatingLeft && ( scrollPos / canvasWidth < .3 ) && rover.min > 1) {
+                   var scrollLeftNts = scrollPos / canvasWidth * (rover.max - rover.min) + rover.min;
+                   rover.updatingLeft = true;
+                   var min = Math.max(rover.min-rover.bufferSize, 1);
+                   var max = rover.min+rover.bufferSize;
+                   rover.fetchAll(min, max, 'left');                       
+               }
+
+            }
+        }
+      });   
+   },
+   
+   setupZoomSlider: function() {
+      var rover = this;
+      
+      var zoomValue = this.zoomValue || 1000; 
+      $(rover.zoomer).slider({
+         orientation: 'vertical',
+           min: rover.zoomMin,
+           max: rover.zoomMax,
+           value: zoomValue,
+           slide: function(event, ui) { 
+               // flip value so slider looks like we are going from max to min;
+    		      var numNtsToShow = rover.zoomMax - ui['value'] + rover.zoomMin;
+    		      
+    		      // redraw rover with the display being numNtsToShow nts wide
+    		      rover.zoom(numNtsToShow);
+            },
+           change: function(event,ui) {
+              // check if event was fired by user and if so, proceed
+              // this stops change from firing when programmatically changing value
+              if (event.originalEvent) {
+                  rover.bufferSize = (rover.scale.scale.max - rover.scale.scale.min) * rover.bufferMultiple;
+                  var newMin = Math.max(rover.scale.scale.min-rover.bufferSize,1);
+                  var newMax = rover.scale.scale.max+rover.bufferSize;
+                  var totalNts = newMax - newMin;
+                  var widthNts = rover.scale.scale.max - rover.scale.scale.min;
+                  var widthPx = $(rover.canvasContentDiv).width();
+                  var totalPx = widthPx / (widthNts / totalNts);
+                  var leftNts = rover.scale.scale.min;
+
+                  if (newMin < rover.min || newMax > rover.max) {
+                     rover.fetchAll( parseInt(newMin), parseInt(newMax), 'center');
+                     rover.draw(newMin, newMax, totalPx, leftNts, true);
+                  } else
+                     rover.draw(newMin, newMax, totalPx, leftNts, false);
+                  rover.min = newMin;
+                  rover.max = newMax;
+                  rover.setViewMinMax(newMin, newMax)
+               }
+           }
+        });      
    },
    
    zoom: function(numNtsToShow) {
@@ -398,10 +525,9 @@ var Rover = Class.extend({
       var maxNts = centerNts + numNtsToShow/2;
             
       rover.draw( minNts, maxNts, this.getDisplayWidth(), undefined, true );
-      
    },
    
-   toURL: function() {
+   toURLParams: function() {
       var rover = this;
       
       // get urls
@@ -441,6 +567,30 @@ var Rover = Class.extend({
       return queryStr;
    },
    
+   toURL: function() {
+      var url = location.href;  // entire url including querystring - also: window.location.href;
+      var baseURL = url.split('?')[0]
+      return baseURL + this.toURLParams();
+   },
+   
+   toIframe: function(args) {
+      var url = this.toURL();
+      var args = args || {};
+      var width = args['width'] || 500;
+      var height = args['height'] || 315;
+      var style = args['style'] ||
+         'border:1px solid rgb(220,220,220); border-radius: 4px" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="';
+      var description = args['description'] ||
+         '<br/><small><a href="' + url + '" style="color:#0000FF;text-align:left">View Full Screen in Rover</a></small>';
+      
+      var iframeStr = '<iframe width="' + width + '" height="' + height + '" style="' + style + '"';
+      iframeStr += url;
+      iframeStr += '&embed=true"'
+      iframeStr += '></iframe>';
+      iframeStr += description;
+      return iframeStr; 
+   },
+   
    loadFromURL: function(url) {
       var rover = this;
       var querys = rover.getUrlQuerys(url);
@@ -454,16 +604,20 @@ var Rover = Class.extend({
       // keep track of querys
       rover.urlQuerys = querys;
       
-      // set region
-      rover.displayMin = parseInt(querys['min']);
-      rover.displayMax = parseInt(querys['max']);
-      zoomValue = zoomMax - (rover.displayMax-rover.displayMin) + zoomMin;                  
-      bufferSize = (rover.displayMax - rover.displayMin) * bufferMultiple;
-
-      if(querys['min'] && querys['max']) {
-         rover.min = Math.max(rover.displayMin - bufferSize,1);
-         rover.max = parseInt(rover.displayMax + bufferSize);
-      }
+      // // set region
+      // rover.displayMin = parseInt(querys['min']);
+      // rover.displayMax = parseInt(querys['max']);
+      // 
+      // // set value of zoom slider
+      var zoomValue = rover.zoomMax - (rover.displayMax-rover.displayMin) + rover.zoomMin;
+      $(rover.zoomer).slider("option", "value", zoomValue);
+      // rover.bufferSize = (rover.displayMax - rover.displayMin) * rover.bufferMultiple;
+      // 
+      // // set rover min/max
+      // if(querys['min'] && querys['max']) {
+      //    rover.min = Math.max(rover.displayMin - rover.bufferSize,1);
+      //    rover.max = parseInt(rover.displayMax + rover.bufferSize);
+      // }
 
       // add Das sources                   
       var urls = querys['urls'].split(',');
@@ -480,13 +634,25 @@ var Rover = Class.extend({
             
          var display = displays[i].toLowerCase();
          if (display == 'none') display = 'collapse';
-         var track = rover.addTrack(display);         
-         if (protocol == 'json')
-            track.setSource(new JsonSource(names[i], urls[i], querys['segment']));
-         else
-            track.setSource(new DasSource(names[i], urls[i], types[i], querys['segment']));
-         if ( track.source.url )
-            track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);         
+        // var track = rover.addTrack(display);      
+        var track = new window.BTrack({
+           url: urls[i],
+           chromosome: querys['segment'],
+           name: names[i],
+           typefilter: types[i]
+         });
+  
+         rover.add( track );
+         
+         //track.center.chart.fetch( {data: $.param({min:rover.min, max:rover.max})} );
+         track.center.chart.fetch({data: $.param({segment:track.get('chromosome'), min:rover.min, max:rover.max}) });
+         
+         // if (protocol == 'json')
+         //    track.setSource(new JsonSource(names[i], urls[i], querys['segment']));
+         // else
+         //    track.setSource(new DasSource(names[i], urls[i], types[i], querys['segment']));
+         // if ( track.source.url )
+         //    track.source.fetch(rover.min, rover.max, track.initSource, track, 'center', true);         
       }
       
       // success
@@ -508,11 +674,27 @@ var Rover = Class.extend({
            queryStringList[tmp[0]] = unescape(tmp[1]);
        }
        return (queryStringList);
+   },
+   
+   jumpTo: function(position) {
+      var rover = this;
+
+      var canvasWidth = rover.getWidthWithBuffers();   
+      var viewerWidth = $(this.canvasContentDiv).width();
+      var viewerWidthNts = viewerWidth / canvasWidth * (rover.max - rover.min);
+      var min = Math.max( position - (rover.max-rover.min)/2, 1 );
+      var max = min + (rover.max - rover.min);
+      var scrollLeftNts = position - viewerWidthNts/2;
+      rover.fetchAll( parseInt(min), parseInt(max), 'center');    
+      rover.draw(min, max, canvasWidth, scrollLeftNts);
+      rover.min = min;
+      rover.max = max;
    },   
    
    getChromosome: function() {
-      for ( var i in this.tracks )
-         return this.tracks[i].source.chromosome;
+      rover.models[0].get('chromosome');
+      // for ( var i in this.tracks )
+      //    return this.tracks[i].source.chromosome;
    },
    
    setViewMinMax: function(min, max) {

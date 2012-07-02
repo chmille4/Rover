@@ -1,485 +1,110 @@
-html 
-{ 
-    height:100%; 
-} 
-body 
-{ 
-    height:100%; 
-    margin:0px; 
-    padding:0px; 
-    border-left:0px; 
-    border-right:0px; 
-    overflow:hidden; 
-    font-size: 13px;
-    font-family: 'Ubuntu', sans-serif;
-}
+/** Rover CSS  - contains styling only for the main viewer element **/
 
-a {
-   color: rgb(106,122,142);
-} 
-
-#header 
-{ 
-    top:0px; 
-    width:100%; 
-    height:50px; 
-    position:absolute; 
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    -moz-box-shadow: inset 0px -1px 3px #1d1d1d;
-    -webkit-box-shadow: inset 0px -1px 3px #1d1d1d;
-    box-shadow: inset 0px -1px 3px #1d1d1d;
-/*    background: #474747;
-    background: -webkit-gradient(linear, left top, left bottom, from(#474747), to(#303030));
-    background: -moz-linear-gradient(top, #474747, #303030);
-    background: linear-gradient(top, #474747, #303030);
-*/  
-    background-image: url(../images/sharkskin.gif);
-    text-align: center;
-    font-size: 30px;
-    color: white;
-    line-height: 50px;
-    text-shadow: 0 -1px 1px black;
-    font-weight: bold;
-} 
-
-#header div 
-{
-   color: #474747;
-   float: left;
-   width:181px;
-   font-size: 1px;
-   text-shadow: 0 0px 0px #474747;
-   border-right: 1px solid #4B515B;
-/*   border-right: 1px solid #181818;*/
-/*   -moz-box-shadow: 1px 0px 1px #525252;
-   -webkit-box-shadow: 1px 0px 1px #525252;
-   box-shadow: 1px 0px 1px #525252;*/
-   box-shadow: 1px 0px 4px #505662;
-}
-        
-#content 
-{ 
-/*            top:40px; 
-    bottom:40px; 
-    width:100%; 
-    overflow:auto; 
-    position:absolute; */
-} 
-
-/*       side      */
-
-#side {
-   top:50px; 
-   bottom:31px; 
-   overflow:auto; 
-   position:absolute;
-   width: 181px;
-   float:left;
-   border-right: 1px solid rgb(180, 180, 180);
-   text-align: center;
-   background: rgb(245,245,245);
-   background: -webkit-gradient(linear, left top, left bottom, from(rgb(245,245,245)), rgb(250,250,250));
-   background: -moz-linear-gradient(top, rgb(245,245,245), rgb(250,250,250));
-   background: linear-gradient(top, rgb(245,245,245), rgb(250,250,250));
-   
-}
-
-.option-controls {
-    -webkit-box-flex: 1;
-    -moz-box-flex: 1;
-    box-flex: 1;
-    line-height: 30px;
-    height: 30px;
-    color: rgb(60, 60, 60);
-    text-shadow: 1px 1px 1px white;
-    color: #333333;
-    font-weight: bold;
-    text-shadow: 0 1px 1px #ffffff;
-    font-size: 18px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
-    background: #ffffff;
-    background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#e0e0e1));
-    background: -moz-linear-gradient(top, #ffffff, #e0e0e1);
-    background: linear-gradient(top, #ffffff, #e0e0e1);
-    -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);    
-}
-
-#subtitle {
-    font: bold italic 10px arial;
-    color: rgb(60, 60, 60);
-    text-shadow: 1px 1px 1px white;
-}
-
-#sourcePanel {    
-    
-
-/*    box-shadow: inset 0px 1px 7px -3px black;     */
-   
-}
-
-#sourcePanel ul {
-    text-align: left;
-    list-style: none;
-    margin-left: 0px;
-    padding-left: 0px;
-}
-
-#sourcePanel li {
-       border-bottom: 1px solid rgb(255,255,255);
-}
-
-#sourcePanel li div {
-   border-bottom: 1px solid rgb(230,230,230);
-   width: 100%;
-   height: 100%;
-}
-
-#sourcePanel li:first-child {
-   border-top: 1px solid rgb(230,230,230);
-}
-
-#sourcePanel li:first-child div {
-   border-top: 1px solid rgb(255,255,255);    
-}
-
-#addSourcePanel {
-    display: none;
-    color: rgb(90,90,90);
-    font: bold 16px arial;
-}
-
-#addSourcePanel a {
-   color: rgb(106,122,142);
-}
-
-#addSourcePanel .myButton {
-   color: rgb(90,90,90);
-}
-
-#about {
-    display: none;
-    width: 300px;
-    position: absolute;
-    left: 50%;
-    margin-left: -150px;
-    top: 20%;
-    text-align: center;
-    z-index: 5;
-    border-radius: 5px;
-    -moz-border-radius: 5px;
-    background-color: rgb(245,245,245);
-    padding: 10px;
-    border: 4px solid rgb(100,100,100);  
-    -moz-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-    -webkit-box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6);
-      
-}
-
-#about p, span{
-    color: rgb(90,90,90);
-    font: bold 13px ubuntu;
-    text-align: left;
-}
-
-#about a{
-    color: rgb(106,122,142);
-}
-
-#sourcePanelToolbar {
-   position: absolute;
-   bottom: 0px;
-   cursor: pointer;
-   width: 181px;
-   text-align: center;
-   border-top: 1px solid rgba(0, 0, 0, 0.3);
-   -moz-box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.1);
-   -webkit-box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
-   box-shadow: 1px -1px 2px rgba(0, 0, 0, 0.1);
-}
-
-/* divide */
-#vdivide {
-   position: absolute;
-   top:50px;
-   bottom: 0px;
-   left: 181px;
-   width: 6px;
-   border: 1px solid #c5c5c5;
-   border-width: 0 1px 0 1px;
-   border-right-color: rgba(0, 0, 0, 0.3);
-   background: #f9f9f9;
-   background: -webkit-gradient(linear, left top, right top, from(#f9f9f9), to(#dfe0e1));
-   background: -moz-linear-gradient(left, #f9f9f9, #dfe0e1);
-   background: linear-gradient(left, #f9f9f9, #dfe0e1);
-}
-
-
-/*       main      */
-
-#main{
-   top:50px; 
-   bottom:31px; 
-   left: 0px;
-   overflow:auto; 
-   position:absolute;
-   right: 0px;
-   text-align: center;
-}
-
-#splash {
-    width: 60%;
-    font: bold 20px ubuntu;
-    text-align:center;
-    margin-left:auto;
-    margin-right:auto;
-    color: rgb(90,90,90);
-
-}
-
-#splash a{
-    color: rgb(106,122,142);
-}
-
-#pan {
-    margin-top: 30px;
-    font: 14px arial;
-}
-
-#top-controls .viewerButtonRight {
-   line-height: 30px;
-   float: left;
-   height: 30px;
-   padding: 0 20px;
-   border-left: 1px solid rgba(0, 0, 0, 0.3);
-   cursor: pointer;
-}
-
-#top-controls .viewerButtonLeft {
-   line-height: 30px;
-   height: 30px;
-   padding: 0 20px;
-   border-right: 1px solid rgba(0, 0, 0, 0.3);
-}
-
-
-#top-controls a{
-    color: rgb(60, 60, 60);
-}
-
-#top-controls input {
-    width: 1.5em;
-    height: .8em;
-}
-
-#rover {
-   position: absolute;
-   left: 6px;
-   right: 41px;
-/*   width: 94.9%;
-   margin-left: 1px;
-   margin-right: 100px;*/       
-/*   margin-left: 10px;
-   margin-right: 50px;*/
-
-}
-
-#canvas-content {
+#rover-canvas-content {
    background-image: url(../images/gray-xgrid-small.png);
    border-top-left-radius:3px;
    -moz-border-radius-topleft:3px;
    border-top-right-radius:3px;
    -moz-border-radius-topright:3px;
-    overflow: auto;
+/*    overflow: auto;*/
+    position: relative;
 }
 
-#link-url {
-    background-color: rgb(230,230,230);
-    color: rgb(50,50,50);
-    border: 1px solid rgb(160,160, 160);
-    border-top: 0px;
-    border-bottom-left-radius:4px;
-    -moz-border-radius-bottomleft:4px;
-    border-bottom-right-radius:4px;
-    -moz-border-radius-bottomright:4px;
-    padding-top: 5px;
-    width: 128px;
-    font-size: 12px;
-    left:-1px;
-    display: none;
-    box-shadow: inset 0px 4px 4px -2px rgb(170,170,170);
+.rover-track-menu {
     position: absolute;
-    line-height: 18px;
-    z-index: 4;
+    left: 5px;
+    width:auto;
+    visibility: hidden;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    background-color: rgb(180,180,180);
+    border: 2px solid rgb(100,100,100);
+    opacity: 0.4;
+    text-align:center;
 }
 
-#link-url input {
-   width: 110px;
+.rover-track-menu a {
+   cursor:pointer;
 }
 
-.slider {    
-    width: 97%; 
-    height: 6px; 
-    font-size: 10px; 
-    display: inline-block;
-    /*background: rgb(30, 30, 30);*/
+.rover-track-menu div {
+   background-image: url(../images/ui-icons_ffffff_256x240.png)
 }
 
-.slider div {
-    background: #d8e7f3;
-}
+.rover-track-menu:hover {
+   opacity: 1;
+}  
 
-.slider div:hover {
-    background: rgb(138, 177, 230);
-}
-
-#zoom{
-   position: absolute;
-   right: 0px;
-   margin-right:0px;   
-   z-index: 2;
-   height: 180px;
-   width: 28px;
-   
-   -moz-border-radius-topleft:3px;
-   -moz-border-radius-bottomleft:3px;   
-   border-top-left-radius:3px;
-   border-bottom-left-radius:3px;
-   padding-top: 10px;
-   padding-bottom: 10px;
-   padding-right: 2px;
-   padding-left: 2px;
-   
-   color: #333333;
-   font-weight: bold;
-   text-shadow: 0 1px 1px #ffffff;
-   font-size: 12px;
-   border: 1px solid rgba(0, 0, 0, 0.3);
-   background: #ffffff;
-   background: -webkit-gradient(linear, left top, right top, from(#ffffff), to(#e0e0e1));
-   background: -moz-linear-gradient(top, #ffffff, #e0e0e1);
-   background: linear-gradient(top, #ffffff, #e0e0e1);
-   -moz-box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
-   -webkit-box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
-   box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
-   -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);
-   
-}
-
-#zoom .ui-icon, #scroll-slider-container .ui-icon, #plus .ui-icon {
-   background-image: url(../images/ui-icons_000000_256x240.png);
-}
-
-#zoom-slider {
-   font-size:9.5px;
-   display:inline-block; 
-   height: 80%;
-}
-.slider-title {
-   font-weight: bold;
-}
-
-#scroll-slider-container{
-   position: absolute;
-   bottom:0px;
-   left: 0px;
-   right: 0px;
-   border-top: 1px solid rgba(0, 0, 0, 0.3);   
-   -webkit-box-flex: 1;
-   -moz-box-flex: 1;
-   box-flex: 1;
-   line-height: 30px;
-   height: 31px;
-   color: rgb(60, 60, 60);
-   text-shadow: 1px 1px 1px white;
-   color: #333333;
-   font-weight: bold;
-   font-size: 11px;
-   background: #F3F3F3;
-   background: -webkit-gradient(linear, left top, left bottom, from(#F3F3F3), to(#D6D6D6));
-   background: -moz-linear-gradient(top, #F3F3F3, ##D6D6D6);
-   background: linear-gradient(top, #F3F3F3, ##D6D6D6);
-   -moz-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-   -webkit-box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-   box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-   -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);
-} 
-
-#cover-scroll-bar{
+#rover-cover-scroll-bar{
    width: 100%;
    background-color: white;
    border-top: 1px solid rgb(210,210,210);
    padding-top: 4px;
 }
 
-#scroll-slider {
-   font-size:9.5px;
-   width: 300px;
-   margin-top: 10px;
-   float:left;
-   margin-right: auto;
-   margin-left: 9px
+#rover-scale{
+   overflow:hidden;
+   border-top-left-radius:3px;
+   -moz-border-radius-topleft:3px;
+   border-top-right-radius:3px;
+   -moz-border-radius-topright:3px;
 }
 
-#scale {
+#rover-scale canvas{
 /*   background: -moz-linear-gradient(top, rgb(95, 95, 95), rgb(70,70,70));
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(95,95,95)), to(rgb(70, 70, 70)));   
 */
+
+   margin: 0px;
    background-color: rgb(68,76,84);
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(86,98,109)), to(rgb(68,76,84)) );   
    background: -moz-linear-gradient(top, rgb(86,98,109), rgb(68,76,84));
 }
 
-#canvasList {
+#rover-canvas-list {
     background-color: white;
     width: auto;
     margin-left: auto;
     margin-right: auto;
-   
+    overflow:auto;
 }
 
-.canvas-label {
+.rover-canvas-label {
     font: bold 12px ubuntu;
     position: absolute;
     left: 40%;
     color: rgb(60,60,60);
 }
 
-.error{
+.rover-error{
    color: red;
    text-decoration: underline;
    display: none;
 }
 
-.error:hover{
+.rover-error:hover{
    cursor: pointer;
 }
 
-.track-edit-div {
+.rover-track-edit-div {
    background: -webkit-gradient(linear, left top, left bottom, from(rgb(254,254,254)), to(rgb(240,240,240)));
    background: -moz-linear-gradient(top, #474747, #303030);
    background: rgb(253, 253, 253);
    position: absolute;
    left: 0px;
-   display:none;
+   visibility: hidden;
    width: 500px;
-/*   height: 400px; // determined by var panelHeight in rover.showEditPanel()*/
    border-radius:4px;
    -moz-border-radius: 4px;
    border: 2px solid rgb(100,100,100);
    
 }
 
-.track-edit-div input {
+.rover-track-edit-div input {
    width: 125px;
 }
 
-.track-edit-div .columns {
+.rover-track-edit-div .columns {
    width: 830px;
    padding-left: 5px;
    padding-right: 5px;
@@ -489,18 +114,18 @@ a {
    font-size: 11px;
 }
 
-.track-edit-div .labels{
+.rover-track-edit-div .labels{
       font-size: 10px;
 }
 
-.info-div {
+.rover-info-div {
    font-size: 10px;
    float: right;
    width: 300px;
    text-align: left;
 }
 
-.info-div .info-title {
+.rover-info-div .info-title {
    font-size: 10px;
    font-weight:bold;
    margin-left: -70px;
@@ -510,73 +135,50 @@ a {
    color: rgb(150,150,150);
 }
 
-.info-div span {
+.rover-info-div span {
    text-align: left;
    font-size: 10px;
    color: rgb(150,150,150);
 }
 
-.canvas {
+.rover-canvas {
     margin-bottom: 0px;
-    margin-top: 0px;    
+    margin-top: 18px;    
     padding: 0px;    
     float: left;
 }
 
-.canvas-div {
+.rover-canvas-div {
 
     border-radius:4px;
     -moz-border-radius: 4px;
-    position:relative;
+/*    position:relative;*/
     padding-top: 5px;
 /*    display:table;*/
         display:inline-block;
 }
 
-.canvas-div:nth-child(odd) {
+.rover-canvas-div:nth-child(odd) {
     background-color: rgb(240, 248, 255);
 }
 
-.canvas-div:nth-child(even) {
+
+.rover-canvas-div:nth-child(even) {
     background-color: white;
 }
 
-.ui-icon {
-    background-image: url(../images/ui-icons_d8e7f3_256x240.png);
+.rover-canvas-listable:nth-child(odd) .rover-canvas-div {
+    background-color: rgb(240, 248, 255);
 }
 
-.option-hover .ui-icon, .ui-state-focus .ui-icon {
-    background-image: url(../images/ui-icons_ffffff_256x240.png);
+.rover-canvas-listable:nth-child(odd) .rover-canvas-div {
+    background-color: white;
 }
 
-.option-control {
-    position: absolute;
-    left: 5px;
-    width:auto;
-    display:none;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
-    background-color: rgb(180,180,180);
-    border: 2px solid rgb(100,100,100);
-    opacity: 0.4;
-    text-align:center;
-}
-
-.option-control a {
-   cursor:pointer;
-}
-
-.option-control div {
-   background-image: url(../images/ui-icons_ffffff_256x240.png)
-}
-
-.option-control:hover {
-  opacity: 1;
-}   
-
-.removeTrackButton{
+.rover-remove-track-button{
    position: absolute;
-   right: 0px;
+   visibility: hidden;
+   right: 5px;
    cursor: pointer;
    background-color: rgb(180,180,180);
    border: 2px solid rgb(100,100,100);
@@ -585,92 +187,10 @@ a {
    border-radius: 10px;
    width: 14px;
    color: white;
-   display: none;
    font-weight: bold;
    -moz-border-radius: 10px;    
 }
 
-.removeTrackButton:hover{
+.rover-remove-track-button:hover{
    opacity: 1;
-}
-
-/*ul.subnav {
-    list-style: none;
-    font: 10px ubuntu;
-    margin: 0px;
-    margin-top: 2px;
-    padding: 0px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    width: 100%;
-    height: 100%;
-    background-color: rgb(174, 208, 255);
-    background-color: rgb(240, 240, 240);
-}
-
-ul.subnav a {
-    text-decoration: none;
-    color: black;
-    font-weight: bold;
-}*/
-
-
-/*       Button      */
-.myButton {
-    -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-    -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-    box-shadow:inset 0px 1px 0px 0px #ffffff;
-    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
-    background:-moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
-    background-color:#ededed;
-    -moz-border-radius:6px;
-    -webkit-border-radius:6px;
-    border-radius:6px;
-    border:1px solid #dcdcdc;
-    display:inline-block;
-    color:#777777;
-    font-family:ubuntu;
-    font-size:15px;
-    font-weight:bold;
-    padding:6px 24px;
-    text-decoration:none;
-    text-shadow:1px 1px 0px #ffffff;
-}.myButton:hover {
-    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
-    background:-moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
-    background-color:#dfdfdf;
-}.myButton:active {
-    position:relative;
-    top:1px;
-}  
-   
-
-
-#copyright {
-   color: rgb(60, 60, 60);
-   text-shadow: 1px 1px 1px white;
-   color: #333333;
-   font-weight: bold;
-   text-shadow: 0 1px 1px #ffffff;
-   width: 350px;
-   position: absolute;
-   bottom: 2px;
-   right: 0px;
-   font-weight: bold; 
-   text-align:center;
-}
-
-#aboutLink {
-   color: rgb(60, 60, 60);
-   text-shadow: 1px 1px 1px white;
-   color: #333333;
-   font-weight: bold;
-   text-shadow: 0 1px 1px #ffffff;
-   position: absolute;
-   bottom: 2px;
-   left: 20px;
-   font-weight: bold; 
-   text-align:center;   
 }
