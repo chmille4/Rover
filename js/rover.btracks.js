@@ -30,7 +30,7 @@ window.BTracks = Backbone.Collection.extend({
 
 
        this.thousandGUrl = "http://bioinformatics.bc.edu/ngsserver";
-       this.thousandGUrl = "http://0.0.0.0:4569";       
+    //   this.thousandGUrl = "http://0.0.0.0:4569";       
        this.thousandGSources = [];
 
        // create container divs
