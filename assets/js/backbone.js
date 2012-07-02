@@ -1182,7 +1182,7 @@
 
     // Ensure that we have a URL.
     if (!options.url) {
-      params.url = getValue(model, 'url') || urlError();
+      params.url = getValue(model, 'url', options) || urlError();
     }
 
     // Ensure that we have the appropriate request data.
@@ -1277,9 +1277,9 @@
 
   // Helper function to get a value from a Backbone object as a property
   // or as a function.
-  var getValue = function(object, prop) {
+  var getValue = function(object, prop, options) {
     if (!(object && object[prop])) return null;
-    return _.isFunction(object[prop]) ? object[prop]() : object[prop];
+    return _.isFunction(object[prop]) ? object[prop](options) : object[prop];
   };
 
   // Throw an error when a URL is needed, and none is supplied.

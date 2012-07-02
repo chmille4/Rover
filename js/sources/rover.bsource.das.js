@@ -1,18 +1,21 @@
 window.BSourceDas = window.BSource.extend({
-   url: function() {
+   url: function(options) {
       var track = rover.tracks.getByCid(this.get('trackId'));
+      var dataArr = options.data.split('&');
+      var data = {};
+      // parse min and max
+      for ( var i in dataArr) {
+         var pair = dataArr[i].split('=');
+         data[pair[0]] = pair[1];
+      }
       var fullUrl = track.get('url') + 
                     '/features?segment=' +
                     track.get('chromosome') +
                     ':'  + 
-                    rover.get('min') +
+                    data.min +
                     "," +
-                    rover.get('max') +
-                    ';type=' + 
-                    ''
-      
-      // trigger fetching event
-      track.trigger('fetching');      
+                    data.max +
+                    ';type=' + rover.get('typeFilter') || '';                    
 
       return fullUrl;
    },
@@ -90,7 +93,12 @@ window.BSourceDas = window.BSource.extend({
        }
 
        this.set({ features:features })
-      // track.forceChange();
+       if (this.drawOnParse) {
+          this.drawOnParse = false;
+          track.center.chart.set({features: features});
+       }
+       track.trigger('fetched');
+      
        return {};
    }
 });

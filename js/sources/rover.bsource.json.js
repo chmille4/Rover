@@ -4,7 +4,7 @@ window.BSourceJson = window.BSource.extend({
      
       // trigger fetching event if main chart
 //      if (track.center.chart.cid == this.cid)
-         track.trigger('fetching');
+//         track.trigger('fetching');
 
       return track.get('url') + '?' + $.param({segment:track.get('chromosome')});
 
@@ -27,12 +27,19 @@ window.BSourceJson = window.BSource.extend({
       
       if (format == 'gz')
          format = urlArray.pop();
+         
+      track.format = format;
 
       if (format == 'bam')
          this.parseBam(response);
       else if (format == 'vcf')
          this.parseVcf(response);
 
+      if (this.drawOnParse) {
+         this.drawOnParse = false;
+         track.center.chart.set({features: this.get('features')});
+      }
+      track.trigger('fetched');
       return {};
    },
    

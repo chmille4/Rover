@@ -743,6 +743,13 @@ window.BTracks = Backbone.Collection.extend({
       // var allNts = rover.get('max') - rover.get('min');
        var min = Math.max(dispMin - bufferSize, 1);
        var max = dispMax + bufferSize
+       _.each(this.tracks.models, function(track) {
+          track.center.chart.fetch({
+             data: $.param({min:min, max:max}),
+             error: function(){alert('error fetching');}
+          });
+       });               
+       
        rover.set({
           displayMin: dispMin, 
           displayMax: dispMax,
@@ -937,7 +944,12 @@ window.ScaleView = Backbone.View.extend({
             // draw whats in left buffer
             else if( (rover.get('displayMin') - rover.get('min')) < ( bufferSize*0.05 )) {
                rover.tracks.each( function(track) {
-                  track.center.chart.set({features: track.left.chart.get('features')});
+                  if (track.parsed)
+                     track.center.chart.set({features: track.left.chart.get('features')});
+                  else {
+                     track.left.chart.drawOnParse = true;
+                     track.trigger('fetching');
+                  }
                });
                var newMin = Math.max( rover.get('min')-bufferSize, 1);
                var newMax = newMin + (rover.get('max')-rover.get('min'));
@@ -946,13 +958,18 @@ window.ScaleView = Backbone.View.extend({
                   min: newMin,
                   max: newMax
                });
-               rover.set({min:newMin}, {silent:true});
-               rover.set({max:newMax});
+               // rover.set({min:newMin}, {silent:true});
+               // rover.set({max:newMax});
             } 
             // draw whats in right buffer
             else if( (rover.get('max')-rover.get('displayMax')) < ( bufferSize*0.05 ) ) {
-               rover.tracks.each( function(track) {
-                  track.center.chart.set({features: track.right.chart.get('features')});
+               rover.tracks.each( function(track) {                  
+                  if (track.parsed)
+                     track.center.chart.set({features: track.right.chart.get('features')});
+                  else {
+                     track.right.chart.drawOnParse = true;
+                     track.trigger('fetching');
+                  }
                });
                var newMax = rover.get('max')+bufferSize;
                $('#rover-canvas-list').stop();
@@ -1024,7 +1041,8 @@ window.ZoomView = Backbone.View.extend({
                       track.center.chart.fetch({
                          data: $.param({min:newMin, max:newMax}),
                          error: function(){alert('error fetching');}
-                      });                      
+                      });     
+                      track.trigger('fetching');                 
                    });
                 } else {
                    rover.set({ min:newMin, max:newMax });

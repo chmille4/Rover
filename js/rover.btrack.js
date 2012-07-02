@@ -31,8 +31,8 @@
          // current view
          this.center = {};
 //         this.center.chart = this.setupDefaultScribl( new Scribl(this.get('canvas'), this.get('canWidth')) );
-         // this.center.chart = new window.BSource( {trackId: this.cid} );    
-         this.center.chart = undefined;
+         this.center.chart = new window.BSource( {trackId: this.cid} );    
+         // this.center.chart = undefined;
          // right buffer
          this.right = {};
          this.right.chart = undefined; //new window.BSource( {trackId: this.cid} );
@@ -71,8 +71,12 @@
             }
             else if ( newProtocol == 'das' )
                sourceType = window.BSourceDas;
-               
+            
+            // create new chart but keep old callbacks
+            var callbacks = this.center.chart._callbacks;
+            delete this.center.chart
             this.center.chart = new sourceType({ trackId: this.cid });
+            this.center.chart._callbacks = callbacks;
             this.left.chart = new sourceType({ trackId: this.cid });
             this.right.chart = new sourceType({ trackId: this.cid });
             
@@ -90,10 +94,14 @@
          chart.offset = 0;
          chart.scale.off = true;
          chart.scale.pretty = false;
+         var roverTrack = this;
          chart.trackHooks.push( function(track) { 
             if (track.chart.ntsToPixels() > 70) {
                track.chart.previousDrawStyle = track.getDrawStyle();
                track.chart.drawStyle = 'line';            
+            } else if (roverTrack.format == 'vcf' && track.chart.ntsToPixels() > 16) {
+               track.chart.previousDrawStyle = track.getDrawStyle();
+               track.chart.drawStyle = 'line';
             } else if (track.previousDrawStyle) {
                track.chart.drawStyle = track.chart.previousDrawStyle;
                track.chart.previousDrawStyle = undefined;
@@ -499,7 +507,7 @@
 
     
     window.BTrackView = Backbone.View.extend({
-      
+       className: 'rover-canvas-listable', 
        events: {
          'mouseenter'   : 'showControls',
          'mouseleave'   : 'hideControls',
@@ -515,12 +523,13 @@
        
        initialize: function() {
           var trackView;
-          _.bindAll(this, 'render', 'draw', 'edit', 'fetching');
+          _.bindAll(this, 'render', 'draw', 'edit', 'showSpinner', 'hideSpinner');
           var self = this;
           this.model.bind('change', this.draw);
           this.model.bind('change:name', function(){self.$('.track-edit-label').html(self.model.get('name'));});
           this.model.bind('change:edit', this.edit);
-          this.model.bind('fetching', this.fetching);
+          this.model.bind('fetching', this.showSpinner);
+          this.model.bind('fetched', this.hideSpinner)
           this.model.bind('change:chromosome', function() {
              self.model.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})});
           });
@@ -536,6 +545,7 @@
           var scribl = this.model.get('scribl');          
           var renderedContent = this.template( $.extend(this.model.toJSON(), {thousandGSources:rover.thousandGSources}) );
           $(this.el).html(renderedContent);
+          this.$('select').selectBox();
           scribl.setCanvas(this.$('canvas')[0]);
           scribl.canvas.width = rover.getWidth();
 
@@ -546,7 +556,7 @@
              // test if rover attr min or max is changing
              if( model.cid == rover.cid && !("min" in model._changed) && !("max" in model._changed) )
                return
-          
+
              var scribl = this.model.get('scribl');
              //if (scribl.getFeatures().length == 0 && this.model.center.chart != undefined) {
              if ( this.model.parsed ) {
@@ -587,16 +597,19 @@
              scribl.canvas.height = scribl.getHeight();
           
              scribl.draw();
-   //          this.$el.css('height', scribl.getHeight() + 10);
-             this.$('.spinner').css('display', 'none');
+             
              // trigger scrollLeft to ensure that the div has the correct scrollLeft value
              this.rover.trigger('scrollLeft');
          
 //                   $('.rover-track-menu').trigger('mouseover');
        },
        
-       fetching:function() {
+       showSpinner:function() {
           this.$('.spinner').css('display', 'inline');
+       },
+       
+       hideSpinner:function() {
+          this.$('.spinner').css('display', 'none');
        },
        
        dropdown: function() {
@@ -634,6 +647,8 @@
        
        hideEdit: function(e) {
           this.model.set({ edit:false });
+          if(this.model.get('url') == undefined)
+            this.removeTrack();
        },
        
        saveEdit: function(e) {
@@ -667,7 +682,10 @@
        thousandGChange: function() {
           var name = this.$('select').val();
           var ext = /(^.+)\.((vcf.gz)?(bam)?)$/.exec(name);
-          ext = ext[ ext.length-1 ];
+          var exts = name.split('.');
+          if (exts[ exts.length-1 ] == 'gz')
+            exts.pop();
+          ext = exts[ exts.length-1 ];
           var url = rover.thousandGUrl + '/json/' + ext + "/" + name;
           this.$('.track-edit-urlInput').val(url);
           this.$('.track-edit-name').val(name);
@@ -684,6 +702,7 @@
            this.collection.bind('reset', this.render);
            this.collection.bind('remove', this.remove);
            this.collection.bind('add', this.add);
+           this.collection.bind('unshift', this.add);
          //  this.collection.bind('add', this.updateScroll);
            this.rover = this.options.rover;
            this.rover.bind('change', this.scroll);
@@ -736,7 +755,7 @@
               rover: rover
            });
            
-           this.$('#rover-canvas-list').append(view.render().el);                     
+           this.$('#rover-canvas-list').prepend(view.render().el);                     
         },
         
         remove: function(track) {

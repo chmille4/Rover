@@ -147,7 +147,8 @@ $.fn.dragscrollable = function( options ){
          prevScrolls : []
       };
 		// Set mouse initiating event on the desired descendant
-		$(settings.dragSelector).live('mousedown', data, dragscroll.mouseDownHandler);
+		// $(settings.dragSelector).live('mousedown', data, dragscroll.mouseDownHandler);
+      $(document).on('mousedown', settings.dragSelector, data, dragscroll.mouseDownHandler);
 						
 	});
 }; //end plugin dragscrollable

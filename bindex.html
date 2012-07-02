@@ -27,11 +27,13 @@
    <script src="assets/js/underscore-min.js"></script>
 	<script src="assets/js/backbone.js"></script> 
 	<script src="assets/js/backbone.getters.setters.js"></script> 
+	<script src="assets/js/jquery.selectBox.js"></script> 
 	<script type="text/javascript" src="dragscrollable.js"></script>
    <link rel="stylesheet" href="css/jquery.ui.aristo.all.css">
    <link rel="stylesheet" type="text/css" href="css/rover.css" />
    <link rel="stylesheet" type="text/css" href="css/index.css" />
    <link rel="stylesheet" type="text/css" href="assets/js/SimplejQueryDropdowns/css/dropdown.css" />
+   <link rel="stylesheet" type="text/css" href="assets/css/jquery.selectBox.css" />
    
    
    <script src="assets/js/jquery-ui.chase.min.js"></script>
@@ -83,7 +85,10 @@
             scroller: document.getElementById('scroll-slider'),
             zoomMin: 100,
             zoomMax: 100000,
-         });         
+         });    
+         
+         // $('.rover-canvas-listable:nth-child(odd) .rover-canvas-div').css('background-color', 'red');
+                       
          
 	      // test if there are any tracks left after track remove
 	      rover.onRemoveTrack = function(id) { if (rover.isEmpty()) {toggleSplashPage(true)} };
@@ -180,15 +185,19 @@
          });
          
          // stupid hack to fix dragscrollable eating the click events on the edit div
-         $('input').live('click', function(){$(this).focus()});
-         $('select').live('click', function(){$(this).focus();});
+        $('input').live('click', function(){$(this).focus()});
+         // $('select').live('click', function(){
+         //    $(this).focus();
+         //    var options = $(this).find('option').length;
+         //    $(this).attr('size', options);
+         // });
 	   });
 	   
 	   function addTrack() {
 	      if (rover.isEmpty())
 	         toggleSplashPage(false);
 	      var newTrack = new window.BTrack;
-	      rover.tracks.add( newTrack );
+	      rover.tracks.add( newTrack ); // add to beginning of collection
 	      newTrack.set({ edit:true });
 	   }
 
@@ -413,7 +422,7 @@
                              <form>
 
                                <span class="labels">1000G Data</span>
-                               <select id="{{track.id}}-edit-thousandG" style="width:130px">
+                               <select id="{{track.id}}-edit-thousandG" style="width:125px">
                                  <option></option>
                                  {{#each thousandGSources}}
                                     <option>{{this}}</option>                                    

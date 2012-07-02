@@ -162,7 +162,16 @@
     background-color: rgb(240, 248, 255);
 }
 
+
 .rover-canvas-div:nth-child(even) {
+    background-color: white;
+}
+
+.rover-canvas-listable:nth-child(odd) .rover-canvas-div {
+    background-color: rgb(240, 248, 255);
+}
+
+.rover-canvas-listable:nth-child(odd) .rover-canvas-div {
     background-color: white;
 }
 
