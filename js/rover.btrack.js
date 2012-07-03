@@ -618,7 +618,7 @@
        
        changeDrawStyle: function(e) {
           var track = this.model;
-          var newDrawStyle = e.srcElement.getAttribute('data-drawstyle');          
+          var newDrawStyle = e.target.getAttribute('data-drawstyle');          
           track.set( {drawStyle:newDrawStyle} );
        },
        
