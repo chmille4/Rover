@@ -178,7 +178,11 @@ a {
       box-shadow: -1px 1px 2px rgba(0, 0, 0, 0.1);
       -webkit-box-shadow: inset -1px -1px 3px #eeeeee, 1px 1px 2px rgba(0, 0, 0, 0.1);
 
-   }   
+   }  
+   
+   #zoom .ui-icon {
+      cursor: pointer;
+   } 
 
    #zoom .ui-icon, #footer .ui-icon, #plus .ui-icon {
       background-image: url(../images/ui-icons_000000_256x240.png);

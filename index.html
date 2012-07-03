@@ -178,6 +178,24 @@
          // });
 	   });
 	   
+	   function zoomOut() {
+	      // everything is backwards
+	      var step = 15000;
+	      var min = $('#zoom-slider').slider('option', 'min');
+	      var value = $('#zoom-slider').slider('value');
+	      var newValue = Math.max(min, value - step);
+	      $('#zoom-slider').slider('value', newValue);
+	   }
+	   
+	   function zoomIn() {
+	      // everything is backwards
+	      var step = 15000;
+	      var max = $('#zoom-slider').slider('option', 'max');
+	      var value = $('#zoom-slider').slider('value');
+	      var newValue = Math.min(max, value + step);
+	      $('#zoom-slider').slider('value', newValue);
+	   }
+	   
 	   function addTrack() {
 	      if (rover.isEmpty())
 	         toggleSplashPage(false);
@@ -314,9 +332,9 @@
       <!-- Zoom Slider -->
       <div id='zoom'>
          <div style="float:left; height:100%">
-            <div class="ui-icon ui-icon-circle-plus"></div>
+            <div class="ui-icon ui-icon-circle-plus" onclick="zoomIn()"></div>
             <div id="zoom-slider"></div>
-            <div class="ui-icon ui-icon-circle-minus"></div>
+            <div class="ui-icon ui-icon-circle-minus" onclick="zoomOut()"></div>
          </div>
          <div id="zoom-title">
             z<br/>o<br/>o<br/>m
