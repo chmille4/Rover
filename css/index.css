@@ -134,7 +134,7 @@ a {
       top: 95px; 
       bottom: 31px; 
       left: 0px;
-      overflow:auto; 
+      overflow:hidden; 
       position:absolute;
       right: 0px;
       text-align: center;

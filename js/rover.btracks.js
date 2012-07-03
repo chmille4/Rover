@@ -344,11 +344,8 @@ window.BTracks = Backbone.Collection.extend({
        return parseInt( (this.get('max') - this.get('min')) / (this.get('displayMax') - this.get('displayMin')) * this.getDisplayWidth() );
     },
 
-    getDisplayWidth: function() {
-      //var sl = this.canvasContentDiv.scrollLeft;
-//      return $('#rover').actual('width'); 
-      if (this.displayWidth == undefined) this.displayWidth = $(this.roverDiv).width();
-      return this.displayWidth;
+    getDisplayWidth: function() {         
+      return $(this.roverDiv).width();
     },
     
     getDisplayWidthNts: function() {

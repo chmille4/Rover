@@ -66,7 +66,7 @@
     width: auto;
     margin-left: auto;
     margin-right: auto;
-    overflow:auto;
+    overflow:hidden;
 }
 
 .rover-canvas-label {

@@ -104,8 +104,8 @@
 //               $('#viewer').append(this.tracksView.render().el);
                $('#viewer').prepend(this.scaleView.render().el);
                $roverDiv.append(this.tracksView.render().el);     
-               $('#rover-canvas-list').dragscrollable({
-                  dragSelector: '.rover-canvas-div',
+               $('#container, #rover-canvas-list').dragscrollable({
+                  dragSelector: '.dragger',
                   acceptPropagatedEvent: true,
                   stop: function(event) {
                      var currPx = $('#'+event.data.scrollable).scrollLeft();
@@ -326,7 +326,7 @@
 
       <!--   Viewer    -->
       <div id='viewer'>
-         <div id='rover'></div>
+         <div id='rover' class="dragger"></div>
       </div>
  
       <!-- Zoom Slider -->
@@ -388,7 +388,7 @@
              </script>
              
              <script id="track-template" type="text/x-handlebars-template">
-                <div class="rover-canvas-div">
+                <div class="rover-canvas-div dragger">
                    <div class="rover-track-menu">
                      <ul class="dropdown">                                                                                                             
                           <li><a style="margin-top:-4px; width: 32px"><img style="float:left" width="16" src="./images/gear_white.png"</img>     
