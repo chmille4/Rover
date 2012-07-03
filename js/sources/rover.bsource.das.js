@@ -15,7 +15,7 @@ window.BSourceDas = window.BSource.extend({
                     data.min +
                     "," +
                     data.max +
-                    ';type=' + rover.get('typeFilter') || '';                    
+                    ';type=' + rover.get('typeFilter') || '';    
 
       return fullUrl;
    },
@@ -24,14 +24,10 @@ window.BSourceDas = window.BSource.extend({
       // call parents parse method
       window.BSourceDas.__super__.parse.call(this, xmlDoc);
       
-      if (xmlDoc.URL)
-          var url = xmlDoc.URL
-       else
-          var url = xmlDoc.lastChild.nodeValue;
-       var matches = url.match(/.*segment=\d:(\d+)\.*\d*,(\d+).*/);               
-       var responseMin = matches[1];
-       var responseMax = matches[2];                                  
-
+       var segment = xmlDoc.getElementsByTagName('SEGMENT')[0];
+       var responseMin = parseInt(segment.getAttribute('start'));
+       var responseMax = parseInt(segment.getAttribute('stop'));
+      
        if (rover.max < responseMin || rover.min > responseMax)
           return;
 
