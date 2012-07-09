@@ -518,24 +518,30 @@
          'click .track-edit-close': 'hideEdit',
          'click .track-edit-save': 'saveEdit',
          'click .rover-remove-track-button' : 'removeTrack',
+         'click .rover-error' : 'refetch',
          'change select' : 'thousandGChange'
        },
        
        initialize: function() {
           var trackView;
-          _.bindAll(this, 'render', 'draw', 'edit', 'showSpinner', 'hideSpinner');
+          _.bindAll(this, 'render', 'draw', 'edit', 'showSpinner', 'hideSpinner', 'showError', 'hideError', 'refetch');
           var self = this;
           this.model.bind('change', this.draw);
           this.model.bind('change:name', function(){self.$('.track-edit-label').html(self.model.get('name'));});
           this.model.bind('change:edit', this.edit);
           this.model.bind('fetching', this.showSpinner);
-          this.model.bind('fetched', this.hideSpinner)
+          this.model.bind('fetched', this.hideSpinner);
+          this.model.bind('hellochase', this.showError);
           this.model.bind('change:chromosome', function() {
-             self.model.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})});
+             self.model.center.chart.fetch({
+                data: $.param({min:rover.get('min'), max:rover.get('max')}),
+                error: function(chart){ chart.trigger('error') }
+             });
           });
           this.rover = this.options.rover;
           this.rover.bind('change', this.draw);
           this.model.center.chart.bind('change:features', this.draw);
+          this.model.center.chart.bind('error', this.showError);
           // create html
           this.template = Handlebars.compile( $('#track-template').html() );
        },
@@ -651,6 +657,15 @@
             this.removeTrack();
        },
        
+       showError: function() {
+          this.$('.rover-error').css('display', 'inline');
+          this.hideSpinner();
+       },
+       
+       hideError: function() {
+          this.$('.rover-error').css('display', 'none');
+       },
+       
        saveEdit: function(e) {
          this.model.set({
             name: this.$('.track-edit-name').val(),
@@ -660,7 +675,10 @@
             edit: false
          });
          
-         this.model.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})});
+         this.model.center.chart.fetch({
+            data: $.param({min:rover.get('min'), max:rover.get('max')}),
+            error: function(chart){ chart.trigger('error') }
+         });
        },
        
        edit: function() {
@@ -677,6 +695,19 @@
              this.$('.rover-track-edit-div').css('visibility', 'hidden');
           }
           
+       },
+       
+       refetch: function() {
+          var min = rover.get('min');
+          var max = rover.get('max');          
+
+          this.hideError();
+          this.showSpinner();
+
+          this.model.center.chart.fetch({
+             data: $.param({ min:min, max:max }),
+             error: function(chart){ chart.trigger('error') }
+          });
        },
        
        thousandGChange: function() {

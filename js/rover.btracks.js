@@ -704,7 +704,12 @@ window.BTracks = Backbone.Collection.extend({
        }       
        
        rover.tracks.reset( tracks );
-       _.each(tracks, function(track) { track.center.chart.fetch({data: $.param({min:rover.get('min'), max:rover.get('max')})}); } );
+       _.each(tracks, function(track) {
+          track.center.chart.fetch({
+                  data: $.param({min:rover.get('min'), max:rover.get('max')}),
+                  error: function(chart){ chart.trigger('error'); }
+             });
+          });
        
        
        // success
@@ -744,7 +749,7 @@ window.BTracks = Backbone.Collection.extend({
        _.each(this.tracks.models, function(track) {
           track.center.chart.fetch({
              data: $.param({min:min, max:max}),
-             error: function(){alert('error fetching');}
+             error: function(chart){ chart.trigger('error') }
           });
        });               
        
@@ -922,7 +927,7 @@ window.ScaleView = Backbone.View.extend({
                _.each(rover.tracks.models, function(track) {
                   track.left.chart.fetch({
                      data: $.param({min:newMin, max:newMax}),
-                     error: function(){alert('error fetching');}
+                     error: function(chart){ chart.trigger('error') }
                   });
                });               
             } 
@@ -934,7 +939,7 @@ window.ScaleView = Backbone.View.extend({
                _.each(rover.tracks.models, function(track) {
                   track.right.chart.fetch({
                      data: $.param({min:newMin, max:newMax}),
-                     error: function(){alert('error fetching');}
+                     error: function(chart){ chart.trigger('error') }
                   });
                });
 
@@ -1029,7 +1034,7 @@ window.ZoomView = Backbone.View.extend({
                 _(rover.tracks.models).each( function(track) {
                    track.center.chart.fetch({
                       data: $.param({min:newMin, max:newMax}),
-                      error: function(){alert('error fetching');}
+                      error: function(chart){ chart.trigger('error') }
                    });     
                    track.trigger('fetching');                 
                 });
